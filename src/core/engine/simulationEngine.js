@@ -80,16 +80,18 @@ export function createSimulationEngine({ seed = 1 } = {}) {
     updateEconomy(state)
     updatePopulation(state)
     updatePolitics(state)
-    updateCrisisCheck(state)
+    updateCrisisCheck(state, rng)
 
-    // Keep a short event log for UI (later replaced by true events engine).
-    state.events.push({
-      id: `${state.time.year}-${state.time.month}-${state.time.tick}`,
-      at: { year: state.time.year, month: state.time.month, tick: state.time.tick },
-      type: 'tick',
-      message: `Month advanced to ${state.time.month}/${state.time.year}`,
-    })
-    if (state.events.length > 50) state.events.splice(0, state.events.length - 50)
+    // One event per year so the feed isn’t flooded; crises add their own.
+    if (state.time.month === 1) {
+      state.events.push({
+        id: `year-${state.time.year}-${state.time.tick}`,
+        at: { ...state.time },
+        type: 'tick',
+        message: `Year ${state.time.year} begins.`,
+      })
+    }
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
   function getState() {

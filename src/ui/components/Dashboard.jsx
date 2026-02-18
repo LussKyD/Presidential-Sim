@@ -1,3 +1,5 @@
+import EconomyChart from './EconomyChart'
+
 function formatPct(x) {
   if (typeof x !== 'number') return '—'
   return `${(x * 100).toFixed(1)}%`
@@ -18,13 +20,21 @@ function Card({ title, value, sub }) {
   )
 }
 
+function eventColor(type) {
+  switch (type) {
+    case 'protest': return '#f4212e'
+    case 'economic': return '#f7931a'
+    default: return '#8b98a5'
+  }
+}
+
 export default function Dashboard({ state }) {
   const time = state?.time
   const econ = state?.economy
   const pop = state?.population
   const pol = state?.politics
 
-  const lastEvents = (state?.events ?? []).slice(-6).reverse()
+  const lastEvents = (state?.events ?? []).slice(-8).reverse()
 
   return (
     <section data-component="Dashboard">
@@ -37,14 +47,20 @@ export default function Dashboard({ state }) {
         <Card title="Coup risk" value={formatPct(pol?.coupRisk)} />
       </div>
 
+      <div style={{ marginTop: 16 }}>
+        <EconomyChart state={state} />
+      </div>
+
       <div style={{ marginTop: 16, ...panelStyle }}>
-        <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent updates</div>
+        <div style={{ fontWeight: 700, marginBottom: 8 }}>Event feed</div>
         {lastEvents.length === 0 ? (
           <div style={{ color: '#8b98a5' }}>No events yet.</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18, color: '#8b98a5' }}>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
             {lastEvents.map((e) => (
-              <li key={e.id}>{e.message}</li>
+              <li key={e.id} style={{ color: eventColor(e.type), marginBottom: 4 }}>
+                {e.message}
+              </li>
             ))}
           </ul>
         )}
