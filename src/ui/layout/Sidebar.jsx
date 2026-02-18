@@ -1,4 +1,9 @@
-export default function Sidebar() {
+export default function Sidebar({ view = 'dashboard', onViewChange }) {
+  const linkStyle = (v) => ({
+    color: view === v ? '#e7e9ea' : '#8b98a5',
+    cursor: 'pointer',
+    textDecoration: 'none',
+  })
   return (
     <aside style={{
       width: 200,
@@ -9,8 +14,16 @@ export default function Sidebar() {
       <nav>
         <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Presidential Sim</div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          <li><a href="#dashboard" style={{ color: '#8b98a5' }}>Dashboard</a></li>
-          <li><a href="#policies" style={{ color: '#8b98a5' }}>Policies</a></li>
+          <li>
+            <button type="button" onClick={() => onViewChange?.('dashboard')} style={{ ...linkStyle('dashboard'), background: 'none', border: 'none', fontSize: 'inherit' }}>
+              Dashboard
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick={() => onViewChange?.('map')} style={{ ...linkStyle('map'), background: 'none', border: 'none', fontSize: 'inherit' }}>
+              Map
+            </button>
+          </li>
         </ul>
       </nav>
     </aside>

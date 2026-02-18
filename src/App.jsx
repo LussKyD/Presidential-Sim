@@ -3,6 +3,7 @@ import MainLayout from './ui/layout/MainLayout'
 import Dashboard from './ui/components/Dashboard'
 import PolicyPanel from './ui/components/PolicyPanel'
 import TermSummary from './ui/components/TermSummary'
+import WorldView from './ui/components/WorldView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 
 const SPEEDS = [
@@ -26,6 +27,7 @@ function App() {
   const [gameKey, setGameKey] = useState(0)
   const [seed, setSeed] = useState(1)
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
+  const [view, setView] = useState('dashboard')
 
   const { state, engine, applyPolicy, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
@@ -45,7 +47,7 @@ function App() {
   const outOfPower = regime && regime.status !== 'in_power'
 
   return (
-    <MainLayout>
+    <MainLayout view={view} onViewChange={setView}>
       <h1>Presidential Sim — Alpha</h1>
       <p style={{ color: '#8b98a5', marginTop: 0 }}>
         One tick = one month. Adjust policies and watch the country react. Systemic consequences, not scripted story.
@@ -75,7 +77,11 @@ function App() {
 
       <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start', flexWrap: 'wrap', opacity: outOfPower ? 0.6 : 1 }}>
         <div style={{ flex: '2 1 520px', minWidth: 320 }}>
-          <Dashboard state={state} />
+          {view === 'map' ? (
+            <WorldView state={state} />
+          ) : (
+            <Dashboard state={state} />
+          )}
         </div>
         <div style={{ flex: '1 1 340px', minWidth: 280 }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>

@@ -53,10 +53,10 @@ Open `http://localhost:5173`. For correct asset paths when testing the built sit
 
 ---
 
-## Tech (planned)
+## Tech
 
 - **Stack:** React, Vite, static export
 - **Simulation:** Pure JS (economy, population, politics, crisis, event bus)
-- **Charts:** Chart.js or lightweight alternative
-- **Optional 3D:** Three.js
+- **Charts:** In-app SVG (economy over time)
+- **3D:** Three.js (Map view: capital city with Palace, Parliament, Media, Military, Bank)
 - **Hosting:** GitHub Pages
