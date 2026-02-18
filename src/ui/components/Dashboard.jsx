@@ -24,6 +24,8 @@ function eventColor(type) {
   switch (type) {
     case 'protest': return '#f4212e'
     case 'economic': return '#f7931a'
+    case 'scandal': return '#a855f7'
+    case 'diplomatic': return '#0ea5e9'
     case 'coup': return '#8b0000'
     case 'election': return '#1d9bf0'
     default: return '#8b98a5'

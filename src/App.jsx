@@ -29,6 +29,7 @@ function App() {
   const [seed, setSeed] = useState(1)
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [view, setView] = useState('dashboard')
+  const [showHowToPlay, setShowHowToPlay] = useState(false)
 
   const { state, engine, applyPolicy, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
@@ -69,6 +70,28 @@ function App() {
       <p style={{ color: '#8b98a5', marginTop: 0 }}>
         One tick = one month. Adjust policies and watch the country react. Systemic consequences, not scripted story.
       </p>
+      <div style={{ marginBottom: 12 }}>
+        <button
+          type="button"
+          onClick={() => setShowHowToPlay((v) => !v)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#8b98a5',
+            cursor: 'pointer',
+            fontSize: 12,
+            padding: 0,
+            textDecoration: 'underline',
+          }}
+        >
+          {showHowToPlay ? 'Hide' : 'How to play'}
+        </button>
+        {showHowToPlay && (
+          <p style={{ color: '#6e767d', fontSize: 12, marginTop: 6, maxWidth: 560 }}>
+            Set policies with the sliders (or use Liberal / Conservative / Authoritarian presets). Keep approval up and coup risk down. Elections run every 4 years — low approval makes losing likely. Avoid coups by keeping military and elites satisfied. Use <kbd style={{ background: '#2f3336', padding: '2px 6px', borderRadius: 4 }}>Space</kbd> to pause, and switch to Map to explore the capital in 3D. Progress is saved automatically; New game starts fresh.
+          </p>
+        )}
+      </div>
 
       {outOfPower && (
         <>

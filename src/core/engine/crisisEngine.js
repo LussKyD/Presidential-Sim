@@ -34,6 +34,18 @@ const ELECTION_LOSE_MESSAGES = [
   'Election: defeat at the polls. Handover begins.',
 ]
 
+const SCANDAL_MESSAGES = [
+  'Scandal: leak implicates officials in kickbacks.',
+  'Media: "Corruption at the top" — approval drops.',
+  'Opposition demands inquiry into government contracts.',
+]
+
+const DIPLOMATIC_MESSAGES = [
+  'Diplomatic incident: ally condemns policy shift.',
+  'Foreign press: relations strained over recent decisions.',
+  'Embassy row: international standing takes a hit.',
+]
+
 function pickRegion(rng) {
   return REGIONS[Math.floor(rng() * REGIONS.length)]
 }
@@ -113,6 +125,30 @@ export function updateCrisisCheck(state, rng) {
       message: pick(ECONOMIC_MESSAGES, rng)(economy.inflation),
     })
     state.population.publicApproval = clamp(population.publicApproval - 0.02, 0, 1)
+  }
+
+  // Scandal when corruption is high
+  if (rng && p.corruptionLevel >= 0.35 && rng() < 0.12) {
+    state.events.push({
+      id: `scandal-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
+      at: { ...state.time },
+      type: 'scandal',
+      message: pick(SCANDAL_MESSAGES, rng),
+    })
+    state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
+    state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) + 0.15, 0, 1)
+  }
+
+  // Diplomatic incident (low chance)
+  if (rng && rng() < 0.06) {
+    state.events.push({
+      id: `diplomatic-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
+      at: { ...state.time },
+      type: 'diplomatic',
+      message: pick(DIPLOMATIC_MESSAGES, rng),
+    })
+    state.population.publicApproval = clamp(population.publicApproval - 0.015, 0, 1)
+    state.shocks.foreignInterference = clamp((state.shocks.foreignInterference || 0.1) + 0.05, 0, 1)
   }
 
   // Cap event log length
