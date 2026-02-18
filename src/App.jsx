@@ -44,6 +44,7 @@ function App() {
 
   const [view, setView] = useState('office')
   const [stateAddressPhase, setStateAddressPhase] = useState(null)
+  const [speechReady, setSpeechReady] = useState(false)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -91,27 +92,37 @@ function App() {
   function handlePhaseComplete(phase) {
     if (phase === STATE_ADDRESS_PHASES.WALK_TO_CARS) {
       setStateAddressPhase(STATE_ADDRESS_PHASES.AT_CARS)
-      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT), 800)
     } else if (phase === STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT) {
       setStateAddressPhase(STATE_ADDRESS_PHASES.AT_PARLIAMENT)
-      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.ENTER_PARLIAMENT), 600)
     } else if (phase === STATE_ADDRESS_PHASES.ENTER_PARLIAMENT) {
+      setSpeechReady(false)
       setStateAddressPhase(STATE_ADDRESS_PHASES.SPEECH)
     } else if (phase === STATE_ADDRESS_PHASES.EXIT_PARLIAMENT) {
       setStateAddressPhase(STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE)
     } else if (phase === STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE) {
       setStateAddressPhase(STATE_ADDRESS_PHASES.AT_PALACE)
-      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.WALK_TO_OFFICE), 600)
     } else if (phase === STATE_ADDRESS_PHASES.WALK_TO_OFFICE) {
       setStateAddressPhase(null)
     }
   }
 
-  function handleSpeechDone() {
-    const positive = (state?.population?.publicApproval ?? 0.5) >= 0.45
-    applyStateAddressOutcome(positive)
-    setStateAddressPhase(STATE_ADDRESS_PHASES.EXIT_PARLIAMENT)
+  function advanceStateAddress() {
+    if (!stateAddressPhase) return
+    if (stateAddressPhase === STATE_ADDRESS_PHASES.AT_CARS) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT)
+    } else if (stateAddressPhase === STATE_ADDRESS_PHASES.AT_PARLIAMENT) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.ENTER_PARLIAMENT)
+    } else if (stateAddressPhase === STATE_ADDRESS_PHASES.AT_PALACE) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.WALK_TO_OFFICE)
+    } else if (stateAddressPhase === STATE_ADDRESS_PHASES.SPEECH && speechReady) {
+      const positive = (state?.population?.publicApproval ?? 0.5) >= 0.45
+      applyStateAddressOutcome(positive)
+      setSpeechReady(false)
+      setStateAddressPhase(STATE_ADDRESS_PHASES.EXIT_PARLIAMENT)
+    }
   }
+
+  // Speech outcome is applied when user clicks "Leave chamber" in advanceStateAddress
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -159,7 +170,7 @@ function App() {
               viewMode={view}
               activityPhase={stateAddressPhase}
               onPhaseComplete={handlePhaseComplete}
-              onSpeechDone={handleSpeechDone}
+              onSpeechReady={() => setSpeechReady(true)}
             />
           </div>
           <DeskPanel
@@ -178,6 +189,8 @@ function App() {
             onStateAddress={startStateAddress}
             stateAddressPhase={stateAddressPhase}
             stateAddressCooldown={stateAddressCooldown}
+            onAdvanceStateAddress={advanceStateAddress}
+            speechReady={speechReady}
             speeds={SPEEDS}
             tableBudget={tableBudget}
             budgetDue={state?.calendar?.budgetDue}

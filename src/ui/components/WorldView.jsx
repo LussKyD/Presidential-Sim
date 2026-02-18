@@ -11,6 +11,8 @@ const OFFICE_DOOR = { x: 0, y: 1.6, z: -2.5 }
 const PALACE_FRONT = { x: 0, z: -10 }
 const DRIVEWAY = { x: 0, z: -7 }
 const PARLIAMENT_POS = { x: -8, z: 4 }
+// Drop-off in front of parliament (building extends z 2..6), not inside
+const PARLIAMENT_DROP_OFF_Z = 1.5
 const PARLIAMENT_ENTRANCE = { x: -8, y: 1.6, z: 3 }
 const CHAMBER_VIEW = { x: -8, y: 1.6, z: 5.5 }
 
@@ -25,6 +27,7 @@ export default function WorldView({
   activityPhase,
   onPhaseComplete,
   onSpeechDone,
+  onSpeechReady,
 }) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
@@ -32,10 +35,14 @@ export default function WorldView({
   const phaseStartRef = useRef(null)
   const onPhaseCompleteRef = useRef(onPhaseComplete)
   const onSpeechDoneRef = useRef(onSpeechDone)
+  const onSpeechReadyRef = useRef(onSpeechReady)
+  const speechReadyFiredRef = useRef(false)
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
   onSpeechDoneRef.current = onSpeechDone
+  onSpeechReadyRef.current = onSpeechReady
+  if (activityPhase !== STATE_ADDRESS_PHASES.SPEECH) speechReadyFiredRef.current = false
 
   useEffect(() => {
     const el = containerRef.current
@@ -213,7 +220,7 @@ export default function WorldView({
       new THREE.Vector3(DRIVEWAY.x, 0.22, DRIVEWAY.z),
       new THREE.Vector3(-2, 0.22, -6),
       new THREE.Vector3(-5, 0.22, -2),
-      new THREE.Vector3(PARLIAMENT_POS.x, 0.22, PARLIAMENT_POS.z + 0.8),
+      new THREE.Vector3(PARLIAMENT_POS.x, 0.22, PARLIAMENT_DROP_OFF_Z),
     ]
     const motorcadePathBack = [...motorcadePathOut].reverse()
 
@@ -385,7 +392,10 @@ export default function WorldView({
         camera.position.lerp(new THREE.Vector3(CHAMBER_VIEW.x, CHAMBER_VIEW.y, CHAMBER_VIEW.z), 0.1)
         controls.target.lerp(new THREE.Vector3(PARLIAMENT_POS.x, 1, PARLIAMENT_POS.z + 1), 0.1)
         const elapsed = Date.now() - phaseStart()
-        if (elapsed >= SPEECH_VIEW_MS) onSpeechDoneRef.current?.()
+        if (elapsed >= SPEECH_VIEW_MS && !speechReadyFiredRef.current) {
+          speechReadyFiredRef.current = true
+          onSpeechReadyRef.current?.()
+        }
       } else if (phase === STATE_ADDRESS_PHASES.EXIT_PARLIAMENT) {
         const elapsed = Date.now() - phaseStart()
         const norm = Math.min(1, elapsed / 1500)

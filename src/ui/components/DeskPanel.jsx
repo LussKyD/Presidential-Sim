@@ -8,15 +8,22 @@ const PHASE_LABELS = {
   [STATE_ADDRESS_PHASES.PLANNING]: 'Planning route & agenda…',
   [STATE_ADDRESS_PHASES.SECURITY]: 'Security securing route…',
   [STATE_ADDRESS_PHASES.WALK_TO_CARS]: 'Walking to motorcade…',
-  [STATE_ADDRESS_PHASES.AT_CARS]: 'At cars — departing…',
+  [STATE_ADDRESS_PHASES.AT_CARS]: 'At motorcade',
   [STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT]: 'Motorcade to Parliament…',
-  [STATE_ADDRESS_PHASES.AT_PARLIAMENT]: 'At Parliament…',
+  [STATE_ADDRESS_PHASES.AT_PARLIAMENT]: 'At Parliament',
   [STATE_ADDRESS_PHASES.ENTER_PARLIAMENT]: 'Entering chamber…',
   [STATE_ADDRESS_PHASES.SPEECH]: 'Addressing Parliament…',
   [STATE_ADDRESS_PHASES.EXIT_PARLIAMENT]: 'Leaving chamber…',
   [STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE]: 'Motorcade back to Palace…',
-  [STATE_ADDRESS_PHASES.AT_PALACE]: 'At Palace…',
+  [STATE_ADDRESS_PHASES.AT_PALACE]: 'At Palace',
   [STATE_ADDRESS_PHASES.WALK_TO_OFFICE]: 'Returning to office…',
+}
+
+const ADVANCE_BUTTON_LABELS = {
+  [STATE_ADDRESS_PHASES.AT_CARS]: 'Board motorcade',
+  [STATE_ADDRESS_PHASES.AT_PARLIAMENT]: 'Enter Parliament',
+  [STATE_ADDRESS_PHASES.AT_PALACE]: 'Return to office',
+  [STATE_ADDRESS_PHASES.SPEECH]: 'Leave chamber',
 }
 
 export default function DeskPanel({
@@ -35,6 +42,8 @@ export default function DeskPanel({
   onStateAddress,
   stateAddressPhase,
   stateAddressCooldown,
+  onAdvanceStateAddress,
+  speechReady,
   speeds,
   tableBudget,
   budgetDue,
@@ -50,6 +59,18 @@ export default function DeskPanel({
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
+  const showAdvanceButton =
+    stateAddressPhase &&
+    (stateAddressPhase === STATE_ADDRESS_PHASES.AT_CARS ||
+      stateAddressPhase === STATE_ADDRESS_PHASES.AT_PARLIAMENT ||
+      stateAddressPhase === STATE_ADDRESS_PHASES.AT_PALACE ||
+      (stateAddressPhase === STATE_ADDRESS_PHASES.SPEECH && speechReady))
+  const advanceLabel =
+    stateAddressPhase === STATE_ADDRESS_PHASES.SPEECH && speechReady
+      ? ADVANCE_BUTTON_LABELS[STATE_ADDRESS_PHASES.SPEECH]
+      : stateAddressPhase
+        ? ADVANCE_BUTTON_LABELS[stateAddressPhase]
+        : null
 
   return (
     <aside
@@ -151,6 +172,21 @@ export default function DeskPanel({
         >
           {phaseLabel}
         </div>
+      )}
+
+      {showAdvanceButton && advanceLabel && (
+        <button
+          type="button"
+          onClick={onAdvanceStateAddress}
+          style={{
+            ...btn,
+            background: '#059669',
+            width: '100%',
+            fontWeight: 700,
+          }}
+        >
+          {advanceLabel}
+        </button>
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>

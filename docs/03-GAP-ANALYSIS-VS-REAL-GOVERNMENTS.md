@@ -178,5 +178,15 @@
 | **Crisis response** | Protest and scandal can set `crisis.pendingResponse`. Modal: player chooses (e.g. dialogue / crackdown / ignore / address nation for protest; deny / investigate / ignore for scandal). Outcomes affect approval and coup risk. |
 | **Calendar** | Budget month (3) and Opening of Parliament (6). In budget month, "Budget day" event and "Table budget in Parliament" button until tabled. Opening event in month 6. |
 | **Cabinet meeting** | Desk activity: "Cabinet meeting" with 6‑month cooldown. Outcome (unity vs disagreement) based on approval; small approval change and event. |
+| **State address flow** | Motorcade stops in front of Parliament (not inside). Player advances each step: walk to cars → board motorcade → at Parliament → enter → speech → leave chamber → motorcade back → return to office. |
+
+### 6.1 Still missing (next priorities)
+
+- **Opposition / parties** — Named opposition strength; election vs opposition; coalition threshold.
+- **Regional variation** — Per-region approval or loyalty; regional events; optional "visit region" activity.
+- **Media as headlines** — Event feed as front page; TV in office shows headline; press conference to set narrative.
+- **International** — 2–3 relations; "Meet foreign leader" flow; relations affect economy/coup.
+- **Judiciary** — Optional court events (e.g. election dispute, constitutional challenge).
+- **More activities** — Full 3D flows for: Launch infrastructure, Security briefing, Press conference.
 
 This doc can be updated as features are added or scope is re-prioritized.
