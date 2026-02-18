@@ -1,7 +1,23 @@
 import { useState } from 'react'
 import PolicyPanel from './PolicyPanel'
+import { STATE_ADDRESS_PHASES, ACTIVITY_IDS, ACTIVITY_LABELS } from '../../core/constants/activities'
 
 const COOLDOWN_MONTHS = 12
+
+const PHASE_LABELS = {
+  [STATE_ADDRESS_PHASES.PLANNING]: 'Planning route & agenda…',
+  [STATE_ADDRESS_PHASES.SECURITY]: 'Security securing route…',
+  [STATE_ADDRESS_PHASES.WALK_TO_CARS]: 'Walking to motorcade…',
+  [STATE_ADDRESS_PHASES.AT_CARS]: 'At cars — departing…',
+  [STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT]: 'Motorcade to Parliament…',
+  [STATE_ADDRESS_PHASES.AT_PARLIAMENT]: 'At Parliament…',
+  [STATE_ADDRESS_PHASES.ENTER_PARLIAMENT]: 'Entering chamber…',
+  [STATE_ADDRESS_PHASES.SPEECH]: 'Addressing Parliament…',
+  [STATE_ADDRESS_PHASES.EXIT_PARLIAMENT]: 'Leaving chamber…',
+  [STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE]: 'Motorcade back to Palace…',
+  [STATE_ADDRESS_PHASES.AT_PALACE]: 'At Palace…',
+  [STATE_ADDRESS_PHASES.WALK_TO_OFFICE]: 'Returning to office…',
+}
 
 export default function DeskPanel({
   state,
@@ -27,16 +43,7 @@ export default function DeskPanel({
   const coupPct = state?.politics?.coupRisk != null ? Math.round(state.politics.coupRisk * 100) : '—'
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
 
-  const phaseLabel =
-    stateAddressPhase === 'planning'
-      ? 'Planning route & agenda…'
-      : stateAddressPhase === 'security'
-        ? 'Security securing route…'
-        : stateAddressPhase === 'motorcade'
-          ? 'Motorcade to Parliament…'
-          : stateAddressPhase === 'speech'
-            ? 'Addressing Parliament…'
-            : null
+  const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
 
   return (
     <aside
@@ -54,9 +61,51 @@ export default function DeskPanel({
       }}
     >
       <div style={{ fontWeight: 700, fontSize: 14, color: '#e7e9ea' }}>Desk</div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#8b98a5' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#8b98a5', flexWrap: 'wrap', gap: 4 }}>
         <span>{date}</span>
         <span>Approval: {approvalPct}% · Coup risk: {coupPct}%</span>
+      </div>
+
+      <div style={{ fontSize: 11, color: '#6e767d', marginTop: -4 }}>Presidential activities</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <button
+          type="button"
+          onClick={onStateAddress}
+          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase}
+          style={{
+            background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
+            color: '#0f1419',
+            border: 'none',
+            padding: '0.5rem 0.75rem',
+            borderRadius: 8,
+            fontWeight: 700,
+            cursor: stateAddressCooldown || stateAddressPhase ? 'not-allowed' : 'pointer',
+            fontSize: 12,
+            textAlign: 'left',
+          }}
+        >
+          {stateAddressCooldown ? `State of the Nation (${stateAddressCooldown} mo)` : 'State of the Nation Address'}
+        </button>
+        {[ACTIVITY_IDS.CABINET_MEETING, ACTIVITY_IDS.MEET_FOREIGN_LEADER, ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
+          <button
+            key={id}
+            type="button"
+            disabled
+            style={{
+              background: '#2f3336',
+              color: '#6e767d',
+              border: 'none',
+              padding: '0.45rem 0.75rem',
+              borderRadius: 8,
+              fontSize: 12,
+              textAlign: 'left',
+              cursor: 'not-allowed',
+            }}
+            title="Coming soon"
+          >
+            {ACTIVITY_LABELS[id]} <span style={{ fontSize: 10 }}>(soon)</span>
+          </button>
+        ))}
       </div>
 
       {phaseLabel && (
@@ -74,23 +123,6 @@ export default function DeskPanel({
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <button
-          type="button"
-          onClick={onStateAddress}
-          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase}
-          style={{
-            background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
-            color: '#0f1419',
-            border: 'none',
-            padding: '0.5rem 0.75rem',
-            borderRadius: 8,
-            fontWeight: 700,
-            cursor: stateAddressCooldown || stateAddressPhase ? 'not-allowed' : 'pointer',
-            fontSize: 12,
-          }}
-        >
-          {stateAddressCooldown ? `State address (${stateAddressCooldown} mo left)` : 'Deliver state address'}
-        </button>
         <button type="button" onClick={toggleRunning} style={btn} disabled={outOfPower}>
           {isRunning ? 'Pause' : 'Resume'}
         </button>

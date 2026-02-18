@@ -7,6 +7,7 @@ import WorldView from './ui/components/WorldView'
 import DeskPanel from './ui/components/DeskPanel'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS } from './core/constants/policyEffects'
+import { STATE_ADDRESS_PHASES } from './core/constants/activities'
 
 const SPEEDS = [
   { value: 0.5, label: '0.5×' },
@@ -42,7 +43,6 @@ function App() {
 
   const [view, setView] = useState('office')
   const [stateAddressPhase, setStateAddressPhase] = useState(null)
-  const [motorcadeActive, setMotorcadeActive] = useState(false)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -70,33 +70,45 @@ function App() {
 
   function startStateAddress() {
     if (outOfPower || stateAddressCooldown > 0 || stateAddressPhase) return
-    setStateAddressPhase('planning')
+    setStateAddressPhase(STATE_ADDRESS_PHASES.PLANNING)
   }
 
-  function handleMotorcadeComplete() {
-    setStateAddressPhase('speech')
+  useEffect(() => {
+    if (stateAddressPhase !== STATE_ADDRESS_PHASES.PLANNING) return
+    const t = window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.SECURITY), 1500)
+    return () => clearTimeout(t)
+  }, [stateAddressPhase])
+
+  useEffect(() => {
+    if (stateAddressPhase !== STATE_ADDRESS_PHASES.SECURITY) return
+    const t = window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.WALK_TO_CARS), 1500)
+    return () => clearTimeout(t)
+  }, [stateAddressPhase])
+
+  function handlePhaseComplete(phase) {
+    if (phase === STATE_ADDRESS_PHASES.WALK_TO_CARS) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.AT_CARS)
+      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT), 800)
+    } else if (phase === STATE_ADDRESS_PHASES.MOTORCADE_TO_PARLIAMENT) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.AT_PARLIAMENT)
+      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.ENTER_PARLIAMENT), 600)
+    } else if (phase === STATE_ADDRESS_PHASES.ENTER_PARLIAMENT) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.SPEECH)
+    } else if (phase === STATE_ADDRESS_PHASES.EXIT_PARLIAMENT) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE)
+    } else if (phase === STATE_ADDRESS_PHASES.MOTORCADE_TO_PALACE) {
+      setStateAddressPhase(STATE_ADDRESS_PHASES.AT_PALACE)
+      window.setTimeout(() => setStateAddressPhase(STATE_ADDRESS_PHASES.WALK_TO_OFFICE), 600)
+    } else if (phase === STATE_ADDRESS_PHASES.WALK_TO_OFFICE) {
+      setStateAddressPhase(null)
+    }
+  }
+
+  function handleSpeechDone() {
     const positive = (state?.population?.publicApproval ?? 0.5) >= 0.45
     applyStateAddressOutcome(positive)
-    window.setTimeout(() => {
-      setStateAddressPhase(null)
-      setMotorcadeActive(false)
-    }, 2000)
+    setStateAddressPhase(STATE_ADDRESS_PHASES.EXIT_PARLIAMENT)
   }
-
-  useEffect(() => {
-    if (stateAddressPhase !== 'planning') return
-    const t = window.setTimeout(() => setStateAddressPhase('security'), 1500)
-    return () => clearTimeout(t)
-  }, [stateAddressPhase])
-
-  useEffect(() => {
-    if (stateAddressPhase !== 'security') return
-    const t = window.setTimeout(() => {
-      setStateAddressPhase('motorcade')
-      setMotorcadeActive(true)
-    }, 1500)
-    return () => clearTimeout(t)
-  }, [stateAddressPhase])
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -140,8 +152,9 @@ function App() {
             <WorldView
               state={state}
               viewMode={view}
-              motorcadeActive={motorcadeActive}
-              onMotorcadeComplete={handleMotorcadeComplete}
+              activityPhase={stateAddressPhase}
+              onPhaseComplete={handlePhaseComplete}
+              onSpeechDone={handleSpeechDone}
             />
           </div>
           <DeskPanel
