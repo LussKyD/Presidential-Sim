@@ -1,3 +1,5 @@
+import { BUDGET_PIE_IDS } from '../../core/constants/policyEffects'
+
 function formatValue(def, value) {
   if (typeof value !== 'number') return '—'
   if (def.id === 'interestRate') return `${(value * 100).toFixed(1)}%`
@@ -5,9 +7,13 @@ function formatValue(def, value) {
 }
 
 export default function PolicyPanel({ policies, values, onChange, presets, onPresetSelect, disabled }) {
+  const spendingPie = policies?.filter((p) => BUDGET_PIE_IDS.includes(p.id)).length === BUDGET_PIE_IDS.length
   return (
     <section data-component="PolicyPanel" style={panelStyle}>
       <div style={{ fontWeight: 800, marginBottom: 10 }}>Policies</div>
+      {spendingPie && (
+        <div style={{ fontSize: 11, color: '#6e767d', marginBottom: 8 }}>Infrastructure, Education, Defense, Police share one budget (100%).</div>
+      )}
       {presets && Object.keys(presets).length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
           {Object.entries(presets).map(([id, { label }]) => (

@@ -95,8 +95,7 @@ export function updateCrisisCheck(state, rng) {
   }
 
   /**
-   * Protest chance from blueprint: unemployment, inflation, corruption, police funding.
-   * If triggered: push event, apply approval/coup risk effects.
+   * Protest: if no pending crisis response, either set pending (player chooses) or apply immediately at low chance.
    */
   const protestChance =
     economy.unemployment * 0.02 +
@@ -106,14 +105,23 @@ export function updateCrisisCheck(state, rng) {
 
   if (rng && protestChance > 0 && rng() < Math.min(protestChance, 0.4)) {
     const region = pickRegion(rng)
-    state.events.push({
-      id: `protest-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
-      at: { ...state.time },
-      type: 'protest',
-      message: pick(PROTEST_MESSAGES, rng)(region),
-    })
-    state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
-    state.politics.coupRisk = clamp(politics.coupRisk + 0.02, 0, 1)
+    const eventId = `protest-${state.time.tick}-${rng().toString(36).slice(2, 6)}`
+    const message = pick(PROTEST_MESSAGES, rng)(region)
+    if (!state.crisis?.pendingResponse) {
+      state.crisis = {
+        pendingResponse: {
+          type: 'protest',
+          eventId,
+          message,
+          region,
+        },
+      }
+      state.events.push({ id: eventId, at: { ...state.time }, type: 'protest', message })
+    } else {
+      state.events.push({ id: eventId, at: { ...state.time }, type: 'protest', message })
+      state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
+      state.politics.coupRisk = clamp(politics.coupRisk + 0.02, 0, 1)
+    }
   }
 
   // Economic anxiety headline when inflation is high
@@ -127,16 +135,20 @@ export function updateCrisisCheck(state, rng) {
     state.population.publicApproval = clamp(population.publicApproval - 0.02, 0, 1)
   }
 
-  // Scandal when corruption is high
+  // Scandal when corruption is high — can demand a response
   if (rng && p.corruptionLevel >= 0.35 && rng() < 0.12) {
-    state.events.push({
-      id: `scandal-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
-      at: { ...state.time },
-      type: 'scandal',
-      message: pick(SCANDAL_MESSAGES, rng),
-    })
-    state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
-    state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) + 0.15, 0, 1)
+    const eventId = `scandal-${state.time.tick}-${rng().toString(36).slice(2, 6)}`
+    const message = pick(SCANDAL_MESSAGES, rng)
+    if (!state.crisis?.pendingResponse) {
+      state.crisis = {
+        pendingResponse: { type: 'scandal', eventId, message },
+      }
+      state.events.push({ id: eventId, at: { ...state.time }, type: 'scandal', message })
+    } else {
+      state.events.push({ id: eventId, at: { ...state.time }, type: 'scandal', message })
+      state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
+      state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) + 0.15, 0, 1)
+    }
   }
 
   // Diplomatic incident (low chance)

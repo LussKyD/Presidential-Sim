@@ -34,6 +34,26 @@ export function useSimulation({ tickMs = 2000, seed = 1, gameKey = 0, initialSav
           try { localStorage.setItem(SAVE_KEY, JSON.stringify(nextState)) } catch (_) {}
         }
       },
+      tableBudget() {
+        if (!engineRef.current) return
+        engineRef.current.tableBudget()
+        setState(engineRef.current.getState())
+      },
+      respondToCrisis(response) {
+        if (!engineRef.current) return
+        engineRef.current.respondToCrisis(response)
+        setState(engineRef.current.getState())
+      },
+      applyCabinetMeetingOutcome(success) {
+        if (!engineRef.current) return
+        engineRef.current.applyCabinetMeetingOutcome(success)
+        setState(engineRef.current.getState())
+      },
+      setBudgetPie(...vals) {
+        if (!engineRef.current?.setBudgetPie) return
+        engineRef.current.setBudgetPie(...vals)
+        setState(engineRef.current.getState())
+      },
       toggleRunning() {
         setIsRunning((v) => {
           const next = !v

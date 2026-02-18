@@ -28,6 +28,10 @@ function eventColor(type) {
     case 'diplomatic': return '#0ea5e9'
     case 'coup': return '#8b0000'
     case 'election': return '#1d9bf0'
+    case 'parliament': return '#059669'
+    case 'calendar': return '#6366f1'
+    case 'crisis_response': return '#0ea5e9'
+    case 'cabinet': return '#8b5cf6'
     default: return '#8b98a5'
   }
 }

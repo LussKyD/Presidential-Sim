@@ -36,11 +36,17 @@ export default function DeskPanel({
   stateAddressPhase,
   stateAddressCooldown,
   speeds,
+  tableBudget,
+  budgetDue,
+  parliamentSupport,
+  onCabinetMeeting,
+  cabinetCooldown,
 }) {
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const coupPct = state?.politics?.coupRisk != null ? Math.round(state.politics.coupRisk * 100) : '—'
+  const parliamentPct = parliamentSupport != null ? Math.round(parliamentSupport * 100) : null
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
@@ -63,8 +69,19 @@ export default function DeskPanel({
       <div style={{ fontWeight: 700, fontSize: 14, color: '#e7e9ea' }}>Desk</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#8b98a5', flexWrap: 'wrap', gap: 4 }}>
         <span>{date}</span>
-        <span>Approval: {approvalPct}% · Coup risk: {coupPct}%</span>
+        <span>Approval: {approvalPct}% · Coup: {coupPct}%{parliamentPct != null ? ` · Parliament: ${parliamentPct}%` : ''}</span>
       </div>
+
+      {budgetDue && (
+        <button
+          type="button"
+          onClick={tableBudget}
+          disabled={outOfPower}
+          style={{ ...btn, background: '#059669', width: '100%' }}
+        >
+          Table budget in Parliament
+        </button>
+      )}
 
       <div style={{ fontSize: 11, color: '#6e767d', marginTop: -4 }}>Presidential activities</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -86,7 +103,21 @@ export default function DeskPanel({
         >
           {stateAddressCooldown ? `State of the Nation (${stateAddressCooldown} mo)` : 'State of the Nation Address'}
         </button>
-        {[ACTIVITY_IDS.CABINET_MEETING, ACTIVITY_IDS.MEET_FOREIGN_LEADER, ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
+        <button
+          type="button"
+          onClick={() => onCabinetMeeting?.(approval >= 0.45)}
+          disabled={outOfPower || cabinetCooldown}
+          style={{
+            ...btn,
+            background: cabinetCooldown ? '#2f3336' : '#1d9bf0',
+            opacity: cabinetCooldown ? 0.8 : 1,
+            textAlign: 'left',
+          }}
+          title={cabinetCooldown ? 'Cabinet cooldown 6 months' : 'Hold cabinet meeting'}
+        >
+          {ACTIVITY_LABELS[ACTIVITY_IDS.CABINET_MEETING]}{cabinetCooldown ? ' (cooldown)' : ''}
+        </button>
+        {[ACTIVITY_IDS.MEET_FOREIGN_LEADER, ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
           <button
             key={id}
             type="button"

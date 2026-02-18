@@ -1,3 +1,6 @@
+/** Four spending categories form a single pie (must sum to 1). */
+export const BUDGET_PIE_IDS = ['infrastructureSpending', 'educationSpending', 'defenseSpending', 'policeFunding']
+
 /** Policy levers and UI metadata (MVP). */
 export const POLICY_DEFS = [
   { id: 'infrastructureSpending', label: 'Infrastructure Spending', min: 0, max: 1, step: 0.01, default: 0.4, affects: 'GDP growth' },

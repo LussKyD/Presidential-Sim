@@ -5,8 +5,9 @@ import PolicyPanel from './ui/components/PolicyPanel'
 import TermSummary from './ui/components/TermSummary'
 import WorldView from './ui/components/WorldView'
 import DeskPanel from './ui/components/DeskPanel'
+import CrisisResponsePanel from './ui/components/CrisisResponsePanel'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
-import { POLICY_PRESETS } from './core/constants/policyEffects'
+import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
 import { STATE_ADDRESS_PHASES } from './core/constants/activities'
 
 const SPEEDS = [
@@ -34,7 +35,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, applyStateAddressOutcome, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -55,6 +56,8 @@ function App() {
     const preset = POLICY_PRESETS[presetId]
     if (!preset?.policies) return
     Object.entries(preset.policies).forEach(([policyId, value]) => applyPolicy(policyId, value))
+    const vals = BUDGET_PIE_IDS.map((id) => preset.policies[id] ?? 0)
+    setBudgetPie(...vals)
   }
 
   const regime = state?.regime
@@ -121,9 +124,11 @@ function App() {
   }, [outOfPower, toggleRunning])
 
   const isWorldView = view === 'office' || view === 'map'
+  const pendingCrisis = state?.crisis?.pendingResponse
 
   return (
     <MainLayout view={view} onViewChange={setView}>
+      {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
         <div
           style={{
@@ -174,6 +179,11 @@ function App() {
             stateAddressPhase={stateAddressPhase}
             stateAddressCooldown={stateAddressCooldown}
             speeds={SPEEDS}
+            tableBudget={tableBudget}
+            budgetDue={state?.calendar?.budgetDue}
+            parliamentSupport={state?.parliament?.support}
+            onCabinetMeeting={applyCabinetMeetingOutcome}
+            cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < 6}
           />
         </div>
       ) : (
