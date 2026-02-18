@@ -50,6 +50,10 @@ export function createSimulationEngine({ seed = 1 } = {}) {
       commanderLoyalty: 0.7,
       ethnicAlignment: 0.65,
     },
+    regime: {
+      status: 'in_power', // 'in_power' | 'coup' | 'voted_out'
+      endReason: null,
+    },
     events: [],
   }
 

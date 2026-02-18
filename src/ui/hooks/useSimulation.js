@@ -43,6 +43,15 @@ export function useSimulation({ tickMs = 2000, seed = 1 } = {}) {
     return () => clearInterval(id)
   }, [tickMs, seed])
 
+  // Auto-pause if regime falls.
+  useEffect(() => {
+    const status = state?.regime?.status
+    if (status && status !== 'in_power') {
+      runningRef.current = false
+      if (isRunning) setIsRunning(false)
+    }
+  }, [state?.regime?.status]) // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     engine: engineRef.current,
     state,

@@ -9,6 +9,9 @@ function App() {
     seed: 1,
   })
 
+  const regime = state?.regime
+  const outOfPower = regime && regime.status !== 'in_power'
+
   return (
     <MainLayout>
       <h1>Presidential Sim — Alpha</h1>
@@ -16,20 +19,40 @@ function App() {
         One tick = one month. Adjust policies and watch the country react.
       </p>
 
-      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {outOfPower && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: '0.6rem 0.9rem',
+            borderRadius: 10,
+            border: '1px solid #f4212e',
+            background: '#1c0f10',
+            color: '#ffd2d2',
+            fontSize: 13,
+          }}
+        >
+          <strong>Out of power:</strong> {regime.endReason}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start', flexWrap: 'wrap', opacity: outOfPower ? 0.6 : 1 }}>
         <div style={{ flex: '2 1 520px', minWidth: 320 }}>
           <Dashboard state={state} />
         </div>
         <div style={{ flex: '1 1 340px', minWidth: 280 }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            <button onClick={toggleRunning} style={buttonStyle}>
+            <button onClick={toggleRunning} style={buttonStyle} disabled={outOfPower}>
               {isRunning ? 'Pause' : 'Resume'}
             </button>
-            <button onClick={tick} style={buttonStyle} disabled={isRunning}>
+            <button onClick={tick} style={buttonStyle} disabled={isRunning || outOfPower}>
               Step month
             </button>
           </div>
-          <PolicyPanel policies={engine?.policyDefs ?? []} values={state?.government?.policies} onChange={applyPolicy} />
+          <PolicyPanel
+            policies={engine?.policyDefs ?? []}
+            values={state?.government?.policies}
+            onChange={outOfPower ? undefined : applyPolicy}
+          />
         </div>
       </div>
     </MainLayout>
