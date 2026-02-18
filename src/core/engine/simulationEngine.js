@@ -19,10 +19,8 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value))
 }
 
-export function createSimulationEngine({ seed = 1 } = {}) {
-  const rng = createSeededRandom(seed)
-
-  const state = {
+function getDefaultState(seed = 1) {
+  return {
     meta: { seed },
     time: { year: 2026, month: 1, tick: 0 },
     economy: {
@@ -32,15 +30,9 @@ export function createSimulationEngine({ seed = 1 } = {}) {
       unemployment: INITIAL_UNEMPLOYMENT,
       history: [],
     },
-    population: {
-      publicApproval: INITIAL_APPROVAL,
-    },
-    politics: {
-      coupRisk: INITIAL_COUP_RISK,
-    },
-    government: {
-      policies: clone(POLICY_DEFAULTS),
-    },
+    population: { publicApproval: INITIAL_APPROVAL },
+    politics: { coupRisk: INITIAL_COUP_RISK },
+    government: { policies: clone(POLICY_DEFAULTS) },
     shocks: {
       supplyShock: 0,
       politicalInstability: 0,
@@ -50,12 +42,19 @@ export function createSimulationEngine({ seed = 1 } = {}) {
       commanderLoyalty: 0.7,
       ethnicAlignment: 0.65,
     },
-    regime: {
-      status: 'in_power', // 'in_power' | 'coup' | 'voted_out'
-      endReason: null,
-    },
+    regime: { status: 'in_power', endReason: null },
     events: [],
   }
+}
+
+export function createSimulationEngine({ seed = 1, initialState } = {}) {
+  const rng = createSeededRandom(seed)
+  const state = initialState ? clone(initialState) : getDefaultState(seed)
+  if (state.meta) state.meta.seed = seed
+  const def = getDefaultState()
+  if (!Array.isArray(state.economy?.history)) state.economy = { ...def.economy, ...state.economy, history: state.economy?.history || [] }
+  if (!state.regime) state.regime = { ...def.regime }
+  if (!state.government?.policies) state.government = { policies: clone(POLICY_DEFAULTS) }
 
   function applyPolicy(policyId, value) {
     const def = POLICY_DEFS.find((d) => d.id === policyId)

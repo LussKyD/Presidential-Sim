@@ -28,6 +28,9 @@ export default function PolicyPanel({ policies, values, onChange }) {
                 onChange={(e) => onChange?.(p.id, e.target.value)}
                 style={{ width: '100%', marginTop: 6 }}
               />
+              {p.affects && (
+                <div style={{ fontSize: 11, color: '#6e767d', marginTop: 2 }}>Affects: {p.affects}</div>
+              )}
             </label>
           )
         })}

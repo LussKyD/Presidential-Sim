@@ -3,7 +3,7 @@ import MainLayout from './ui/layout/MainLayout'
 import Dashboard from './ui/components/Dashboard'
 import PolicyPanel from './ui/components/PolicyPanel'
 import TermSummary from './ui/components/TermSummary'
-import { useSimulation } from './ui/hooks/useSimulation'
+import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 
 const SPEEDS = [
   { value: 0.5, label: '0.5×' },
@@ -11,12 +11,35 @@ const SPEEDS = [
   { value: 2, label: '2×' },
 ]
 
+function getStoredSave() {
+  try {
+    const s = localStorage.getItem(SAVE_KEY)
+    const data = s ? JSON.parse(s) : null
+    return data?.regime?.status === 'in_power' ? data : null
+  } catch {
+    return null
+  }
+}
+
 function App() {
   const [speed, setSpeed] = useState(1)
+  const [gameKey, setGameKey] = useState(0)
+  const [seed, setSeed] = useState(1)
+  const [initialSave, setInitialSave] = useState(() => getStoredSave())
+
   const { state, engine, applyPolicy, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
-    seed: 1,
+    seed,
+    gameKey,
+    initialSave,
   })
+
+  function startNewGame() {
+    try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
+    setInitialSave(null)
+    setGameKey((k) => k + 1)
+    setSeed(Math.floor(Date.now() % 1e9))
+  }
 
   const regime = state?.regime
   const outOfPower = regime && regime.status !== 'in_power'
@@ -44,6 +67,9 @@ function App() {
             <strong>Out of power:</strong> {regime.endReason}
           </div>
           <TermSummary state={state} />
+          <button onClick={startNewGame} style={{ ...buttonStyle, marginTop: 8 }}>
+            New game
+          </button>
         </>
       )}
 
@@ -58,6 +84,9 @@ function App() {
             </button>
             <button onClick={tick} style={buttonStyle} disabled={isRunning || outOfPower}>
               Step month
+            </button>
+            <button onClick={startNewGame} style={{ ...buttonStyle, background: '#2f3336', color: '#e7e9ea' }} disabled={outOfPower}>
+              New game
             </button>
             <span style={{ color: '#8b98a5', fontSize: 12 }}>Speed:</span>
             {SPEEDS.map(({ value, label }) => (
