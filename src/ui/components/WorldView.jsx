@@ -2,9 +2,22 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-/** Minimal 3D city view — capital with key buildings. Phase 6. */
-export default function WorldView({ state }) {
+const PALACE = { x: 0, z: 0 }
+const PARLIAMENT = { x: -4, z: 2 }
+const OFFICE_CAM = { x: 1.8, y: 1.3, z: 1.8 }
+const OFFICE_LOOK = { x: -3, y: 0.3, z: 1.5 }
+const MOTORCADE_DURATION_MS = 4500
+
+/** 3D world: Office (president's view from palace) or Map (orbit). Motorcade = camera Palace → Parliament. */
+export default function WorldView({ state, viewMode = 'office', motorcadeActive, onMotorcadeComplete }) {
   const containerRef = useRef(null)
+  const motorcadeStartRef = useRef(null)
+  const onCompleteRef = useRef(onMotorcadeComplete)
+  const viewModeRef = useRef(viewMode)
+  const motorcadeActiveRef = useRef(motorcadeActive)
+  onCompleteRef.current = onMotorcadeComplete
+  viewModeRef.current = viewMode
+  motorcadeActiveRef.current = motorcadeActive
 
   useEffect(() => {
     const el = containerRef.current
@@ -24,8 +37,8 @@ export default function WorldView({ state }) {
     scene.fog = new THREE.Fog(0x0f1419, 8, 22)
 
     camera = new THREE.PerspectiveCamera(50, el.clientWidth / el.clientHeight, 0.1, 100)
-    camera.position.set(8, 6, 8)
-    camera.lookAt(0, 0, 0)
+    camera.position.set(OFFICE_CAM.x, OFFICE_CAM.y, OFFICE_CAM.z)
+    camera.lookAt(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
 
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(el.clientWidth, el.clientHeight)
@@ -62,8 +75,42 @@ export default function WorldView({ state }) {
     controls.minDistance = 4
     controls.maxDistance = 20
 
+    const officePos = new THREE.Vector3(OFFICE_CAM.x, OFFICE_CAM.y, OFFICE_CAM.z)
+    const officeLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
+    const parliamentPos = new THREE.Vector3(PARLIAMENT.x + 5, 4, PARLIAMENT.z + 2)
+    const parliamentLook = new THREE.Vector3(PARLIAMENT.x, 0.6, PARLIAMENT.z)
+
+    function setOfficeView() {
+      camera.position.copy(officePos)
+      controls.target.copy(officeLook)
+      camera.lookAt(officeLook)
+    }
+
+    function setMapView() {
+      camera.position.set(8, 6, 8)
+      controls.target.set(0, 0, 0)
+    }
+
     function animate() {
       frameId = requestAnimationFrame(animate)
+      const mot = motorcadeActiveRef.current
+      const vm = viewModeRef.current
+      if (mot && motorcadeStartRef.current !== null) {
+        const t = (Date.now() - motorcadeStartRef.current) / MOTORCADE_DURATION_MS
+        if (t >= 1) {
+          motorcadeStartRef.current = null
+          camera.position.copy(parliamentPos)
+          controls.target.copy(parliamentLook)
+          onCompleteRef.current?.()
+        } else {
+          const smooth = t * t * (3 - 2 * t)
+          camera.position.lerpVectors(officePos, parliamentPos, smooth)
+          controls.target.lerpVectors(officeLook, parliamentLook, smooth)
+        }
+      } else if (vm === 'office' && !mot) {
+        camera.position.lerp(officePos, 0.05)
+        controls.target.lerp(officeLook, 0.05)
+      }
       controls.update()
       renderer.render(scene, camera)
     }
@@ -88,13 +135,17 @@ export default function WorldView({ state }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (motorcadeActive) motorcadeStartRef.current = Date.now()
+  }, [motorcadeActive])
+
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: 420, background: '#0f1419', borderRadius: 12, overflow: 'hidden' }}>
-      <div ref={containerRef} style={{ width: '100%', height: 420 }} />
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: 380 }} />
       <div
         style={{
           position: 'absolute',
@@ -110,7 +161,7 @@ export default function WorldView({ state }) {
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
-        Drag to rotate · Scroll to zoom · Palace (center), Parliament, Media, Military, Bank
+        {viewMode === 'office' ? "Your view from the President's Office · Switch to Map to orbit" : 'Drag to rotate · Scroll to zoom'}
       </div>
     </div>
   )

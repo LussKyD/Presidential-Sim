@@ -25,6 +25,15 @@ export function useSimulation({ tickMs = 2000, seed = 1, gameKey = 0, initialSav
           try { localStorage.setItem(SAVE_KEY, JSON.stringify(nextState)) } catch (_) {}
         }
       },
+      applyStateAddressOutcome(positive) {
+        if (!engineRef.current) return
+        engineRef.current.applyStateAddressOutcome(positive)
+        const nextState = engineRef.current.getState()
+        setState(nextState)
+        if (nextState?.regime?.status === 'in_power') {
+          try { localStorage.setItem(SAVE_KEY, JSON.stringify(nextState)) } catch (_) {}
+        }
+      },
       toggleRunning() {
         setIsRunning((v) => {
           const next = !v

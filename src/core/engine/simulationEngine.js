@@ -97,6 +97,25 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
+  /** State address delivered: apply approval effect and push event. Cooldown 12 months. */
+  function applyStateAddressOutcome(positive) {
+    if (state.regime?.status !== 'in_power') return
+    const last = state.meta?.lastStateAddressTick ?? -999
+    if (state.time.tick - last < 12) return
+    state.meta.lastStateAddressTick = state.time.tick
+    const delta = positive ? 0.03 : -0.02
+    state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
+    state.events.push({
+      id: `state-address-${state.time.tick}`,
+      at: { ...state.time },
+      type: 'state_address',
+      message: positive
+        ? 'State address to Parliament: strong reception. Approval rises.'
+        : 'State address to Parliament: lukewarm reception. Approval dips.',
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   function getState() {
     return clone(state)
   }
@@ -105,6 +124,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     getState,
     tick,
     applyPolicy,
+    applyStateAddressOutcome,
     policyDefs: POLICY_DEFS,
   }
 }
