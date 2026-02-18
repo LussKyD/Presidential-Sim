@@ -3,8 +3,43 @@ import { clamp } from '../../utils/mathHelpers'
 
 const REGIONS = ['Capital', 'North', 'South', 'East', 'West']
 
+const PROTEST_MESSAGES = [
+  (r) => `Protest in ${r}: unrest over economy and corruption.`,
+  (r) => `${r} rallies against cost of living and graft.`,
+  (r) => `Street protests in ${r} — "Jobs and accountability now."`,
+  (r) => `Demonstrations in ${r}; police contain crowds.`,
+]
+
+const ECONOMIC_MESSAGES = [
+  (inf) => `Media: "Cost of living crisis" as inflation hits ${(inf * 100).toFixed(0)}%.`,
+  (inf) => `Opposition: "People can't afford basics" — inflation ${(inf * 100).toFixed(0)}%.`,
+  (inf) => `Headlines: soaring prices erode wages; inflation at ${(inf * 100).toFixed(0)}%.`,
+]
+
+const COUP_MESSAGES = [
+  'Coup attempt succeeds. You are removed from power.',
+  'Military declares you unfit; tanks secure the palace.',
+  'Generals seize control. Your term ends tonight.',
+]
+
+const ELECTION_WIN_MESSAGES = [
+  'Election: you narrowly win another term.',
+  'Election: victory, but opposition gains ground.',
+  'Election: you hold power; coalition talks ahead.',
+]
+
+const ELECTION_LOSE_MESSAGES = [
+  'Election: you lose power after a disappointing result.',
+  'Election: voters choose change. You concede.',
+  'Election: defeat at the polls. Handover begins.',
+]
+
 function pickRegion(rng) {
   return REGIONS[Math.floor(rng() * REGIONS.length)]
+}
+
+function pick(arr, rng) {
+  return arr[Math.floor(rng() * arr.length)]
 }
 
 export function updateCrisisCheck(state, rng) {
@@ -23,7 +58,7 @@ export function updateCrisisCheck(state, rng) {
       id: `coup-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
       type: 'coup',
-      message: 'Coup attempt succeeds. You are removed from power.',
+      message: pick(COUP_MESSAGES, rng),
     })
     state.politics.coupRisk = 1
     return state
@@ -38,9 +73,7 @@ export function updateCrisisCheck(state, rng) {
       id: `election-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
       type: 'election',
-      message: lost
-        ? 'Election: you lose power after a disappointing result.'
-        : 'Election: you narrowly win another term.',
+      message: lost ? pick(ELECTION_LOSE_MESSAGES, rng) : pick(ELECTION_WIN_MESSAGES, rng),
     })
     if (lost) {
       state.regime.status = 'voted_out'
@@ -65,7 +98,7 @@ export function updateCrisisCheck(state, rng) {
       id: `protest-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
       type: 'protest',
-      message: `Protest in ${region}: unrest over economy and corruption.`,
+      message: pick(PROTEST_MESSAGES, rng)(region),
     })
     state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
     state.politics.coupRisk = clamp(politics.coupRisk + 0.02, 0, 1)
@@ -77,7 +110,7 @@ export function updateCrisisCheck(state, rng) {
       id: `anxiety-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
       type: 'economic',
-      message: `Media: "Cost of living crisis" as inflation hits ${(economy.inflation * 100).toFixed(0)}%.`,
+      message: pick(ECONOMIC_MESSAGES, rng)(economy.inflation),
     })
     state.population.publicApproval = clamp(population.publicApproval - 0.02, 0, 1)
   }

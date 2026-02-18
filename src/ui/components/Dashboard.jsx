@@ -24,8 +24,38 @@ function eventColor(type) {
   switch (type) {
     case 'protest': return '#f4212e'
     case 'economic': return '#f7931a'
+    case 'coup': return '#8b0000'
+    case 'election': return '#1d9bf0'
     default: return '#8b98a5'
   }
+}
+
+function DriversPanel({ approvalDrivers, coupDrivers }) {
+  const formatEffect = (e) => (e >= 0 ? `+${(e * 100).toFixed(0)}%` : `${(e * 100).toFixed(0)}%`)
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 16 }}>
+      <div style={{ ...panelStyle, minWidth: 220, flex: '1 1 240px' }}>
+        <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5' }}>What moves approval</div>
+        {(approvalDrivers ?? []).map((d) => (
+          <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, marginBottom: 4 }}>
+            <span style={{ color: '#e7e9ea' }}>{d.label}</span>
+            <span style={{ color: d.effect >= 0 ? '#00ba7c' : '#f4212e', fontVariantNumeric: 'tabular-nums' }}>
+              {formatEffect(d.effect)}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={{ ...panelStyle, minWidth: 220, flex: '1 1 240px' }}>
+        <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5' }}>What drives coup risk</div>
+        {(coupDrivers ?? []).map((d) => (
+          <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, marginBottom: 4 }}>
+            <span style={{ color: '#e7e9ea' }}>{d.label}</span>
+            <span style={{ color: '#f7931a', fontVariantNumeric: 'tabular-nums' }}>{(d.effect * 100).toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function Dashboard({ state }) {
@@ -50,6 +80,8 @@ export default function Dashboard({ state }) {
       <div style={{ marginTop: 16 }}>
         <EconomyChart state={state} />
       </div>
+
+      <DriversPanel approvalDrivers={pop?.approvalDrivers} coupDrivers={pol?.coupDrivers} />
 
       <div style={{ marginTop: 16, ...panelStyle }}>
         <div style={{ fontWeight: 700, marginBottom: 8 }}>Event feed</div>

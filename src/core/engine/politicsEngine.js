@@ -39,5 +39,12 @@ export function updatePolitics(state) {
   )
 
   state.politics.coupRisk = coupRisk
+  // Transparency: what’s driving coup risk
+  state.politics.coupDrivers = [
+    { id: 'military', label: 'Military disloyalty', effect: militaryDisloyalty * 0.4 },
+    { id: 'elite', label: 'Elite dissatisfaction', effect: eliteDissatisfaction * 0.3 },
+    { id: 'unrest', label: 'Public unrest', effect: publicUnrest * 0.2 },
+    { id: 'foreign', label: 'Foreign interference', effect: foreignInterference * 0.1 },
+  ]
   return state
 }

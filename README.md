@@ -20,6 +20,12 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 - **This repo:** Web-based alpha: simulation engine + policy sliders + dashboard + events. Optional 3D lite later.
 - **Later:** This validates the loop; full 3D/open world would be a separate client (e.g. Unreal) using the same design.
 
+### What makes this different
+
+- **vs spreadsheet sims** (e.g. Power & Revolution, SuperPower 2): Transparent cause-effect — you see *what* moves approval and coup risk, not just numbers. No “pointless hand-waving”; every lever has visible consequences.
+- **vs narrative-heavy games** (e.g. This Is The President): Emergent story from systems — protests, elections, coups and headlines arise from your policies and the model, not one scripted plot. Replayable; each run has a “Your term” summary.
+- **vs dry government sims:** Event variety (multiple phrasings for protests, headlines, coups), tick speed control for tension, and a path to 3D immersion later.
+
 ---
 
 ## Status

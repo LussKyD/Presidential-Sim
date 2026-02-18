@@ -33,5 +33,12 @@ export function updatePopulation(state) {
   )
 
   state.population.publicApproval = approval
+  // Cause-effect transparency (vs spreadsheet sims): what’s moving the number
+  state.population.approvalDrivers = [
+    { id: 'economy', label: 'Economy (inflation & jobs)', effect: economicSatisfaction * 0.4 },
+    { id: 'ideology', label: 'Ideological fit', effect: ideologicalAlignment * 0.3 },
+    { id: 'media', label: 'Media & trust', effect: mediaInfluence * 0.2 },
+    { id: 'corruption', label: 'Corruption perception', effect: -corruptionPerception * 0.3 },
+  ]
   return state
 }
