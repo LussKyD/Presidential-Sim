@@ -1,0 +1,8 @@
+[
+  {
+    "id": "protest",
+    "label": "Protest in {region}",
+    "condition": {},
+    "effects": {}
+  }
+]

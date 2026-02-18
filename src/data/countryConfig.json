@@ -1,0 +1,5 @@
+{
+  "name": "Republic of Valdris",
+  "capital": "Capitol City",
+  "regions": ["Capital", "North", "South", "East", "West"]
+}

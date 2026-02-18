@@ -24,8 +24,26 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 
 ## Status
 
-- **Current:** Analysis and roadmap complete; implementation not started.
-- **Next:** Phase 0 — Vite + React, folder structure, GitHub Pages deploy.
+- **Current:** Phase 0 complete — Vite + React, full folder structure, placeholder engine/UI, GitHub Actions deploy.
+- **Next:** Phase 1 — Simulation engine core (economy, population, politics, time, event bus).
+
+---
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. For correct asset paths when testing the built site locally, run `npm run build` then `npm run preview` (serves with base `/Presidential-Sim/`).
+
+---
+
+## Deploy (GitHub Pages)
+
+1. In repo **Settings → Pages**, set **Source** to **GitHub Actions**.
+2. Push to `main`; the workflow builds and deploys. Live site: `https://lusskyd.github.io/Presidential-Sim/`.
 
 ---
 
