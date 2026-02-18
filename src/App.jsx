@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MainLayout from './ui/layout/MainLayout'
 import Dashboard from './ui/components/Dashboard'
 import PolicyPanel from './ui/components/PolicyPanel'
 import TermSummary from './ui/components/TermSummary'
 import WorldView from './ui/components/WorldView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
+import { POLICY_PRESETS } from './core/constants/policyEffects'
 
 const SPEEDS = [
   { value: 0.5, label: '0.5×' },
@@ -43,8 +44,24 @@ function App() {
     setSeed(Math.floor(Date.now() % 1e9))
   }
 
+  function applyPreset(presetId) {
+    const preset = POLICY_PRESETS[presetId]
+    if (!preset?.policies) return
+    Object.entries(preset.policies).forEach(([policyId, value]) => applyPolicy(policyId, value))
+  }
+
   const regime = state?.regime
   const outOfPower = regime && regime.status !== 'in_power'
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.code !== 'Space' || e.target?.closest('input, button, [contenteditable]')) return
+      e.preventDefault()
+      if (!outOfPower) toggleRunning()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [outOfPower, toggleRunning])
 
   return (
     <MainLayout view={view} onViewChange={setView}>
@@ -116,6 +133,9 @@ function App() {
             policies={engine?.policyDefs ?? []}
             values={state?.government?.policies}
             onChange={outOfPower ? undefined : applyPolicy}
+            presets={POLICY_PRESETS}
+            onPresetSelect={outOfPower ? undefined : applyPreset}
+            disabled={outOfPower}
           />
         </div>
       </div>

@@ -17,8 +17,8 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 ## Vision (summary)
 
 - **Core fantasy:** You are inside power — policies, rallies, motorcades, crises — not managing from a menu.
-- **This repo:** Web-based alpha: simulation engine + policy sliders + dashboard + events. Optional 3D lite later.
-- **Later:** This validates the loop; full 3D/open world would be a separate client (e.g. Unreal) using the same design.
+- **This repo:** Web-based alpha: simulation engine, policy sliders, dashboard, events, 3D Map view, save/load, policy presets.
+- **Later:** Full 3D/open world would be a separate client (e.g. Unreal) using the same design.
 
 ### What makes this different
 
@@ -30,8 +30,8 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 
 ## Status
 
-- **Current:** Phase 0 complete — Vite + React, full folder structure, placeholder engine/UI, GitHub Actions deploy.
-- **Next:** Phase 1 — Simulation engine core (economy, population, politics, time, event bus).
+- **Current:** Phases 0–6 complete — simulation engine, dashboard, events (protest/coup/election), economy chart, approval/coup drivers, term summary, tick speed, save/load, New game, policy presets (Liberal/Conservative/Authoritarian), 3D Map view (Three.js).
+- **Next:** Balance tuning, more event types, or expand 3D (e.g. motorcade feel).
 
 ---
 

@@ -14,3 +14,49 @@ export const POLICY_DEFS = [
 export const POLICY_DEFAULTS = Object.fromEntries(
   POLICY_DEFS.map((p) => [p.id, p.default]),
 )
+
+/** Presets: Liberal, Conservative, Authoritarian (slider values). */
+export const POLICY_PRESETS = {
+  liberal: {
+    label: 'Liberal',
+    policies: {
+      infrastructureSpending: 0.55,
+      educationSpending: 0.5,
+      defenseSpending: 0.3,
+      policeFunding: 0.3,
+      corruptionLevel: 0.15,
+      moneyPrinting: 0.15,
+      interestRate: 0.04,
+      pressFreedom: 0.85,
+      foreignInvestment: 0.6,
+    },
+  },
+  conservative: {
+    label: 'Conservative',
+    policies: {
+      infrastructureSpending: 0.35,
+      educationSpending: 0.3,
+      defenseSpending: 0.55,
+      policeFunding: 0.5,
+      corruptionLevel: 0.2,
+      moneyPrinting: 0.1,
+      interestRate: 0.06,
+      pressFreedom: 0.5,
+      foreignInvestment: 0.5,
+    },
+  },
+  authoritarian: {
+    label: 'Authoritarian',
+    policies: {
+      infrastructureSpending: 0.4,
+      educationSpending: 0.25,
+      defenseSpending: 0.65,
+      policeFunding: 0.7,
+      corruptionLevel: 0.5,
+      moneyPrinting: 0.35,
+      interestRate: 0.03,
+      pressFreedom: 0.2,
+      foreignInvestment: 0.35,
+    },
+  },
+}

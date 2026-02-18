@@ -4,10 +4,34 @@ function formatValue(def, value) {
   return `${Math.round(value * 100)}%`
 }
 
-export default function PolicyPanel({ policies, values, onChange }) {
+export default function PolicyPanel({ policies, values, onChange, presets, onPresetSelect, disabled }) {
   return (
     <section data-component="PolicyPanel" style={panelStyle}>
       <div style={{ fontWeight: 800, marginBottom: 10 }}>Policies</div>
+      {presets && Object.keys(presets).length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+          {Object.entries(presets).map(([id, { label }]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onPresetSelect?.(id)}
+              disabled={disabled}
+              style={{
+                padding: '0.35rem 0.6rem',
+                fontSize: 11,
+                fontWeight: 600,
+                background: '#2f3336',
+                color: '#e7e9ea',
+                border: 'none',
+                borderRadius: 6,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {policies.map((p) => {
           const v = Number(values?.[p.id] ?? p.default ?? 0)
