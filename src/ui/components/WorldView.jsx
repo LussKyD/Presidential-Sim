@@ -21,7 +21,12 @@ const MOTORCADE_DURATION_MS = 6000
 const SPEECH_VIEW_MS = 3000
 
 /** First-person 3D world: office interior (your eyes at desk), exterior (palace, cars, road, parliament), full state-address flow. */
-const TV_STATIONS = ['VALDRIS 1', 'NATIONAL', 'CAPITAL NEWS']
+const OFFICE_TV_CHANNELS = [
+  { id: 'tv4', label: 'TV4' },
+  { id: 'natv', label: 'NATV' },
+  { id: 'defence', label: 'DEFENCE TV' },
+  { id: 'ini', label: 'INI TV' },
+]
 
 export default function WorldView({
   state,
@@ -513,8 +518,10 @@ export default function WorldView({
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
-  const lastEvent = state?.events?.length ? state.events[state.events.length - 1] : null
-  const showTicker = viewMode === 'office' && !activityPhase
+  const events = state?.events ?? []
+  const lastEvent = events.length ? events[events.length - 1] : null
+  const recentMessages = [...events].reverse().slice(0, 4).map((e) => e.message)
+  const showOfficeTv = viewMode === 'office' && !activityPhase
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
@@ -523,26 +530,27 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
-      {showTicker && (
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'stretch', background: 'linear-gradient(to top, #0a0a0c 0%, #111 100%)', borderTop: '2px solid #1a1a1a', boxShadow: '0 -2px 12px rgba(0,0,0,0.4)', pointerEvents: 'none' }}>
-          <div style={{ display: 'flex', gap: 0, padding: '6px 10px', background: '#111', borderRight: '1px solid #2f3336', fontSize: 9, color: '#6e767d', alignItems: 'center' }}>
-            {TV_STATIONS.map((s, i) => (
-              <span key={s} style={{ marginRight: 10, color: i === 0 ? '#1d9bf0' : '#6e767d', fontWeight: i === 0 ? 700 : 400 }}>{s}</span>
+      {showOfficeTv && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', width: 320, maxWidth: '85vw', zIndex: 5, pointerEvents: 'none' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 3, background: '#0a0a0c', border: '10px solid #1a1a1a', borderRadius: 4, boxShadow: 'inset 0 0 0 2px #2f3336, 0 8px 32px rgba(0,0,0,0.5)', padding: 4 }}>
+            {OFFICE_TV_CHANNELS.map((ch, i) => (
+              <div key={ch.id} style={{ background: '#111', borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 72 }}>
+                <div style={{ padding: '4px 6px', background: '#16181c', borderBottom: '1px solid #2f3336', fontSize: 9, fontWeight: 700, color: i === 0 ? '#1d9bf0' : '#8b98a5' }}>
+                  {ch.label}
+                </div>
+                <div style={{ flex: 1, padding: '6px 8px', fontSize: 10, color: '#e7e9ea', lineHeight: 1.3, display: 'flex', alignItems: 'center' }}>
+                  {recentMessages[i] ? (
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{i === 0 && lastEvent ? `LIVE ${recentMessages[i]}` : recentMessages[i]}</span>
+                  ) : (
+                    <span style={{ color: '#6e767d' }}>—</span>
+                  )}
+                </div>
+              </div>
             ))}
-          </div>
-          <div style={{ flex: 1, padding: '6px 12px', fontSize: 12, color: '#e7e9ea', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            {lastEvent ? (
-              <>
-                <span style={{ color: '#f4212e', fontWeight: 700, marginRight: 8, flexShrink: 0 }}>LIVE</span>
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastEvent.message}</span>
-              </>
-            ) : (
-              <span style={{ color: '#6e767d' }}>No headlines</span>
-            )}
           </div>
         </div>
       )}
-      <div style={{ position: 'absolute', bottom: showTicker ? 40 : 10, left: 10, color: '#6e767d', fontSize: 11 }}>
+      <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
         {viewMode === 'office' ? "First-person: you're at the desk · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
       </div>
     </div>
