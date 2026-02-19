@@ -4,9 +4,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STATE_ADDRESS_PHASES } from '../../core/constants/activities'
 import { formatGameDate } from '../../utils/dateFormat'
 
-// Office interior (origin): president at desk, first-person = eyes behind desk looking into room
+// Oval Office style: president in lone chair behind desk, looking into room and at TV on far wall
 const OFFICE_EYE = { x: 0, y: 1.6, z: 0.6 }
-const OFFICE_LOOK = { x: 0, y: 1.2, z: -2.5 }
+const OFFICE_LOOK = { x: 0, y: 1.4, z: -2.7 }
 const OFFICE_DOOR = { x: 0, y: 1.6, z: -2.5 }
 // Exterior: palace front, driveway, parliament (separate from office so motorcade is outside)
 const PALACE_FRONT = { x: 0, z: -10 }
@@ -80,18 +80,26 @@ export default function WorldView({
     sun.position.set(10, 25, 10)
     scene.add(sun)
 
-    // ---- Office interior (only visible when in office or walking to/from) ----
+    // ---- Oval Office interior: president at desk (lone chair) looking at room + TV on far wall ----
     const officeGroup = new THREE.Group()
     const of = 6
     const officeFloor = new THREE.Mesh(
       new THREE.PlaneGeometry(of, of),
-      new THREE.MeshStandardMaterial({ color: 0x1e2127 })
+      new THREE.MeshStandardMaterial({ color: 0x252220 })
     )
     officeFloor.rotation.x = -Math.PI / 2
     officeFloor.position.y = 0.01
     officeGroup.add(officeFloor)
+    const ovalRug = new THREE.Mesh(
+      new THREE.CircleGeometry(2.6, 48),
+      new THREE.MeshStandardMaterial({ color: 0xd4c4a8 })
+    )
+    ovalRug.rotation.x = -Math.PI / 2
+    ovalRug.scale.z = 1.2
+    ovalRug.position.y = 0.015
+    officeGroup.add(ovalRug)
 
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x252a33 })
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x3d3832 })
     const wallH = 2.6
     ;[
       [0, 1.3, -3, 0],
@@ -106,47 +114,56 @@ export default function WorldView({
     })
 
     const desk = new THREE.Mesh(
-      new THREE.BoxGeometry(2.4, 0.8, 1),
-      new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
+      new THREE.BoxGeometry(2.4, 0.82, 1.05),
+      new THREE.MeshStandardMaterial({ color: 0x6b4423 })
     )
-    desk.position.set(0, 0.4, -1.4)
+    desk.position.set(0, 0.41, -1.4)
     officeGroup.add(desk)
 
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x111111 })
-    const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.6), chairMat)
-    chairSeat.position.set(0, 0.4, 0.1)
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0x2a1510 })
+    const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.18, 0.58), chairMat)
+    chairSeat.position.set(0, 0.38, 0.12)
     officeGroup.add(chairSeat)
-    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.15), chairMat)
-    chairBack.position.set(0, 0.85, -0.15)
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.95, 0.12), chairMat)
+    chairBack.position.set(0, 0.98, -0.08)
     officeGroup.add(chairBack)
 
-    const visitorSeat = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.5), chairMat)
-    visitorSeat.position.set(0, 0.35, -2.5)
-    officeGroup.add(visitorSeat)
+    const visitorMat = new THREE.MeshStandardMaterial({ color: 0x2a2520 })
+    ;[-0.65, 0, 0.65].forEach((px) => {
+      const visitorSeat = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.2, 0.48), visitorMat)
+      visitorSeat.position.set(px, 0.34, -2.5)
+      officeGroup.add(visitorSeat)
+    })
 
-    const couchMat = new THREE.MeshStandardMaterial({ color: 0x3c434d })
-    const couch = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.6), couchMat)
-    couch.position.set(-1.4, 0.25, 0.4)
+    const couchMat = new THREE.MeshStandardMaterial({ color: 0x5c5348 })
+    const couch = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.48, 0.65), couchMat)
+    couch.position.set(-1.35, 0.24, 0.35)
     couch.rotation.y = Math.PI / 12
     officeGroup.add(couch)
-    const couch2 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.6), couchMat)
-    couch2.position.set(1.4, 0.25, 0.4)
+    const couch2 = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.48, 0.65), couchMat)
+    couch2.position.set(1.35, 0.24, 0.35)
     couch2.rotation.y = -Math.PI / 12
     officeGroup.add(couch2)
+    const coffeeTable = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.48, 0.08, 24),
+      new THREE.MeshStandardMaterial({ color: 0x4a4035 })
+    )
+    coffeeTable.position.set(0, 0.04, 0.25)
+    officeGroup.add(coffeeTable)
 
     const tablet = new THREE.Mesh(
       new THREE.BoxGeometry(0.7, 0.03, 0.45),
       new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x1d9bf0, emissiveIntensity: 0.2 })
     )
-    tablet.position.set(0.4, 0.81, -1.1)
+    tablet.position.set(0.4, 0.82, -1.08)
     tablet.rotation.x = -Math.PI / 12
     officeGroup.add(tablet)
 
     const tv = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 0.9, 0.05),
-      new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0x111827, emissiveIntensity: 0.5 })
+      new THREE.BoxGeometry(1.7, 0.95, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0x1a1f26, emissiveIntensity: 0.6 })
     )
-    tv.position.set(0, 1.5, 2.6)
+    tv.position.set(0, 1.45, -2.78)
     officeGroup.add(tv)
 
     scene.add(officeGroup)
@@ -478,8 +495,16 @@ export default function WorldView({
       } else {
         if (vm === 'office') {
           controls.enabled = false
-          camera.position.lerp(new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z), 0.08)
-          controls.target.lerp(new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z), 0.08)
+          // Snap to desk view when back in office (no phase). Avoids stuck camera after return from Parliament.
+          const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
+          const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
+          if (camera.position.distanceTo(deskEye) > 0.5) {
+            camera.position.copy(deskEye)
+            controls.target.copy(deskLook)
+          } else {
+            camera.position.lerp(deskEye, 0.08)
+            controls.target.lerp(deskLook, 0.08)
+          }
         } else {
           controls.enabled = true
           camera.position.lerp(new THREE.Vector3(12, 9, 12), 0.05)
