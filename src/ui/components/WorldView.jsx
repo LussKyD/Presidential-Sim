@@ -531,7 +531,7 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
       {showOfficeTv && (
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', width: 320, maxWidth: '85vw', zIndex: 5, pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', top: '22%', left: '50%', transform: 'translate(-50%, -50%)', width: 320, maxWidth: '85vw', zIndex: 5, pointerEvents: 'none' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 3, background: '#0a0a0c', border: '10px solid #1a1a1a', borderRadius: 4, boxShadow: 'inset 0 0 0 2px #2f3336, 0 8px 32px rgba(0,0,0,0.5)', padding: 4 }}>
             {OFFICE_TV_CHANNELS.map((ch, i) => (
               <div key={ch.id} style={{ background: '#111', borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 72 }}>
