@@ -475,6 +475,7 @@ export default function WorldView({
         camera.position.lerp(new THREE.Vector3(0, 1.6, -6.5), 0.1)
         controls.target.lerp(new THREE.Vector3(0, 1, -8), 0.1)
       } else if (phase === STATE_ADDRESS_PHASES.WALK_TO_OFFICE) {
+        officeCameraSettledRef.current = false
         const elapsed = Date.now() - phaseStart()
         const norm = Math.min(1, elapsed / WALK_DURATION_MS)
         const outside = new THREE.Vector3(0, 1.6, -6.5)
@@ -499,11 +500,10 @@ export default function WorldView({
           controls.enabled = true
           controls.minDistance = 1.2
           controls.maxDistance = 10
-          // On first entry back to office with no activity, snap to desk view once,
-          // then let the user rotate/pan freely without re-anchoring every frame.
-          if (!phase && !officeCameraSettledRef.current) {
-            const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
-            const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
+          const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
+          const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
+          const needSnap = !officeCameraSettledRef.current || camera.position.distanceTo(deskEye) > 2
+          if (!phase && needSnap) {
             camera.position.copy(deskEye)
             controls.target.copy(deskLook)
             officeCameraSettledRef.current = true
