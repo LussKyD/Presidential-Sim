@@ -3,7 +3,6 @@ import PolicyPanel from './PolicyPanel'
 import { STATE_ADDRESS_PHASES, ACTIVITY_IDS, ACTIVITY_LABELS } from '../../core/constants/activities'
 import { getCountry } from '../../core/constants/international'
 import { formatGameDate } from '../../utils/dateFormat'
-import { getCountry } from '../../core/constants/international'
 
 const COOLDOWN_MONTHS = 12
 
