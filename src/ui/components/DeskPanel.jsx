@@ -82,7 +82,7 @@ export default function DeskPanel({
   const coupPct = state?.politics?.coupRisk != null ? Math.round(state.politics.coupRisk * 100) : '—'
   const parliamentPct = parliamentSupport != null ? Math.round(parliamentSupport * 100) : null
   const oppositionPct = oppositionStrength != null ? Math.round(oppositionStrength * 100) : null
-  const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
+  const date = state?.time ? (state.time.day != null ? `Day ${state.time.day} · ${state.time.month}/${state.time.year}` : `${state.time.month}/${state.time.year}`) : '—'
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
   const showAdvanceButton =

@@ -31,11 +31,14 @@ function clone(value) {
 
 const BUDGET_MONTH = 3
 const OPENING_OF_PARLIAMENT_MONTH = 6
+/** Each month has 7 substantial days; one tick = one day. */
+const DAYS_PER_MONTH = 7
+const COOLDOWN_MONTHS_TO_TICKS = (months) => months * DAYS_PER_MONTH
 
 function getDefaultState(seed = 1) {
   return {
     meta: { seed, lastVisitRegionTick: -999, lastSecurityBriefingTick: -999, lastPressConferenceTick: -999, lastLaunchInfrastructureTick: -999 },
-    time: { year: 2026, month: 1, tick: 0 },
+    time: { year: 2026, month: 1, day: 1, tick: 0 },
     economy: {
       gdp: INITIAL_GDP,
       gdpGrowth: 0,
@@ -70,6 +73,15 @@ function getDefaultState(seed = 1) {
 export function createSimulationEngine({ seed = 1, initialState } = {}) {
   const rng = createSeededRandom(seed)
   const state = initialState ? clone(initialState) : getDefaultState(seed)
+  // Migrate old saves: 1 tick used to mean 1 month; now 1 tick = 1 day, 7 days = 1 month.
+  if (state.time && state.time.day == null) {
+    const oldTicks = state.time.tick ?? 0
+    state.time.tick = oldTicks * DAYS_PER_MONTH
+    state.time.day = 1
+    state.time.month = oldTicks === 0 ? 1 : (oldTicks % 12 || 12)
+    state.time.year = 2026 + (oldTicks === 0 ? 0 : Math.floor((oldTicks - 1) / 12))
+  }
+  if (state.time && state.time.day == null) state.time.day = 1
   if (state.meta) {
     state.meta.seed = seed
     if (typeof state.meta.lastVisitRegionTick !== 'number') state.meta.lastVisitRegionTick = -999
@@ -112,10 +124,14 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
 
   function tick() {
     state.time.tick += 1
-    state.time.month += 1
-    if (state.time.month > 12) {
-      state.time.month = 1
-      state.time.year += 1
+    state.time.day += 1
+    if (state.time.day > DAYS_PER_MONTH) {
+      state.time.day = 1
+      state.time.month += 1
+      if (state.time.month > 12) {
+        state.time.month = 1
+        state.time.year += 1
+      }
     }
 
     // Instability rises when approval is low and coup risk is high.
@@ -137,7 +153,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
       const target = clamp(0.2 + (1 - approval) * 0.65, 0.15, 0.9)
       state.opposition.strength = clamp(state.opposition.strength * 0.97 + target * 0.03, 0.1, 0.9)
     }
-    if (state.calendar) {
+    if (state.calendar && state.time.day === 1) {
       if (state.time.month === 1) {
         state.calendar.budgetTabledThisYear = false
         state.calendar.budgetDue = false
@@ -185,7 +201,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     }
 
     // One event per year so the feed isn’t flooded; crises add their own.
-    if (state.time.month === 1) {
+    if (state.time.day === 1 && state.time.month === 1) {
       state.events.push({
         id: `year-${state.time.year}-${state.time.tick}`,
         at: { ...state.time },
@@ -281,7 +297,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   function applyCabinetMeetingOutcome(success) {
     if (state.regime?.status !== 'in_power') return
     const last = state.meta?.lastCabinetTick ?? -999
-    if (state.time.tick - last < 6) return
+    if (state.time.tick - last < COOLDOWN_MONTHS_TO_TICKS(6)) return
     state.meta.lastCabinetTick = state.time.tick
     const delta = success ? 0.02 : -0.01
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
@@ -298,7 +314,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   function applyStateAddressOutcome(positive) {
     if (state.regime?.status !== 'in_power') return
     const last = state.meta?.lastStateAddressTick ?? -999
-    if (state.time.tick - last < 12) return
+    if (state.time.tick - last < COOLDOWN_MONTHS_TO_TICKS(12)) return
     state.meta.lastStateAddressTick = state.time.tick
     const delta = positive ? 0.03 : -0.02
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
@@ -314,7 +330,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
-  const VISIT_REGION_COOLDOWN_TICKS = 6
+  const VISIT_REGION_COOLDOWN_TICKS = COOLDOWN_MONTHS_TO_TICKS(6)
   function applyVisitRegion(regionId) {
     if (state.regime?.status !== 'in_power' || !REGION_IDS.includes(regionId)) return
     const last = state.meta?.lastVisitRegionTick ?? -999
@@ -332,7 +348,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
-  const SECURITY_BRIEFING_COOLDOWN_TICKS = 6
+  const SECURITY_BRIEFING_COOLDOWN_TICKS = COOLDOWN_MONTHS_TO_TICKS(6)
   function applySecurityBriefingOutcome() {
     if (state.regime?.status !== 'in_power') return
     const last = state.meta?.lastSecurityBriefingTick ?? -999
@@ -348,7 +364,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
-  const PRESS_CONFERENCE_COOLDOWN_TICKS = 6
+  const PRESS_CONFERENCE_COOLDOWN_TICKS = COOLDOWN_MONTHS_TO_TICKS(6)
   function applyPressConferenceOutcome() {
     if (state.regime?.status !== 'in_power') return
     const last = state.meta?.lastPressConferenceTick ?? -999
@@ -369,7 +385,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
-  const LAUNCH_INFRASTRUCTURE_COOLDOWN_TICKS = 6
+  const LAUNCH_INFRASTRUCTURE_COOLDOWN_TICKS = COOLDOWN_MONTHS_TO_TICKS(6)
   function applyLaunchInfrastructure(regionId) {
     if (state.regime?.status !== 'in_power' || !REGION_IDS.includes(regionId)) return
     const last = state.meta?.lastLaunchInfrastructureTick ?? -999
@@ -435,7 +451,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.pendingMeeting = null
   }
 
-  const MEET_FOREIGN_COOLDOWN_TICKS = 6
+  const MEET_FOREIGN_COOLDOWN_TICKS = COOLDOWN_MONTHS_TO_TICKS(6)
   function applyMeetForeignLeader(countryId) {
     if (state.regime?.status !== 'in_power' || !COUNTRY_IDS.includes(countryId)) return
     const last = state.international?.lastMeetForeignTick ?? -999

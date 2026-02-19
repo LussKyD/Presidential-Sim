@@ -517,7 +517,7 @@ export default function WorldView({
 
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
-  const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
+  const date = state?.time ? (state.time.day != null ? `Day ${state.time.day} · ${state.time.month}/${state.time.year}` : `${state.time.month}/${state.time.year}`) : '—'
   const events = state?.events ?? []
   const lastEvent = events.length ? events[events.length - 1] : null
   const recentMessages = [...events].reverse().slice(0, 4).map((e) => e.message)

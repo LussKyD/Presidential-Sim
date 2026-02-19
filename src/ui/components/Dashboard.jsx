@@ -77,7 +77,7 @@ export default function Dashboard({ state }) {
   return (
     <section data-component="Dashboard">
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Card title="Date" value={time ? `${time.month}/${time.year}` : '—'} sub={time ? `Tick ${time.tick}` : ''} />
+        <Card title="Date" value={time ? (time.day != null ? `Day ${time.day} · ${time.month}/${time.year}` : `${time.month}/${time.year}`) : '—'} sub={time ? `Tick ${time.tick}` : ''} />
         <Card title="GDP" value={formatNum(econ?.gdp)} sub={econ ? `Growth: ${formatPct(econ.gdpGrowth)}` : ''} />
         <Card title="Inflation" value={formatPct(econ?.inflation)} />
         <Card title="Unemployment" value={formatPct(econ?.unemployment)} />

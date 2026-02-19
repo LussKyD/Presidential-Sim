@@ -26,6 +26,7 @@
 | **Launch infrastructure** — Desk activity: pick region → multi-phase flow (depart → motorcade → at site → ribbon-cutting → return). Narrative cards + Continue; outcome: regional +5%, national +1.5%, event; 6‑month cooldown. | Set-piece: opening of project, regional approval (gap 3.2, 2.4). Flow first; 3D site visit later. |
 | **Media as headlines** — Event feed as “front page”; quad-panel TV in office (TV4, NATV, DEFENCE TV, INI TV) | News cycle, framing (gap 2.6, 3.2). |
 | **Office + palace exterior + motorcade (3 cars) + Parliament building + chamber** | Residence + motorcade + legislature as physical spaces. Real life: larger palace, full motorcade composition, security. |
+| **Time: 7 days per month** — One tick = one day; each month has 7 substantial days. Cooldowns and calendar (budget month, opening, elections) stay in months; UI shows “Day X · M/Y”. | Gives day-level granularity within the month; gameplay balance unchanged (6‑month cooldown = 42 ticks, etc.). |
 
 ---
 

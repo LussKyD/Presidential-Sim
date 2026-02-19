@@ -90,9 +90,10 @@ function App() {
   const lastStateAddressTick = state?.meta?.lastStateAddressTick ?? -999
   const currentTick = state?.time?.tick ?? 0
   const stateAddressCooldown = (() => {
-    const elapsed = currentTick - lastStateAddressTick
-    if (elapsed >= STATE_ADDRESS_COOLDOWN_MONTHS) return 0
-    return STATE_ADDRESS_COOLDOWN_MONTHS - elapsed
+    const elapsedDays = currentTick - lastStateAddressTick
+    const elapsedMonths = Math.floor(elapsedDays / 7)
+    if (elapsedMonths >= STATE_ADDRESS_COOLDOWN_MONTHS) return 0
+    return STATE_ADDRESS_COOLDOWN_MONTHS - elapsedMonths
   })()
 
   function startStateAddress() {
