@@ -2,11 +2,11 @@
 import { getCountry } from '../../core/constants/international'
 import { formatGameDate } from '../../utils/dateFormat'
 
-const SEAL_COLORS = { norden: '#1e3a5f', sudland: '#0d5c2e', eastalia: '#8b2500' }
+const SEAL_COLORS = { norden: '#1e3a5f', sudland: '#0d5c2e', eastalia: '#8b2500', valdris: '#1a365d' }
 
 function CountrySeal({ countryId, name }) {
   const initial = name ? name[0].toUpperCase() : '?'
-  const fill = SEAL_COLORS[countryId] || '#2f3336'
+  const fill = SEAL_COLORS[countryId] ?? (countryId == null ? SEAL_COLORS.valdris : '#2f3336')
   return (
     <div
       style={{
@@ -72,10 +72,25 @@ export default function DossierModal({ dossier, onClose }) {
           </div>
         </div>
         <div style={{ borderTop: '1px solid #2f3336', paddingTop: 16 }}>
-          <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>Deputy handed over</div>
-          <div style={{ fontSize: 13, color: '#e7e9ea', lineHeight: 1.5, marginBottom: 12 }}>{dossier.summary}</div>
-          <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>While you were away</div>
-          <div style={{ fontSize: 13, color: '#cfd9de', lineHeight: 1.55 }}>{dossier.details}</div>
+          {dossier.type === 'deputy_handover' ? (
+            <>
+              <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>Deputy handed over</div>
+              <div style={{ fontSize: 13, color: '#e7e9ea', lineHeight: 1.5, marginBottom: 12 }}>{dossier.summary}</div>
+              <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>While you were away</div>
+              <div style={{ fontSize: 13, color: '#cfd9de', lineHeight: 1.55 }}>{dossier.details}</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>Summary</div>
+              <div style={{ fontSize: 13, color: '#e7e9ea', lineHeight: 1.5, marginBottom: 12 }}>{dossier.summary}</div>
+              {dossier.details && (
+                <>
+                  <div style={{ fontSize: 11, color: '#8b98a5', marginBottom: 6 }}>Details</div>
+                  <div style={{ fontSize: 13, color: '#cfd9de', lineHeight: 1.55 }}>{dossier.details}</div>
+                </>
+              )}
+            </>
+          )}
         </div>
         <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
           <button

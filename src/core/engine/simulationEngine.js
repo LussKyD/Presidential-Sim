@@ -302,11 +302,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.meta.lastCabinetTick = state.time.tick
     const delta = success ? 0.02 : -0.01
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
+    const summary = success ? 'Cabinet meeting: unity behind your agenda.' : 'Cabinet meeting: ministers disagree on priorities.'
+    const details = success ? 'Ministers aligned behind your priorities. Coordination strengthened.' : 'Some ministers raised concerns. Follow-up required.'
+    const dossier = addDossier({ countryId: null, type: 'cabinet', title: 'Cabinet meeting brief', summary, details, at: state.time })
     state.events.push({
       id: `cabinet-${state.time.tick}`,
       at: { ...state.time },
       type: 'cabinet',
-      message: success ? 'Cabinet meeting: unity behind your agenda.' : 'Cabinet meeting: ministers disagree on priorities.',
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -340,11 +344,14 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const current = state.regions?.[regionId] ?? 0.5
     state.regions[regionId] = clamp(current + 0.06, 0.05, 0.95)
     state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.01, 0, 1)
+    const summary = `President visited ${regionId}. Regional support strengthened.`
+    const dossier = addDossier({ countryId: null, type: 'visit_region', title: `Visit brief — ${regionId}`, summary, details: `Regional rally and meetings in ${regionId}. Local approval increased. National approval nudged up.`, at: state.time })
     state.events.push({
       id: `visit-region-${state.time.tick}-${regionId}`,
       at: { ...state.time },
       type: 'visit_region',
-      message: `President visited ${regionId}. Regional support strengthened.`,
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -356,11 +363,14 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.time.tick - last < SECURITY_BRIEFING_COOLDOWN_TICKS) return
     state.meta.lastSecurityBriefingTick = state.time.tick
     state.politics.coupRisk = clamp((state.politics.coupRisk ?? 0.2) - 0.02, 0.05, 0.95)
+    const summary = 'Security briefing concluded. Threat assessment updated; coup risk slightly reduced.'
+    const dossier = addDossier({ countryId: null, type: 'security_briefing', title: 'Security briefing brief', summary, details: 'Intel reviewed. No imminent threats. Coup risk assessment adjusted downward. Recommend continued monitoring.', at: state.time })
     state.events.push({
       id: `security-briefing-${state.time.tick}`,
       at: { ...state.time },
       type: 'security_briefing',
-      message: 'Security briefing concluded. Threat assessment updated; coup risk slightly reduced.',
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -375,13 +385,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const positive = approval >= 0.45
     const delta = positive ? 0.02 : -0.01
     state.population.publicApproval = clamp(approval + delta, 0, 1)
+    const summary = positive ? 'Press conference: message landed well. Approval rises.' : 'Press conference: tough questions; approval dips.'
+    const details = positive ? 'Key points well received. Headlines favourable.' : 'Some hostile questions. Coverage mixed.'
+    const dossier = addDossier({ countryId: null, type: 'press_conference', title: 'Press conference brief', summary, details, at: state.time })
     state.events.push({
       id: `press-conference-${state.time.tick}`,
       at: { ...state.time },
       type: 'press_conference',
-      message: positive
-        ? 'Press conference: message landed well. Approval rises.'
-        : 'Press conference: tough questions; approval dips.',
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -395,11 +407,14 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const current = state.regions?.[regionId] ?? 0.5
     state.regions[regionId] = clamp(current + 0.05, 0.05, 0.95)
     state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.015, 0, 1)
+    const summary = `Infrastructure project launched in ${regionId}. Regional support and approval rise.`
+    const dossier = addDossier({ countryId: null, type: 'launch_infrastructure', title: `Infrastructure launch — ${regionId}`, summary, details: `Ribbon-cutting and opening ceremony in ${regionId}. Regional and national approval increased.`, at: state.time })
     state.events.push({
       id: `launch-infra-${state.time.tick}-${regionId}`,
       at: { ...state.time },
       type: 'launch_infrastructure',
-      message: `Infrastructure project launched in ${regionId}. Regional support and approval rise.`,
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
