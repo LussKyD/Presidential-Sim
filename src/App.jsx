@@ -195,6 +195,7 @@ function App() {
             tableBudget={tableBudget}
             budgetDue={state?.calendar?.budgetDue}
             parliamentSupport={state?.parliament?.support}
+            oppositionStrength={state?.opposition?.strength}
             onCabinetMeeting={applyCabinetMeetingOutcome}
             cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < 6}
           />

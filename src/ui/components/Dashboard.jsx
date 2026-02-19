@@ -81,6 +81,7 @@ export default function Dashboard({ state }) {
         <Card title="Unemployment" value={formatPct(econ?.unemployment)} />
         <Card title="Approval" value={formatPct(pop?.publicApproval)} />
         <Card title="Coup risk" value={formatPct(pol?.coupRisk)} />
+        <Card title="Opposition" value={formatPct(state?.opposition?.strength)} sub="Election threat" />
       </div>
 
       <div style={{ marginTop: 16 }}>

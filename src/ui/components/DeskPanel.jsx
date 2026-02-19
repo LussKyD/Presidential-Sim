@@ -48,6 +48,7 @@ export default function DeskPanel({
   tableBudget,
   budgetDue,
   parliamentSupport,
+  oppositionStrength,
   onCabinetMeeting,
   cabinetCooldown,
 }) {
@@ -56,6 +57,7 @@ export default function DeskPanel({
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const coupPct = state?.politics?.coupRisk != null ? Math.round(state.politics.coupRisk * 100) : '—'
   const parliamentPct = parliamentSupport != null ? Math.round(parliamentSupport * 100) : null
+  const oppositionPct = oppositionStrength != null ? Math.round(oppositionStrength * 100) : null
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
@@ -90,7 +92,7 @@ export default function DeskPanel({
       <div style={{ fontWeight: 700, fontSize: 14, color: '#e7e9ea' }}>Desk</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#8b98a5', flexWrap: 'wrap', gap: 4 }}>
         <span>{date}</span>
-        <span>Approval: {approvalPct}% · Coup: {coupPct}%{parliamentPct != null ? ` · Parliament: ${parliamentPct}%` : ''}</span>
+        <span>Approval: {approvalPct}% · Coup: {coupPct}%{parliamentPct != null ? ` · Parliament: ${parliamentPct}%` : ''}{oppositionPct != null ? ` · Opposition: ${oppositionPct}%` : ''}</span>
       </div>
 
       {budgetDue && (

@@ -57,6 +57,7 @@ function getDefaultState(seed = 1) {
       ethnicAlignment: 0.65,
     },
     regime: { status: 'in_power', endReason: null },
+    opposition: { strength: 0.35 },
     events: [],
   }
 }
@@ -74,6 +75,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   }
   if (!state.parliament) state.parliament = { support: def.parliament?.support ?? 0.55 }
   if (!state.calendar) state.calendar = { ...def.calendar, budgetTabledThisYear: state.calendar?.budgetTabledThisYear ?? false, budgetDue: state.calendar?.budgetDue ?? false }
+  if (!state.opposition) state.opposition = { strength: def.opposition?.strength ?? 0.35 }
 
   function applyPolicy(policyId, value) {
     const def = POLICY_DEFS.find((d) => d.id === policyId)
@@ -113,6 +115,11 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.parliament) {
       const target = state.population.publicApproval * 0.7 + 0.2
       state.parliament.support = clamp(state.parliament.support * 0.97 + target * 0.03, 0.1, 0.95)
+    }
+    if (state.opposition) {
+      const approval = state.population.publicApproval
+      const target = clamp(0.2 + (1 - approval) * 0.65, 0.15, 0.9)
+      state.opposition.strength = clamp(state.opposition.strength * 0.97 + target * 0.03, 0.1, 0.9)
     }
     if (state.calendar) {
       if (state.time.month === 1) {
@@ -163,6 +170,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const roll = rng()
     if (roll < support) {
       state.population.publicApproval = clamp(state.population.publicApproval + 0.02, 0, 1)
+      if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.02, 0.1, 0.9)
       state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: 'Parliament passes your budget. Government wins vote.' })
     } else if (roll < support + 0.2) {
       state.population.publicApproval = clamp(state.population.publicApproval - 0.01, 0, 1)
@@ -170,6 +178,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     } else {
       state.population.publicApproval = clamp(state.population.publicApproval - 0.05, 0, 1)
       state.politics.coupRisk = clamp(state.politics.coupRisk + 0.03, 0, 1)
+      if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
       state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: 'Parliament rejects budget. Opposition blocks government.' })
     }
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
@@ -183,13 +192,16 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (pending.type === 'protest') {
       if (response === 'dialogue') {
         state.population.publicApproval = clamp(population.publicApproval + 0.02, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.01, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You ordered dialogue with protesters. Approval rises slightly.' })
       } else if (response === 'crackdown') {
         state.population.publicApproval = clamp(population.publicApproval - 0.06, 0, 1)
         state.politics.coupRisk = clamp(politics.coupRisk + 0.04, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'Security crackdown on protesters. Approval drops; unrest grows.' })
       } else if (response === 'ignore') {
         state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'No formal response. Protest fades but some lose faith.' })
       } else if (response === 'address_nation') {
         state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
@@ -198,13 +210,16 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     } else if (pending.type === 'scandal') {
       if (response === 'deny') {
         state.population.publicApproval = clamp(population.publicApproval - 0.02, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You denied the allegations. Media skeptical.' })
       } else if (response === 'investigate') {
         state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
         state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) - 0.1, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.01, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You ordered an inquiry. Public sees accountability.' })
       } else if (response === 'ignore') {
         state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
+        if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'No comment. Scandal drags on; approval falls.' })
       }
     }
@@ -235,6 +250,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.meta.lastStateAddressTick = state.time.tick
     const delta = positive ? 0.03 : -0.02
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
+    if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + (positive ? -0.02 : 0.02), 0.1, 0.9)
     state.events.push({
       id: `state-address-${state.time.tick}`,
       at: { ...state.time },

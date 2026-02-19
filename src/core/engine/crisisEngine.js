@@ -76,11 +76,13 @@ export function updateCrisisCheck(state, rng) {
     return state
   }
 
-  // ----- Elections every 4 years -----
+  // ----- Elections every 4 years: you vs opposition (with random swing) -----
   const monthsInOffice = (state.time.year - 2026) * 12 + (state.time.month - 1)
   if (monthsInOffice > 0 && monthsInOffice % 48 === 0 && rng) {
-    const loseChance = clamp(0.6 - population.publicApproval, 0.05, 0.9)
-    const lost = rng() < loseChance
+    const approval = population.publicApproval
+    const oppositionStrength = state.opposition?.strength ?? 0.35
+    const swing = (rng() - 0.5) * 0.2
+    const lost = oppositionStrength + swing > approval
     state.events.push({
       id: `election-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
@@ -121,6 +123,7 @@ export function updateCrisisCheck(state, rng) {
       state.events.push({ id: eventId, at: { ...state.time }, type: 'protest', message })
       state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
       state.politics.coupRisk = clamp(politics.coupRisk + 0.02, 0, 1)
+      if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
     }
   }
 
@@ -148,6 +151,7 @@ export function updateCrisisCheck(state, rng) {
       state.events.push({ id: eventId, at: { ...state.time }, type: 'scandal', message })
       state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
       state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) + 0.15, 0, 1)
+      if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
     }
   }
 
