@@ -49,6 +49,41 @@ export function useSimulation({ tickMs = 2000, seed = 1, gameKey = 0, initialSav
         engineRef.current.applyCabinetMeetingOutcome(success)
         setState(engineRef.current.getState())
       },
+      scheduleMeeting(contactId, month, year) {
+        if (!engineRef.current) return
+        engineRef.current.scheduleMeeting(contactId, month, year)
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
+      logCall(contactId) {
+        if (!engineRef.current) return
+        engineRef.current.logCall(contactId)
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
+      addDiaryEntry(text) {
+        if (!engineRef.current) return
+        engineRef.current.addDiaryEntry(text)
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
+      addProposedEvent(month, year, title) {
+        if (!engineRef.current) return
+        engineRef.current.addProposedEvent(month, year, title)
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
+      dismissMeeting(meetingId) {
+        if (!engineRef.current) return
+        engineRef.current.dismissMeeting(meetingId)
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
       setBudgetPie(...vals) {
         if (!engineRef.current?.setBudgetPie) return
         engineRef.current.setBudgetPie(...vals)

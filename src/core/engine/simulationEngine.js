@@ -60,6 +60,7 @@ function getDefaultState(seed = 1) {
     regime: { status: 'in_power', endReason: null },
     opposition: { strength: 0.35 },
     regions: getDefaultRegionalApproval(INITIAL_APPROVAL),
+    desk: { meetings: [], callLog: [], diary: [], proposedEvents: [] },
     events: [],
   }
 }
@@ -80,6 +81,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   if (!state.opposition) state.opposition = { strength: def.opposition?.strength ?? 0.35 }
   if (!state.regions || typeof state.regions !== 'object') state.regions = { ...getDefaultRegionalApproval(def.population?.publicApproval ?? 0.5) }
   REGION_IDS.forEach((id) => { if (typeof state.regions[id] !== 'number') state.regions[id] = def.regions?.[id] ?? 0.5 })
+  if (!state.desk || !Array.isArray(state.desk.meetings)) state.desk = { meetings: state.desk?.meetings ?? [], callLog: state.desk?.callLog ?? [], diary: state.desk?.diary ?? [], proposedEvents: state.desk?.proposedEvents ?? [] }
 
   function applyPolicy(policyId, value) {
     const def = POLICY_DEFS.find((d) => d.id === policyId)
@@ -152,6 +154,11 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     }
     updatePolitics(state)
     updateCrisisCheck(state, rng)
+
+    if (state.regime?.status === 'in_power' && state.desk?.meetings?.length) {
+      const due = state.desk.meetings.find((m) => !m.done && m.month === state.time.month && m.year === state.time.year)
+      if (due) state.pendingMeeting = due
+    }
 
     // One event per year so the feed isn’t flooded; crises add their own.
     if (state.time.month === 1) {
@@ -287,6 +294,37 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     return clone(state)
   }
 
+  function scheduleMeeting(contactId, month, year) {
+    if (!state.desk) state.desk = { meetings: [], callLog: [], diary: [], proposedEvents: [] }
+    const id = `meeting-${state.time.tick}-${Math.random().toString(36).slice(2, 8)}`
+    state.desk.meetings.push({ id, contactId, month: Number(month), year: Number(year), done: false })
+  }
+
+  function logCall(contactId) {
+    if (!state.desk) state.desk = { meetings: [], callLog: [], diary: [], proposedEvents: [] }
+    state.desk.callLog.push({ contactId, month: state.time.month, year: state.time.year, tick: state.time.tick })
+    if (state.desk.callLog.length > 50) state.desk.callLog.shift()
+  }
+
+  function addDiaryEntry(text) {
+    if (!state.desk) state.desk = { meetings: [], callLog: [], diary: [], proposedEvents: [] }
+    const t = String(text).trim()
+    if (!t) return
+    state.desk.diary.push({ tick: state.time.tick, month: state.time.month, year: state.time.year, text: t })
+    if (state.desk.diary.length > 100) state.desk.diary.shift()
+  }
+
+  function addProposedEvent(month, year, title) {
+    if (!state.desk) state.desk = { meetings: [], callLog: [], diary: [], proposedEvents: [] }
+    state.desk.proposedEvents.push({ month: Number(month), year: Number(year), title: String(title).trim() || 'Event' })
+  }
+
+  function dismissMeeting(meetingId) {
+    const m = state.desk?.meetings?.find((x) => x.id === meetingId)
+    if (m) m.done = true
+    state.pendingMeeting = null
+  }
+
   return {
     getState,
     tick,
@@ -296,6 +334,11 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     tableBudget,
     respondToCrisis,
     applyCabinetMeetingOutcome,
+    scheduleMeeting,
+    logCall,
+    addDiaryEntry,
+    addProposedEvent,
+    dismissMeeting,
     policyDefs: POLICY_DEFS,
   }
 }

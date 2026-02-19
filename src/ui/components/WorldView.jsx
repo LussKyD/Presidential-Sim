@@ -21,6 +21,8 @@ const MOTORCADE_DURATION_MS = 6000
 const SPEECH_VIEW_MS = 3000
 
 /** First-person 3D world: office interior (your eyes at desk), exterior (palace, cars, road, parliament), full state-address flow. */
+const TV_STATIONS = ['VALDRIS 1', 'NATIONAL', 'CAPITAL NEWS']
+
 export default function WorldView({
   state,
   viewMode = 'office',
@@ -28,6 +30,7 @@ export default function WorldView({
   onPhaseComplete,
   onSpeechDone,
   onSpeechReady,
+  onTabletClick,
 }) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
@@ -36,12 +39,14 @@ export default function WorldView({
   const onPhaseCompleteRef = useRef(onPhaseComplete)
   const onSpeechDoneRef = useRef(onSpeechDone)
   const onSpeechReadyRef = useRef(onSpeechReady)
+  const onTabletClickRef = useRef(onTabletClick)
   const speechReadyFiredRef = useRef(false)
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
   onSpeechDoneRef.current = onSpeechDone
   onSpeechReadyRef.current = onSpeechReady
+  onTabletClickRef.current = onTabletClick
   if (activityPhase !== STATE_ADDRESS_PHASES.SPEECH) speechReadyFiredRef.current = false
 
   useEffect(() => {
@@ -271,6 +276,19 @@ export default function WorldView({
     controls.maxDistance = 30
     controls.enablePan = true
 
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
+    function onCanvasClick(event) {
+      if (activityPhaseRef.current || viewModeRef.current !== 'office') return
+      const rect = renderer.domElement.getBoundingClientRect()
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+      raycaster.setFromCamera(mouse, camera)
+      const hits = raycaster.intersectObject(tablet, true)
+      if (hits.length > 0) onTabletClickRef.current?.()
+    }
+    renderer.domElement.addEventListener('click', onCanvasClick)
+
     const phaseStart = () => {
       if (phaseStartRef.current === null) phaseStartRef.current = Date.now()
       return phaseStartRef.current
@@ -479,6 +497,7 @@ export default function WorldView({
     window.addEventListener('resize', onResize)
 
     return () => {
+      renderer.domElement.removeEventListener('click', onCanvasClick)
       window.removeEventListener('resize', onResize)
       if (frameId) cancelAnimationFrame(frameId)
       controls?.dispose()
@@ -504,14 +523,30 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
-      {showTvHeadline && (
-        <div style={{ position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)', right: 12, maxWidth: 420, pointerEvents: 'none', background: 'rgba(0,0,0,0.82)', border: '1px solid #2f3336', borderRadius: 6, padding: '8px 12px', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
-          <div style={{ fontSize: 9, color: '#1d9bf0', fontWeight: 700, letterSpacing: '0.06em', marginBottom: 4 }}>VALDRIS NEWS · LIVE</div>
-          <div style={{ fontSize: 12, color: '#e7e9ea', lineHeight: 1.3 }}>{lastEvent.message}</div>
+      {viewMode === 'office' && !activityPhase && (
+        <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: 320, pointerEvents: 'none', background: '#0a0a0c', border: '12px solid #1a1a1a', borderRadius: 8, boxShadow: 'inset 0 0 0 2px #2f3336, 0 8px 24px rgba(0,0,0,0.5)' }}>
+          <div style={{ display: 'flex', gap: 0, padding: '6px 8px', background: '#111', borderBottom: '1px solid #2f3336', fontSize: 9, color: '#6e767d' }}>
+            {TV_STATIONS.map((s, i) => (
+              <span key={s} style={{ flex: 1, textAlign: 'center', color: i === 0 ? '#1d9bf0' : '#6e767d', fontWeight: i === 0 ? 700 : 400 }}>{s}</span>
+            ))}
+          </div>
+          <div style={{ minHeight: 88, padding: '10px 12px', background: '#0f1419' }}>
+            <div style={{ flex: 1, height: 48 }} />
+            <div style={{ fontSize: 11, color: '#e7e9ea', lineHeight: 1.35, borderTop: '1px solid #2f3336', paddingTop: 8, width: '100%' }}>
+              {lastEvent ? (
+                <>
+                  <span style={{ color: '#f4212e', fontWeight: 700, marginRight: 6 }}>LIVE</span>
+                  {lastEvent.message}
+                </>
+              ) : (
+                <span style={{ color: '#6e767d' }}>No headlines</span>
+              )}
+            </div>
+          </div>
         </div>
       )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
-        {viewMode === 'office' ? "First-person: you're at the desk · Activities from the desk" : 'Orbit the capital'}
+        {viewMode === 'office' ? "First-person: you're at the desk · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
       </div>
     </div>
   )

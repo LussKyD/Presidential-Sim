@@ -6,6 +6,8 @@ import TermSummary from './ui/components/TermSummary'
 import WorldView from './ui/components/WorldView'
 import DeskPanel from './ui/components/DeskPanel'
 import CrisisResponsePanel from './ui/components/CrisisResponsePanel'
+import TabletPanel from './ui/components/TabletPanel'
+import MeetingModal from './ui/components/MeetingModal'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
 import { STATE_ADDRESS_PHASES } from './core/constants/activities'
@@ -35,7 +37,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -45,6 +47,7 @@ function App() {
   const [view, setView] = useState('office')
   const [stateAddressPhase, setStateAddressPhase] = useState(null)
   const [speechReady, setSpeechReady] = useState(false)
+  const [tabletOpen, setTabletOpen] = useState(false)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -138,6 +141,20 @@ function App() {
   const pendingCrisis = state?.crisis?.pendingResponse
 
   return (
+    <>
+      {tabletOpen && (
+        <TabletPanel
+          state={state}
+          onClose={() => setTabletOpen(false)}
+          onAddDiaryEntry={addDiaryEntry}
+          onAddProposedEvent={addProposedEvent}
+          onLogCall={logCall}
+          onScheduleMeeting={scheduleMeeting}
+        />
+      )}
+      {state?.pendingMeeting && (
+        <MeetingModal meeting={state.pendingMeeting} onDismiss={dismissMeeting} />
+      )}
     <MainLayout view={view} onViewChange={setView}>
       {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
@@ -171,6 +188,7 @@ function App() {
               activityPhase={stateAddressPhase}
               onPhaseComplete={handlePhaseComplete}
               onSpeechReady={() => setSpeechReady(true)}
+              onTabletClick={() => setTabletOpen(true)}
             />
           </div>
           <DeskPanel
@@ -275,6 +293,7 @@ function App() {
         </>
       )}
     </MainLayout>
+    </>
   )
 }
 
