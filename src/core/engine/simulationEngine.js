@@ -13,6 +13,7 @@ import {
   INITIAL_UNEMPLOYMENT,
 } from '../constants/baseValues'
 import { POLICY_DEFAULTS, POLICY_DEFS, BUDGET_PIE_IDS } from '../constants/policyEffects'
+import { REGION_IDS, getDefaultRegionalApproval } from '../constants/regions'
 
 function normalizeBudgetPie(policies) {
   const sum = BUDGET_PIE_IDS.reduce((s, id) => s + (policies[id] ?? 0), 0)
@@ -58,6 +59,7 @@ function getDefaultState(seed = 1) {
     },
     regime: { status: 'in_power', endReason: null },
     opposition: { strength: 0.35 },
+    regions: getDefaultRegionalApproval(INITIAL_APPROVAL),
     events: [],
   }
 }
@@ -76,6 +78,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   if (!state.parliament) state.parliament = { support: def.parliament?.support ?? 0.55 }
   if (!state.calendar) state.calendar = { ...def.calendar, budgetTabledThisYear: state.calendar?.budgetTabledThisYear ?? false, budgetDue: state.calendar?.budgetDue ?? false }
   if (!state.opposition) state.opposition = { strength: def.opposition?.strength ?? 0.35 }
+  if (!state.regions || typeof state.regions !== 'object') state.regions = { ...getDefaultRegionalApproval(def.population?.publicApproval ?? 0.5) }
+  REGION_IDS.forEach((id) => { if (typeof state.regions[id] !== 'number') state.regions[id] = def.regions?.[id] ?? 0.5 })
 
   function applyPolicy(policyId, value) {
     const def = POLICY_DEFS.find((d) => d.id === policyId)
@@ -137,6 +141,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
 
     updateEconomy(state)
     updatePopulation(state)
+    if (state.regions) {
+      const national = state.population.publicApproval
+      REGION_IDS.forEach((id) => {
+        const current = state.regions[id] ?? 0.5
+        const drift = current * 0.95 + national * 0.05
+        const noise = (rng() - 0.5) * 0.02
+        state.regions[id] = clamp(drift + noise, 0.05, 0.95)
+      })
+    }
     updatePolitics(state)
     updateCrisisCheck(state, rng)
 
@@ -190,21 +203,29 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.crisis = null
     const { population, politics } = state
     if (pending.type === 'protest') {
+      const regionId = pending.region
+      const bumpRegion = (delta) => {
+        if (state.regions && regionId && state.regions[regionId] != null) state.regions[regionId] = clamp((state.regions[regionId] ?? 0.5) + delta, 0.05, 0.95)
+      }
       if (response === 'dialogue') {
         state.population.publicApproval = clamp(population.publicApproval + 0.02, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.01, 0.1, 0.9)
+        bumpRegion(0.04)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You ordered dialogue with protesters. Approval rises slightly.' })
       } else if (response === 'crackdown') {
         state.population.publicApproval = clamp(population.publicApproval - 0.06, 0, 1)
         state.politics.coupRisk = clamp(politics.coupRisk + 0.04, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
+        bumpRegion(-0.1)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'Security crackdown on protesters. Approval drops; unrest grows.' })
       } else if (response === 'ignore') {
         state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
+        bumpRegion(-0.05)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'No formal response. Protest fades but some lose faith.' })
       } else if (response === 'address_nation') {
         state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
+        bumpRegion(0.02)
         state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You addressed the nation. Calm restored for now.' })
       }
     } else if (pending.type === 'scandal') {

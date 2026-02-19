@@ -1,7 +1,6 @@
 /** Event/crisis triggers and effects. */
 import { clamp } from '../../utils/mathHelpers'
-
-const REGIONS = ['Capital', 'North', 'South', 'East', 'West']
+import { REGION_IDS } from '../constants/regions'
 
 const PROTEST_MESSAGES = [
   (r) => `Protest in ${r}: unrest over economy and corruption.`,
@@ -47,7 +46,7 @@ const DIPLOMATIC_MESSAGES = [
 ]
 
 function pickRegion(rng) {
-  return REGIONS[Math.floor(rng() * REGIONS.length)]
+  return REGION_IDS[Math.floor(rng() * REGION_IDS.length)]
 }
 
 function pick(arr, rng) {
@@ -124,6 +123,7 @@ export function updateCrisisCheck(state, rng) {
       state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
       state.politics.coupRisk = clamp(politics.coupRisk + 0.02, 0, 1)
       if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
+      if (state.regions && state.regions[region] != null) state.regions[region] = clamp((state.regions[region] ?? 0.5) - 0.06, 0.05, 0.95)
     }
   }
 
