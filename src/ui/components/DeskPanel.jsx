@@ -2,6 +2,7 @@ import { useState } from 'react'
 import PolicyPanel from './PolicyPanel'
 import { STATE_ADDRESS_PHASES, ACTIVITY_IDS, ACTIVITY_LABELS } from '../../core/constants/activities'
 import { getCountry } from '../../core/constants/international'
+import { formatGameDate } from '../../utils/dateFormat'
 
 const COOLDOWN_MONTHS = 12
 
@@ -82,7 +83,7 @@ export default function DeskPanel({
   const coupPct = state?.politics?.coupRisk != null ? Math.round(state.politics.coupRisk * 100) : '—'
   const parliamentPct = parliamentSupport != null ? Math.round(parliamentSupport * 100) : null
   const oppositionPct = oppositionStrength != null ? Math.round(oppositionStrength * 100) : null
-  const date = state?.time ? (state.time.day != null ? `Day ${state.time.day} · ${state.time.month}/${state.time.year}` : `${state.time.month}/${state.time.year}`) : '—'
+  const date = state?.time ? formatGameDate(state.time) : '—'
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
   const showAdvanceButton =

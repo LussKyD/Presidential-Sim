@@ -197,7 +197,10 @@ function App() {
             const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
             if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
-            if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) addEvent(`President back from ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
+            if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) {
+              addEvent(`President back from ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
+              addEvent('While you were away, your deputy handled a minor domestic issue. Calm maintained.', 'deputy')
+            }
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
               setStateVisitCountry(null)

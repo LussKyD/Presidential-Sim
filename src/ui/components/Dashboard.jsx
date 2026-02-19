@@ -1,6 +1,7 @@
 import EconomyChart from './EconomyChart'
 import { REGION_IDS } from '../../core/constants/regions'
 import { COUNTRIES } from '../../core/constants/international'
+import { formatGameDate } from '../../utils/dateFormat'
 
 function formatPct(x) {
   if (typeof x !== 'number') return '—'
@@ -34,6 +35,7 @@ function eventColor(type) {
     case 'calendar': return '#6366f1'
     case 'crisis_response': return '#0ea5e9'
     case 'cabinet': return '#8b5cf6'
+    case 'deputy': return '#6366f1'
     default: return '#8b98a5'
   }
 }
@@ -77,7 +79,7 @@ export default function Dashboard({ state }) {
   return (
     <section data-component="Dashboard">
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Card title="Date" value={time ? (time.day != null ? `Day ${time.day} · ${time.month}/${time.year}` : `${time.month}/${time.year}`) : '—'} sub={time ? `Tick ${time.tick}` : ''} />
+        <Card title="Date" value={time ? formatGameDate(time) : '—'} sub={time ? `Tick ${time.tick}` : ''} />
         <Card title="GDP" value={formatNum(econ?.gdp)} sub={econ ? `Growth: ${formatPct(econ.gdpGrowth)}` : ''} />
         <Card title="Inflation" value={formatPct(econ?.inflation)} />
         <Card title="Unemployment" value={formatPct(econ?.unemployment)} />
