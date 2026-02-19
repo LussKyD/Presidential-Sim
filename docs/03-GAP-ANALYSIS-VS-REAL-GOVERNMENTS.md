@@ -181,12 +181,13 @@
 | **State address flow** | Motorcade stops in front of Parliament (not inside). Player advances each step: walk to cars → board motorcade → at Parliament → enter → speech → leave chamber → motorcade back → return to office. |
 | **Opposition** | Opposition strength (0–1) drifts with approval; elections are you vs opposition (approval vs opposition + random swing). Scandals, protests, crackdowns boost opposition; state address, budget passed, dialogue/investigate nudge it down. Shown in Dashboard and Desk. |
 | **Regional approval** | Five regions (Capital, North, South, East, West); each has approval 0–1, drifting toward national with variance. Protests hit the affected region; crisis response (dialogue/crackdown/ignore) changes that region. Dashboard shows regional approval bars. |
+| **Media as headlines** | Event feed styled as "Front page" (masthead, LATEST lead headline, dates). In office view, TV-style chyron shows latest headline ("VALDRIS NEWS · LIVE"). |
 
 ### 6.1 Still missing (next priorities)
 
 - **Opposition depth** — Optional: named opposition leader, coalition threshold, “opposition tables motion” events.
 - **Visit region** — Optional activity: travel to a region to boost approval there.
-- **Media as headlines** — Event feed as front page; TV in office shows headline; press conference to set narrative.
+- **Press conference** — Optional activity to set narrative / respond to media.
 - **International** — 2–3 relations; "Meet foreign leader" flow; relations affect economy/coup.
 - **Judiciary** — Optional court events (e.g. election dispute, constitutional challenge).
 - **More activities** — Full 3D flows for: Launch infrastructure, Security briefing, Press conference.

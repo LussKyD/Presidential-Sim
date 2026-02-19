@@ -494,6 +494,8 @@ export default function WorldView({
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
+  const lastEvent = state?.events?.length ? state.events[state.events.length - 1] : null
+  const showTvHeadline = viewMode === 'office' && !activityPhase && lastEvent
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
@@ -502,6 +504,12 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
+      {showTvHeadline && (
+        <div style={{ position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)', right: 12, maxWidth: 420, pointerEvents: 'none', background: 'rgba(0,0,0,0.82)', border: '1px solid #2f3336', borderRadius: 6, padding: '8px 12px', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+          <div style={{ fontSize: 9, color: '#1d9bf0', fontWeight: 700, letterSpacing: '0.06em', marginBottom: 4 }}>VALDRIS NEWS · LIVE</div>
+          <div style={{ fontSize: 12, color: '#e7e9ea', lineHeight: 1.3 }}>{lastEvent.message}</div>
+        </div>
+      )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
         {viewMode === 'office' ? "First-person: you're at the desk · Activities from the desk" : 'Orbit the capital'}
       </div>

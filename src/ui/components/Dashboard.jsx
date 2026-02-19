@@ -112,18 +112,30 @@ export default function Dashboard({ state }) {
 
       <DriversPanel approvalDrivers={pop?.approvalDrivers} coupDrivers={pol?.coupDrivers} />
 
-      <div style={{ marginTop: 16, ...panelStyle }}>
-        <div style={{ fontWeight: 700, marginBottom: 8 }}>Event feed</div>
+      <div style={{ marginTop: 16, ...panelStyle, borderLeft: '4px solid #1d9bf0' }}>
+        <div style={{ fontSize: 10, color: '#6e767d', letterSpacing: '0.08em', marginBottom: 4 }}>REPUBLIC OF VALDRIS</div>
+        <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: '#e7e9ea' }}>Front page</div>
         {lastEvents.length === 0 ? (
-          <div style={{ color: '#8b98a5' }}>No events yet.</div>
+          <div style={{ color: '#8b98a5', fontStyle: 'italic' }}>No headlines yet.</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            {lastEvents.map((e) => (
-              <li key={e.id} style={{ color: eventColor(e.type), marginBottom: 4 }}>
-                {e.message}
-              </li>
-            ))}
-          </ul>
+          <>
+            <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #2f3336' }}>
+              <span style={{ fontSize: 10, color: '#f4212e', fontWeight: 700, marginRight: 6 }}>LATEST</span>
+              <span style={{ fontSize: 11, color: '#8b98a5' }}>{lastEvents[0].at ? `${lastEvents[0].at.month}/${lastEvents[0].at.year}` : ''}</span>
+              <div style={{ color: eventColor(lastEvents[0].type), fontWeight: 700, fontSize: 13, marginTop: 4, lineHeight: 1.35 }}>
+                {lastEvents[0].message}
+              </div>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 14, listStyle: 'none' }}>
+              {lastEvents.slice(1, 7).map((e) => (
+                <li key={e.id} style={{ color: '#8b98a5', marginBottom: 6, fontSize: 12, display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                  <span style={{ color: eventColor(e.type), flexShrink: 0 }}>•</span>
+                  <span style={{ color: '#e7e9ea' }}>{e.message}</span>
+                  {e.at && <span style={{ fontSize: 10, color: '#6e767d' }}>{e.at.month}/{e.at.year}</span>}
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
     </section>
