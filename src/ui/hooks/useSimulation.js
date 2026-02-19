@@ -98,6 +98,13 @@ export function useSimulation({ tickMs = 2000, seed = 1, gameKey = 0, initialSav
         setState(next)
         if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
       },
+      applySecurityBriefingOutcome() {
+        if (!engineRef.current) return
+        engineRef.current.applySecurityBriefingOutcome()
+        const next = engineRef.current.getState()
+        setState(next)
+        if (next?.regime?.status === 'in_power') try { localStorage.setItem(SAVE_KEY, JSON.stringify(next)) } catch (_) {}
+      },
       setBudgetPie(...vals) {
         if (!engineRef.current?.setBudgetPie) return
         engineRef.current.setBudgetPie(...vals)

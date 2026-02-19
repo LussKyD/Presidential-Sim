@@ -34,7 +34,7 @@ const OPENING_OF_PARLIAMENT_MONTH = 6
 
 function getDefaultState(seed = 1) {
   return {
-    meta: { seed, lastVisitRegionTick: -999 },
+    meta: { seed, lastVisitRegionTick: -999, lastSecurityBriefingTick: -999 },
     time: { year: 2026, month: 1, tick: 0 },
     economy: {
       gdp: INITIAL_GDP,
@@ -73,6 +73,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   if (state.meta) {
     state.meta.seed = seed
     if (typeof state.meta.lastVisitRegionTick !== 'number') state.meta.lastVisitRegionTick = -999
+    if (typeof state.meta.lastSecurityBriefingTick !== 'number') state.meta.lastSecurityBriefingTick = -999
   }
   const def = getDefaultState()
   if (!Array.isArray(state.economy?.history)) state.economy = { ...def.economy, ...state.economy, history: state.economy?.history || [] }
@@ -329,6 +330,22 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
+  const SECURITY_BRIEFING_COOLDOWN_TICKS = 6
+  function applySecurityBriefingOutcome() {
+    if (state.regime?.status !== 'in_power') return
+    const last = state.meta?.lastSecurityBriefingTick ?? -999
+    if (state.time.tick - last < SECURITY_BRIEFING_COOLDOWN_TICKS) return
+    state.meta.lastSecurityBriefingTick = state.time.tick
+    state.politics.coupRisk = clamp((state.politics.coupRisk ?? 0.2) - 0.02, 0.05, 0.95)
+    state.events.push({
+      id: `security-briefing-${state.time.tick}`,
+      at: { ...state.time },
+      type: 'security_briefing',
+      message: 'Security briefing concluded. Threat assessment updated; coup risk slightly reduced.',
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   function getState() {
     return clone(state)
   }
@@ -397,6 +414,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     dismissMeeting,
     applyMeetForeignLeader,
     applyVisitRegion,
+    applySecurityBriefingOutcome,
     policyDefs: POLICY_DEFS,
   }
 }

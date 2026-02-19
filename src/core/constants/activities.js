@@ -75,5 +75,18 @@ export const VISIT_REGION_PHASE_ORDER = [
   VISIT_REGION_PHASES.RETURN,
 ]
 
+/** Security briefing flow: enter room → review intel → decision. */
+export const SECURITY_BRIEFING_PHASES = {
+  ENTER: 'enter',
+  REVIEW: 'review',
+  DECISION: 'decision',
+}
+
+export const SECURITY_BRIEFING_PHASE_ORDER = [
+  SECURITY_BRIEFING_PHASES.ENTER,
+  SECURITY_BRIEFING_PHASES.REVIEW,
+  SECURITY_BRIEFING_PHASES.DECISION,
+]
+
 /** Which activities are implemented with full 3D flow (rest show "Coming soon"). */
 export const ACTIVITIES_WITH_FLOW = [ACTIVITY_IDS.STATE_OF_NATION]

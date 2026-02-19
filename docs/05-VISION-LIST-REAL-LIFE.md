@@ -21,6 +21,7 @@
 | **Opposition** — Strength drifts; elections = you vs opposition | Parties, opposition, coalition math (gap 2.8, 3.2). |
 | **Regional approval** — Five regions, per-region approval; protests hit region; crisis response affects region | Subnational variation; regional loyalty (gap 2.7, 3.2). |
 | **Visit region** — Desk activity: pick region → multi-phase flow (depart → motorcade → in region rally → return). Narrative cards + Continue; outcome: regional approval +6%, small national approval nudge; 6‑month cooldown. | Heads of state visit regions for rallies, meetings; “go to North” style (gap 2.7, 3.2, 2.4). Flow first; 3D motorcade to region later. |
+| **Security briefing** — Desk activity: multi-phase flow (enter briefing room → review intel → decision). Narrative cards + Continue; outcome: coup risk −2%, event; 6‑month cooldown. | Security council / NSC; intel and threat posture (gap 2.5, 3.2). Flow first; 3D briefing room later. |
 | **Media as headlines** — Event feed as “front page”; TV in office with stations/headlines | News cycle, framing (gap 2.6, 3.2). |
 | **Office + palace exterior + motorcade (3 cars) + Parliament building + chamber** | Residence + motorcade + legislature as physical spaces. Real life: larger palace, full motorcade composition, security. |
 
@@ -70,7 +71,7 @@
 |------|-------------------------------|--------|
 | **Cabinet meeting** — Walk to cabinet room, sit, agenda items, outcome | Cabinet with portfolios; you chair (gap 2.1, 3.1). | Upgrade from one modal to short 3D flow. |
 | **Launch infrastructure** — Site visit, motorcade to site, speech, ribbon-cutting | Set-piece: opening of project, regional approval (gap 3.2). | Flow with 3D or narrative steps. |
-| **Security briefing** — Briefing room, intel, decision (restrain / deploy / etc.) | Security council, use of force choices (gap 2.5, 3.2). | Flow: enter room, read brief, choose. |
+| **Security briefing (3D room)** — Currently narrative flow; upgrade to 3D briefing room, intel screen, decision | Security council (gap 2.5). | Replace narrative with 3D briefing room scene. |
 | **Press conference** — Walk to podium, Q&A beats, headline result | Shape narrative (gap 2.6, 3.2). | Flow: podium, questions, outcome. |
 | **Visit region (3D motorcade)** — Currently narrative flow; upgrade to 3D motorcade to region, rally beat, return | Regional approval (done as narrative flow); real life: motorcade to region. | Replace narrative “motorcade” step with actual 3D motorcade to region location. |
 | **Opening of Parliament** — Calendar event; optional flow: attend, speech | Fixed calendar (gap 2.11). | Can reuse Parliament chamber + short speech. |
@@ -119,7 +120,7 @@
 1. **Motorcade & airport** — Full motorcade composition (bikes, ambulance, etc.); motorcade to airport; airport as 3D location; plane stairs + wave; plane interior (office, takeoff, brief meeting). Unlocks full state-visit 3D.
 2. **Palace** — Multiple rooms (cabinet, briefing), security opening doors.
 3. **State visit abroad** — Arrival at foreign airport, red carpet, motorcade to foreign palace, meeting room 3D; optional embassy beat.
-4. **Domestic activities** — Cabinet, Launch infrastructure, Security briefing, Press conference as flows (3D or narrative steps).
+4. **Domestic activities** — Cabinet (done), Security briefing (narrative flow done), Launch infrastructure, Press conference as flows (3D or narrative steps).
 5. **Visit region 3D** — Motorcade to region in 3D (narrative flow done), one beat, return.
 6. **Polish** — News during trip, deputy-in-charge mechanic, headlines per activity.
 7. **Optional depth** — Opposition motion, judiciary, appointments, treaties.
@@ -128,7 +129,7 @@
 
 ## 4. Summary
 
-- **Done:** State of the Nation (full 3D), state visit (phase sequence + narrative cards), parliament as actor, budget pie, crisis response, calendar, cabinet meeting, international relations, opposition, regional approval, **visit region** (phase sequence + narrative cards, regional + national approval boost, 6‑month cooldown), media headlines, office + palace + motorcade (3 cars) + Parliament.
-- **Implement later:** Palace (multiple rooms, security, doors), full motorcade (bikes, ambulance, special forces), airport (lounge, red carpet, honour guard, plane stairs, wave, plane interior, takeoff), state visit 3D abroad (arrival, foreign palace, meeting room, optional embassy), all domestic activities as flows, **visit region 3D** (motorcade to region in 3D), news during trip, deputy-in-charge, and optional judiciary/opposition/appointments/treaties.
+- **Done:** State of the Nation (full 3D), state visit (phase sequence + narrative cards), parliament as actor, budget pie, crisis response, calendar, cabinet meeting, international relations, opposition, regional approval, visit region (phase sequence + narrative cards, regional + national approval boost, 6‑month cooldown), **security briefing** (phase sequence + narrative cards, coup risk −2%, 6‑month cooldown), media headlines, office + palace + motorcade (3 cars) + Parliament.
+- **Implement later:** Palace (multiple rooms, security, doors), full motorcade (bikes, ambulance, special forces), airport (lounge, red carpet, honour guard, plane stairs, wave, plane interior, takeoff), state visit 3D abroad (arrival, foreign palace, meeting room, optional embassy), Launch infrastructure & Press conference as flows, visit region 3D (motorcade to region in 3D), security briefing 3D (briefing room), news during trip, deputy-in-charge, and optional judiciary/opposition/appointments/treaties.
 
 This doc is the **vision list** for real-life-aligned, deep immersion; update it as we implement each item.

@@ -183,6 +183,8 @@
 | **Regional approval** | Five regions (Capital, North, South, East, West); each has approval 0–1, drifting toward national with variance. Protests hit the affected region; crisis response (dialogue/crackdown/ignore) changes that region. Dashboard shows regional approval bars. |
 | **Media as headlines** | Event feed styled as "Front page"; in office view, TV frame with stations and headlines inside. |
 | **International** | Three bilateral relations (Norden, Sudland, Eastalia); drift and diplomatic incidents lower a random relation; low relations raise foreign-interference. "Meet foreign leader" desk activity: pick country, 6‑month cooldown, improves relation; immersive state-visit flow (narrative phases). Dashboard shows relation bars. |
+| **Visit region** | Desk activity: pick region → multi-phase narrative flow (depart → motorcade → in region → return); regional approval +6%, national +1%; 6‑month cooldown. |
+| **Security briefing** | Desk activity: multi-phase narrative flow (enter briefing room → review intel → decision); coup risk −2%, event; 6‑month cooldown. |
 
 ### 6.1 Still missing (next priorities)
 
@@ -191,6 +193,6 @@
 - **Press conference** — Optional activity to set narrative / respond to media.
 - **International depth** — State visits, treaties, sanctions (optional).
 - **Judiciary** — Optional court events (e.g. election dispute, constitutional challenge).
-- **More activities** — Full 3D flows for: Launch infrastructure, Security briefing, Press conference.
+- **More activities** — Full 3D flows for: Launch infrastructure, Press conference; 3D upgrade for Security briefing (briefing room).
 
 This doc can be updated as features are added or scope is re-prioritized.

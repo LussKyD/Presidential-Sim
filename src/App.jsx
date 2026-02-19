@@ -12,9 +12,10 @@ import MeetForeignModal from './ui/components/MeetForeignModal'
 import StateVisitView from './ui/components/StateVisitView'
 import VisitRegionModal from './ui/components/VisitRegionModal'
 import VisitRegionView from './ui/components/VisitRegionView'
+import SecurityBriefingView from './ui/components/SecurityBriefingView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
-import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER } from './core/constants/activities'
+import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER, SECURITY_BRIEFING_PHASES, SECURITY_BRIEFING_PHASE_ORDER } from './core/constants/activities'
 import { getCountry } from './core/constants/international'
 
 const SPEEDS = [
@@ -42,7 +43,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -59,6 +60,7 @@ function App() {
   const [showVisitRegionModal, setShowVisitRegionModal] = useState(false)
   const [visitRegionPhase, setVisitRegionPhase] = useState(null)
   const [visitRegionId, setVisitRegionId] = useState(null)
+  const [securityBriefingPhase, setSecurityBriefingPhase] = useState(null)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -221,6 +223,20 @@ function App() {
           }}
         />
       )}
+      {securityBriefingPhase && (
+        <SecurityBriefingView
+          phase={securityBriefingPhase}
+          onAdvance={() => {
+            const idx = SECURITY_BRIEFING_PHASE_ORDER.indexOf(securityBriefingPhase)
+            if (securityBriefingPhase === SECURITY_BRIEFING_PHASES.DECISION) applySecurityBriefingOutcome()
+            if (idx < 0 || idx >= SECURITY_BRIEFING_PHASE_ORDER.length - 1) {
+              setSecurityBriefingPhase(null)
+            } else {
+              setSecurityBriefingPhase(SECURITY_BRIEFING_PHASE_ORDER[idx + 1])
+            }
+          }}
+        />
+      )}
     <MainLayout view={view} onViewChange={setView}>
       {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
@@ -290,6 +306,9 @@ function App() {
             visitRegionCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastVisitRegionTick ?? -999) < 6}
             visitRegionPhase={visitRegionPhase}
             visitRegionId={visitRegionId}
+            onSecurityBriefing={() => setSecurityBriefingPhase(SECURITY_BRIEFING_PHASES.ENTER)}
+            securityBriefingCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastSecurityBriefingTick ?? -999) < 6}
+            securityBriefingPhase={securityBriefingPhase}
           />
         </div>
       ) : (
