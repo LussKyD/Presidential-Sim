@@ -47,6 +47,7 @@ export default function WorldView({
   const onSpeechReadyRef = useRef(onSpeechReady)
   const onTabletClickRef = useRef(onTabletClick)
   const speechReadyFiredRef = useRef(false)
+  const officeCameraSettledRef = useRef(false)
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
@@ -160,10 +161,11 @@ export default function WorldView({
     officeGroup.add(tablet)
 
     const tv = new THREE.Mesh(
-      new THREE.BoxGeometry(1.7, 0.95, 0.06),
-      new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0x1a1f26, emissiveIntensity: 0.6 })
+      new THREE.BoxGeometry(1.3, 0.7, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0x111827, emissiveIntensity: 0.7 })
     )
-    tv.position.set(0, 1.45, -2.78)
+    // Position and size tuned so the in-world TV aligns visually with the on-screen TV4/NATV widget.
+    tv.position.set(0, 1.6, -2.85)
     officeGroup.add(tv)
 
     scene.add(officeGroup)
@@ -494,20 +496,20 @@ export default function WorldView({
         }
       } else {
         if (vm === 'office') {
-          // Allow user to rotate/pan camera in office so they can fix a stuck view after return from Parliament.
           controls.enabled = true
           controls.minDistance = 1.2
           controls.maxDistance = 10
-          const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
-          const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
-          if (camera.position.distanceTo(deskEye) > 1.5) {
+          // On first entry back to office with no activity, snap to desk view once,
+          // then let the user rotate/pan freely without re-anchoring every frame.
+          if (!phase && !officeCameraSettledRef.current) {
+            const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
+            const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
             camera.position.copy(deskEye)
             controls.target.copy(deskLook)
-          } else {
-            camera.position.lerp(deskEye, 0.06)
-            controls.target.lerp(deskLook, 0.06)
+            officeCameraSettledRef.current = true
           }
         } else {
+          officeCameraSettledRef.current = false
           controls.minDistance = 4
           controls.maxDistance = 30
           controls.enabled = true
