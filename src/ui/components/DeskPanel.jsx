@@ -3,6 +3,7 @@ import PolicyPanel from './PolicyPanel'
 import { STATE_ADDRESS_PHASES, ACTIVITY_IDS, ACTIVITY_LABELS } from '../../core/constants/activities'
 import { getCountry } from '../../core/constants/international'
 import { formatGameDate } from '../../utils/dateFormat'
+import { getCountry } from '../../core/constants/international'
 
 const COOLDOWN_MONTHS = 12
 
@@ -71,6 +72,7 @@ export default function DeskPanel({
   launchInfrastructureCooldown,
   launchInfrastructurePhase,
   launchInfrastructureRegion,
+  onOpenDossier,
 }) {
   const stateVisitActive = !!stateVisitPhase
   const visitRegionActive = !!visitRegionPhase
@@ -84,6 +86,7 @@ export default function DeskPanel({
   const parliamentPct = parliamentSupport != null ? Math.round(parliamentSupport * 100) : null
   const oppositionPct = oppositionStrength != null ? Math.round(oppositionStrength * 100) : null
   const date = state?.time ? formatGameDate(state.time) : '—'
+  const recentDossiers = (state?.desk?.dossiers ?? []).slice(-5).reverse()
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
   const showAdvanceButton =
@@ -315,6 +318,43 @@ export default function DeskPanel({
         >
           {policiesOpen ? 'Hide policies' : 'Policies'}
         </button>
+        {recentDossiers.length > 0 && onOpenDossier && (
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #2f3336' }}>
+            <div style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.05em', marginBottom: 8 }}>RECENT DOSSIERS</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {recentDossiers.map((d) => {
+                const country = d.countryId ? getCountry(d.countryId) : null
+                const name = country?.name ?? d.countryId ?? '—'
+                const initial = name[0]?.toUpperCase() ?? '?'
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => onOpenDossier(d.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '8px 10px',
+                      background: '#0f1419',
+                      border: '1px solid #2f3336',
+                      borderRadius: 8,
+                      color: '#e7e9ea',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                    }}
+                  >
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2f3336', border: '2px solid #8b98a5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+                      {initial}
+                    </div>
+                    <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
         {policiesOpen && (
           <div style={{ marginTop: 8 }}>
             <PolicyPanel

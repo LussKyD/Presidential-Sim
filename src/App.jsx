@@ -16,6 +16,7 @@ import SecurityBriefingView from './ui/components/SecurityBriefingView'
 import PressConferenceView from './ui/components/PressConferenceView'
 import LaunchInfrastructureModal from './ui/components/LaunchInfrastructureModal'
 import LaunchInfrastructureView from './ui/components/LaunchInfrastructureView'
+import DossierModal from './ui/components/DossierModal'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
 import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER, SECURITY_BRIEFING_PHASES, SECURITY_BRIEFING_PHASE_ORDER, PRESS_CONFERENCE_PHASES, PRESS_CONFERENCE_PHASE_ORDER, LAUNCH_INFRASTRUCTURE_PHASES, LAUNCH_INFRASTRUCTURE_PHASE_ORDER } from './core/constants/activities'
@@ -28,6 +29,7 @@ const SPEEDS = [
 ]
 
 const STATE_ADDRESS_COOLDOWN_MONTHS = 12
+const SIX_MONTHS_IN_DAYS = 42 // 6 months × 7 days per month
 
 function getStoredSave() {
   try {
@@ -45,8 +47,9 @@ function App() {
   const [seed, setSeed] = useState(1)
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
+  const [openDossierId, setOpenDossierId] = useState(null)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, applyLaunchInfrastructure, addEvent, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, applyLaunchInfrastructure, addEvent, addDossier, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -198,8 +201,17 @@ function App() {
             if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
             if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) {
-              addEvent(`President back from ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
-              addEvent('While you were away, your deputy handled a minor domestic issue. Calm maintained.', 'deputy')
+              const countryName = getCountry(stateVisitCountry)?.name ?? stateVisitCountry
+              addEvent(`President back from ${countryName}.`, 'state_visit')
+              const dossier = addDossier({
+                countryId: stateVisitCountry,
+                type: 'deputy_handover',
+                title: `Handover brief — ${countryName}`,
+                summary: 'Deputy handed over. While you were away, your deputy handled a minor domestic issue. Calm maintained.',
+                details: 'Your deputy convened a brief inter-ministerial meeting on a minor labour dispute. No escalation. Calm maintained. You resume with full authority.',
+                at: state?.time,
+              })
+              addEvent('While you were away, your deputy handled a minor domestic issue. Calm maintained.', 'deputy', dossier ? { dossierId: dossier.id } : {})
             }
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
@@ -356,25 +368,26 @@ function App() {
             parliamentSupport={state?.parliament?.support}
             oppositionStrength={state?.opposition?.strength}
             onCabinetMeeting={applyCabinetMeetingOutcome}
-            cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < 6}
+            cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < SIX_MONTHS_IN_DAYS}
             onMeetForeignLeader={() => setShowMeetForeignModal(true)}
-            foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < 6}
+            foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < SIX_MONTHS_IN_DAYS}
             stateVisitPhase={stateVisitPhase}
             stateVisitCountry={stateVisitCountry}
             onVisitRegion={() => setShowVisitRegionModal(true)}
-            visitRegionCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastVisitRegionTick ?? -999) < 6}
+            visitRegionCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastVisitRegionTick ?? -999) < SIX_MONTHS_IN_DAYS}
             visitRegionPhase={visitRegionPhase}
             visitRegionId={visitRegionId}
             onSecurityBriefing={() => setSecurityBriefingPhase(SECURITY_BRIEFING_PHASES.ENTER)}
-            securityBriefingCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastSecurityBriefingTick ?? -999) < 6}
+            securityBriefingCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastSecurityBriefingTick ?? -999) < SIX_MONTHS_IN_DAYS}
             securityBriefingPhase={securityBriefingPhase}
             onPressConference={() => setPressConferencePhase(PRESS_CONFERENCE_PHASES.PREP)}
-            pressConferenceCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastPressConferenceTick ?? -999) < 6}
+            pressConferenceCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastPressConferenceTick ?? -999) < SIX_MONTHS_IN_DAYS}
             pressConferencePhase={pressConferencePhase}
             onLaunchInfrastructure={() => setShowLaunchInfrastructureModal(true)}
-            launchInfrastructureCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastLaunchInfrastructureTick ?? -999) < 6}
+            launchInfrastructureCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastLaunchInfrastructureTick ?? -999) < SIX_MONTHS_IN_DAYS}
             launchInfrastructurePhase={launchInfrastructurePhase}
             launchInfrastructureRegion={launchInfrastructureRegion}
+            onOpenDossier={setOpenDossierId}
           />
         </div>
       ) : (
@@ -408,7 +421,7 @@ function App() {
 
           <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start', flexWrap: 'wrap', opacity: outOfPower ? 0.6 : 1 }}>
             <div style={{ flex: '2 1 520px', minWidth: 320 }}>
-              <Dashboard state={state} />
+              <Dashboard state={state} onOpenDossier={setOpenDossierId} />
             </div>
             <div style={{ flex: '1 1 340px', minWidth: 280 }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -452,6 +465,12 @@ function App() {
         </>
       )}
     </MainLayout>
+      {openDossierId && (
+        <DossierModal
+          dossier={state?.desk?.dossiers?.find((d) => d.id === openDossierId)}
+          onClose={() => setOpenDossierId(null)}
+        />
+      )}
     </>
   )
 }

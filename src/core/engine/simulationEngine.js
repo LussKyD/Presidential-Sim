@@ -64,7 +64,7 @@ function getDefaultState(seed = 1) {
     regime: { status: 'in_power', endReason: null },
     opposition: { strength: 0.35 },
     regions: getDefaultRegionalApproval(INITIAL_APPROVAL),
-    desk: { meetings: [], callLog: [], diary: [], proposedEvents: [] },
+    desk: { meetings: [], callLog: [], diary: [], proposedEvents: [], dossiers: [] },
     international: { relations: getDefaultRelations(), lastMeetForeignTick: -999 },
     events: [],
   }
@@ -101,7 +101,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   if (!state.opposition) state.opposition = { strength: def.opposition?.strength ?? 0.35 }
   if (!state.regions || typeof state.regions !== 'object') state.regions = { ...getDefaultRegionalApproval(def.population?.publicApproval ?? 0.5) }
   REGION_IDS.forEach((id) => { if (typeof state.regions[id] !== 'number') state.regions[id] = def.regions?.[id] ?? 0.5 })
-  if (!state.desk || !Array.isArray(state.desk.meetings)) state.desk = { meetings: state.desk?.meetings ?? [], callLog: state.desk?.callLog ?? [], diary: state.desk?.diary ?? [], proposedEvents: state.desk?.proposedEvents ?? [] }
+  if (!state.desk || !Array.isArray(state.desk.meetings)) state.desk = { meetings: state.desk?.meetings ?? [], callLog: state.desk?.callLog ?? [], diary: state.desk?.diary ?? [], proposedEvents: state.desk?.proposedEvents ?? [], dossiers: state.desk?.dossiers ?? [] }
+  if (!Array.isArray(state.desk.dossiers)) state.desk.dossiers = []
   if (!state.international?.relations) state.international = { relations: { ...getDefaultRelations(), ...state.international?.relations }, lastMeetForeignTick: state.international?.lastMeetForeignTick ?? -999 }
   COUNTRY_IDS.forEach((id) => { if (typeof state.international.relations[id] !== 'number') state.international.relations[id] = 0.5 })
 
@@ -403,17 +404,37 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
-  function addEvent(message, type = 'news') {
+  function addEvent(message, type = 'news', opts = {}) {
     if (!state.events) state.events = []
     const msg = String(message).trim()
     if (!msg) return
-    state.events.push({
+    const ev = {
       id: `event-${state.time.tick}-${Date.now()}`,
       at: { ...state.time },
       type: type || 'news',
       message: msg,
-    })
+    }
+    if (opts.dossierId) ev.dossierId = opts.dossierId
+    state.events.push(ev)
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
+  function addDossier({ countryId, type = 'brief', title, summary, details, at }) {
+    if (!state.desk) state.desk = { meetings: [], callLog: [], diary: [], proposedEvents: [], dossiers: [] }
+    if (!Array.isArray(state.desk.dossiers)) state.desk.dossiers = []
+    const id = `dossier-${state.time.tick}-${Date.now()}`
+    const dossier = {
+      id,
+      countryId: countryId || null,
+      type: type || 'brief',
+      title: String(title || 'Brief').trim(),
+      summary: String(summary || '').trim(),
+      details: String(details || '').trim(),
+      at: at ? { ...at } : { ...state.time },
+    }
+    state.desk.dossiers.push(dossier)
+    if (state.desk.dossiers.length > 30) state.desk.dossiers.shift()
+    return dossier
   }
 
   function getState() {
@@ -472,6 +493,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     getState,
     tick,
     addEvent,
+    addDossier,
     applyPolicy,
     setBudgetPie,
     applyStateAddressOutcome,

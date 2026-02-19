@@ -2,9 +2,9 @@
 export const COUNTRY_IDS = ['norden', 'sudland', 'eastalia']
 
 export const COUNTRIES = [
-  { id: 'norden', name: 'Norden', leader: 'PM Helga Voss' },
-  { id: 'sudland', name: 'Sudland', leader: 'President Carlos Mbeki' },
-  { id: 'eastalia', name: 'Eastalia', leader: 'Chairman Wei Lin' },
+  { id: 'norden', name: 'Norden', leader: 'PM Helga Voss', seal: 'norden' },
+  { id: 'sudland', name: 'Sudland', leader: 'President Carlos Mbeki', seal: 'sudland' },
+  { id: 'eastalia', name: 'Eastalia', leader: 'Chairman Wei Lin', seal: 'eastalia' },
 ]
 
 export function getDefaultRelations() {

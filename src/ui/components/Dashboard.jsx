@@ -68,7 +68,7 @@ function DriversPanel({ approvalDrivers, coupDrivers }) {
   )
 }
 
-export default function Dashboard({ state }) {
+export default function Dashboard({ state, onOpenDossier }) {
   const time = state?.time
   const econ = state?.economy
   const pop = state?.population
@@ -149,12 +149,22 @@ export default function Dashboard({ state }) {
               <div style={{ color: eventColor(lastEvents[0].type), fontWeight: 700, fontSize: 13, marginTop: 4, lineHeight: 1.35 }}>
                 {lastEvents[0].message}
               </div>
+              {lastEvents[0].dossierId && onOpenDossier && (
+                <button type="button" onClick={() => onOpenDossier(lastEvents[0].dossierId)} style={{ marginTop: 8, fontSize: 11, background: '#2f3336', color: '#1d9bf0', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}>
+                  View dossier
+                </button>
+              )}
             </div>
             <ul style={{ margin: 0, paddingLeft: 14, listStyle: 'none' }}>
               {lastEvents.slice(1, 7).map((e) => (
-                <li key={e.id} style={{ color: '#8b98a5', marginBottom: 6, fontSize: 12, display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                <li key={e.id} style={{ color: '#8b98a5', marginBottom: 6, fontSize: 12, display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
                   <span style={{ color: eventColor(e.type), flexShrink: 0 }}>•</span>
-                  <span style={{ color: '#e7e9ea' }}>{e.message}</span>
+                  <span style={{ color: '#e7e9ea', flex: 1 }}>{e.message}</span>
+                  {e.dossierId && onOpenDossier && (
+                    <button type="button" onClick={() => onOpenDossier(e.dossierId)} style={{ fontSize: 10, background: 'transparent', color: '#6366f1', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}>
+                      Dossier
+                    </button>
+                  )}
                   {e.at && <span style={{ fontSize: 10, color: '#6e767d' }}>{e.at.month}/{e.at.year}</span>}
                 </li>
               ))}
