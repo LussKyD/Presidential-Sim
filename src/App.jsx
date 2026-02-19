@@ -9,9 +9,11 @@ import CrisisResponsePanel from './ui/components/CrisisResponsePanel'
 import TabletPanel from './ui/components/TabletPanel'
 import MeetingModal from './ui/components/MeetingModal'
 import MeetForeignModal from './ui/components/MeetForeignModal'
+import StateVisitView from './ui/components/StateVisitView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
-import { STATE_ADDRESS_PHASES } from './core/constants/activities'
+import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER } from './core/constants/activities'
+import { getCountry } from './core/constants/international'
 
 const SPEEDS = [
   { value: 0.5, label: '0.5×' },
@@ -50,6 +52,8 @@ function App() {
   const [speechReady, setSpeechReady] = useState(false)
   const [tabletOpen, setTabletOpen] = useState(false)
   const [showMeetForeignModal, setShowMeetForeignModal] = useState(false)
+  const [stateVisitPhase, setStateVisitPhase] = useState(null)
+  const [stateVisitCountry, setStateVisitCountry] = useState(null)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -160,8 +164,29 @@ function App() {
       {showMeetForeignModal && (
         <MeetForeignModal
           state={state}
-          onPick={(id) => { applyMeetForeignLeader(id); setShowMeetForeignModal(false) }}
+          onPick={(id) => {
+            setStateVisitCountry(id)
+            setShowMeetForeignModal(false)
+            setStateVisitPhase(STATE_VISIT_PHASES.HANDOVER)
+          }}
           onClose={() => setShowMeetForeignModal(false)}
+        />
+      )}
+      {stateVisitPhase && (
+        <StateVisitView
+          phase={stateVisitPhase}
+          countryName={getCountry(stateVisitCountry)?.name ?? ''}
+          leaderName={getCountry(stateVisitCountry)?.leader ?? ''}
+          onAdvance={() => {
+            const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
+            if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
+            if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
+              setStateVisitPhase(null)
+              setStateVisitCountry(null)
+            } else {
+              setStateVisitPhase(STATE_VISIT_PHASE_ORDER[idx + 1])
+            }
+          }}
         />
       )}
     <MainLayout view={view} onViewChange={setView}>
@@ -227,6 +252,8 @@ function App() {
             cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < 6}
             onMeetForeignLeader={() => setShowMeetForeignModal(true)}
             foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < 6}
+            stateVisitPhase={stateVisitPhase}
+            stateVisitCountry={stateVisitCountry}
           />
         </div>
       ) : (

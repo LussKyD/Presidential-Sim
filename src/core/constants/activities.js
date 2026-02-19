@@ -34,5 +34,29 @@ export const ACTIVITY_LABELS = {
   [ACTIVITY_IDS.PRESS_CONFERENCE]: 'Press conference',
 }
 
+/** State visit flow: handover → travel → arrival → meeting at foreign palace → return. */
+export const STATE_VISIT_PHASES = {
+  HANDOVER: 'handover',
+  MOTORCADE_TO_AIRPORT: 'motorcade_to_airport',
+  FLIGHT: 'flight',
+  ARRIVAL: 'arrival',
+  MOTORCADE_TO_PALACE: 'motorcade_to_palace',
+  MEETING_AT_PALACE: 'meeting_at_palace',
+  RETURN_FLIGHT: 'return_flight',
+  RETURN_TO_OFFICE: 'return_to_office',
+}
+
+/** Ordered list for state visit progression (next = same index + 1). */
+export const STATE_VISIT_PHASE_ORDER = [
+  STATE_VISIT_PHASES.HANDOVER,
+  STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT,
+  STATE_VISIT_PHASES.FLIGHT,
+  STATE_VISIT_PHASES.ARRIVAL,
+  STATE_VISIT_PHASES.MOTORCADE_TO_PALACE,
+  STATE_VISIT_PHASES.MEETING_AT_PALACE,
+  STATE_VISIT_PHASES.RETURN_FLIGHT,
+  STATE_VISIT_PHASES.RETURN_TO_OFFICE,
+]
+
 /** Which activities are implemented with full 3D flow (rest show "Coming soon"). */
 export const ACTIVITIES_WITH_FLOW = [ACTIVITY_IDS.STATE_OF_NATION]
