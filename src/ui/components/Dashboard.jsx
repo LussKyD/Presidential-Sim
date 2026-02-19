@@ -36,6 +36,12 @@ function eventColor(type) {
     case 'crisis_response': return '#0ea5e9'
     case 'cabinet': return '#8b5cf6'
     case 'deputy': return '#6366f1'
+    case 'state_address': return '#1d9bf0'
+    case 'security_briefing': return '#059669'
+    case 'press_conference': return '#0ea5e9'
+    case 'visit_region': return '#f7931a'
+    case 'launch_infrastructure': return '#6366f1'
+    case 'tick': return '#8b98a5'
     default: return '#8b98a5'
   }
 }

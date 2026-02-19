@@ -164,7 +164,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
         state.events.push({ id: `budget-due-${state.time.tick}`, at: { ...state.time }, type: 'calendar', message: 'Budget day — table your budget in Parliament.' })
       }
       if (state.time.month === state.calendar.openingMonth) {
-        state.events.push({ id: `opening-${state.time.tick}`, at: { ...state.time }, type: 'calendar', message: 'Opening of Parliament. Session begins.' })
+        const openDossier = addDossier({ countryId: null, type: 'calendar', title: 'Opening of Parliament brief', summary: 'Opening of Parliament. Session begins.', details: 'New session convened. Legislative agenda set.', at: state.time })
+        state.events.push({ id: `opening-${state.time.tick}`, at: { ...state.time }, type: 'calendar', message: 'Opening of Parliament. Session begins.', dossierId: openDossier?.id })
       }
     }
 
@@ -203,11 +204,13 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
 
     // One event per year so the feed isn’t flooded; crises add their own.
     if (state.time.day === 1 && state.time.month === 1) {
+      const yearDossier = addDossier({ countryId: null, type: 'calendar', title: `Year ${state.time.year} brief`, summary: `Year ${state.time.year} begins.`, details: 'New year. Legislative and calendar reset.', at: state.time })
       state.events.push({
         id: `year-${state.time.year}-${state.time.tick}`,
         at: { ...state.time },
         type: 'tick',
         message: `Year ${state.time.year} begins.`,
+        dossierId: yearDossier?.id,
       })
     }
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
@@ -229,18 +232,28 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.calendar.budgetDue = false
     const support = state.parliament.support
     const roll = rng()
+    let summary, details, dossier
     if (roll < support) {
       state.population.publicApproval = clamp(state.population.publicApproval + 0.02, 0, 1)
       if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.02, 0.1, 0.9)
-      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: 'Parliament passes your budget. Government wins vote.' })
+      summary = 'Parliament passes your budget. Government wins vote.'
+      details = 'Full budget passed. Opposition outvoted.'
+      dossier = addDossier({ countryId: null, type: 'parliament', title: 'Budget vote brief', summary, details, at: state.time })
+      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: summary, dossierId: dossier?.id })
     } else if (roll < support + 0.2) {
       state.population.publicApproval = clamp(state.population.publicApproval - 0.01, 0, 1)
-      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: 'Parliament amends budget. Compromise reached.' })
+      summary = 'Parliament amends budget. Compromise reached.'
+      details = 'Amendments adopted. Revised budget passed.'
+      dossier = addDossier({ countryId: null, type: 'parliament', title: 'Budget vote brief', summary, details, at: state.time })
+      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: summary, dossierId: dossier?.id })
     } else {
       state.population.publicApproval = clamp(state.population.publicApproval - 0.05, 0, 1)
       state.politics.coupRisk = clamp(state.politics.coupRisk + 0.03, 0, 1)
       if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
-      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: 'Parliament rejects budget. Opposition blocks government.' })
+      summary = 'Parliament rejects budget. Opposition blocks government.'
+      details = 'Budget vote lost. Opposition majority. Government weakened.'
+      dossier = addDossier({ countryId: null, type: 'parliament', title: 'Budget vote brief', summary, details, at: state.time })
+      state.events.push({ id: `budget-${state.time.tick}`, at: { ...state.time }, type: 'parliament', message: summary, dossierId: dossier?.id })
     }
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -250,6 +263,10 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (!pending || state.regime?.status !== 'in_power') return
     state.crisis = null
     const { population, politics } = state
+    const pushCrisisEvent = (message, summary, details) => {
+      const dossier = addDossier({ countryId: null, type: 'crisis_response', title: 'Crisis response brief', summary, details, at: state.time })
+      state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message, dossierId: dossier?.id })
+    }
     if (pending.type === 'protest') {
       const regionId = pending.region
       const bumpRegion = (delta) => {
@@ -259,37 +276,37 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
         state.population.publicApproval = clamp(population.publicApproval + 0.02, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.01, 0.1, 0.9)
         bumpRegion(0.04)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You ordered dialogue with protesters. Approval rises slightly.' })
+        pushCrisisEvent('You ordered dialogue with protesters. Approval rises slightly.', 'Dialogue with protesters. Approval rises slightly.', 'Talks held. Tensions eased.')
       } else if (response === 'crackdown') {
         state.population.publicApproval = clamp(population.publicApproval - 0.06, 0, 1)
         state.politics.coupRisk = clamp(politics.coupRisk + 0.04, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
         bumpRegion(-0.1)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'Security crackdown on protesters. Approval drops; unrest grows.' })
+        pushCrisisEvent('Security crackdown on protesters. Approval drops; unrest grows.', 'Security crackdown on protesters. Approval drops; unrest grows.', 'Force used. Regional support fell.')
       } else if (response === 'ignore') {
         state.population.publicApproval = clamp(population.publicApproval - 0.03, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
         bumpRegion(-0.05)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'No formal response. Protest fades but some lose faith.' })
+        pushCrisisEvent('No formal response. Protest fades but some lose faith.', 'No formal response. Protest fades but some lose faith.', 'Issue faded. Some approval lost.')
       } else if (response === 'address_nation') {
         state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
         bumpRegion(0.02)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You addressed the nation. Calm restored for now.' })
+        pushCrisisEvent('You addressed the nation. Calm restored for now.', 'You addressed the nation. Calm restored for now.', 'National address. Calm restored.')
       }
     } else if (pending.type === 'scandal') {
       if (response === 'deny') {
         state.population.publicApproval = clamp(population.publicApproval - 0.02, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.02, 0.1, 0.9)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You denied the allegations. Media skeptical.' })
+        pushCrisisEvent('You denied the allegations. Media skeptical.', 'You denied the allegations. Media skeptical.', 'Denial issued. Coverage mixed.')
       } else if (response === 'investigate') {
         state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
         state.shocks.scandalLevel = clamp((state.shocks.scandalLevel || 0) - 0.1, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.01, 0.1, 0.9)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'You ordered an inquiry. Public sees accountability.' })
+        pushCrisisEvent('You ordered an inquiry. Public sees accountability.', 'You ordered an inquiry. Public sees accountability.', 'Inquiry announced. Scandal level reduced.')
       } else if (response === 'ignore') {
         state.population.publicApproval = clamp(population.publicApproval - 0.04, 0, 1)
         if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.03, 0.1, 0.9)
-        state.events.push({ id: `response-${state.time.tick}`, at: { ...state.time }, type: 'crisis_response', message: 'No comment. Scandal drags on; approval falls.' })
+        pushCrisisEvent('No comment. Scandal drags on; approval falls.', 'No comment. Scandal drags on; approval falls.', 'No response. Story continued.')
       }
     }
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
@@ -324,13 +341,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const delta = positive ? 0.03 : -0.02
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
     if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + (positive ? -0.02 : 0.02), 0.1, 0.9)
+    const summary = positive ? 'State address to Parliament: strong reception. Approval rises.' : 'State address to Parliament: lukewarm reception. Approval dips.'
+    const details = positive ? 'Parliament and public responded well. Agenda reinforced.' : 'Mixed reception. Opposition critical.'
+    const dossier = addDossier({ countryId: null, type: 'state_address', title: 'State of the Nation brief', summary, details, at: state.time })
     state.events.push({
       id: `state-address-${state.time.tick}`,
       at: { ...state.time },
       type: 'state_address',
-      message: positive
-        ? 'State address to Parliament: strong reception. Approval rises.'
-        : 'State address to Parliament: lukewarm reception. Approval dips.',
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
@@ -495,11 +514,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.international.lastMeetForeignTick = state.time.tick
     const r = state.international.relations[countryId] ?? 0.5
     state.international.relations[countryId] = clamp(r + 0.08, 0.2, 0.9)
+    const countryName = getCountry(countryId)?.name ?? countryId
+    const summary = `Bilateral meeting with ${countryName} concluded. Relations improved.`
+    const dossier = addDossier({ countryId, type: 'state_visit', title: `Bilateral meeting brief — ${countryName}`, summary, details: `Meeting at palace. Relations strengthened. Follow-up agreed.`, at: state.time })
     state.events.push({
       id: `meet-foreign-${state.time.tick}-${countryId}`,
       at: { ...state.time },
       type: 'state_address',
-      message: `Bilateral meeting with ${getCountry(countryId)?.name ?? countryId} concluded. Relations improved.`,
+      message: summary,
+      dossierId: dossier?.id,
     })
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }

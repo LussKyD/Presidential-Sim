@@ -37,13 +37,15 @@ export function updateEconomy(state) {
   state.economy.inflation = inflation
   state.economy.unemployment = unemployment
 
-  state.economy.history.push({
-    year: state.time.year,
-    month: state.time.month,
-    gdp: nextGdp,
-    inflation,
-    unemployment,
-  })
+  if (state.time.day === 1) {
+    state.economy.history.push({
+      year: state.time.year,
+      month: state.time.month,
+      gdp: nextGdp,
+      inflation,
+      unemployment,
+    })
+  }
 
   return state
 }
