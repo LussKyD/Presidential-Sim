@@ -494,18 +494,22 @@ export default function WorldView({
         }
       } else {
         if (vm === 'office') {
-          controls.enabled = false
-          // Snap to desk view when back in office (no phase). Avoids stuck camera after return from Parliament.
+          // Allow user to rotate/pan camera in office so they can fix a stuck view after return from Parliament.
+          controls.enabled = true
+          controls.minDistance = 1.2
+          controls.maxDistance = 10
           const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
           const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
-          if (camera.position.distanceTo(deskEye) > 0.5) {
+          if (camera.position.distanceTo(deskEye) > 1.5) {
             camera.position.copy(deskEye)
             controls.target.copy(deskLook)
           } else {
-            camera.position.lerp(deskEye, 0.08)
-            controls.target.lerp(deskLook, 0.08)
+            camera.position.lerp(deskEye, 0.06)
+            controls.target.lerp(deskLook, 0.06)
           }
         } else {
+          controls.minDistance = 4
+          controls.maxDistance = 30
           controls.enabled = true
           camera.position.lerp(new THREE.Vector3(12, 9, 12), 0.05)
           controls.target.lerp(new THREE.Vector3(0, 0, -3), 0.05)
@@ -587,7 +591,7 @@ export default function WorldView({
         </div>
       )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#8b98a5', fontSize: 12 }}>
-        {viewMode === 'office' ? "You're at the desk — Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
+        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
       </div>
     </div>
   )
