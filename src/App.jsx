@@ -196,6 +196,7 @@ function App() {
             const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
             if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
+            if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) addEvent(`President back from ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
               setStateVisitCountry(null)
@@ -212,6 +213,7 @@ function App() {
             setVisitRegionId(id)
             setShowVisitRegionModal(false)
             setVisitRegionPhase(VISIT_REGION_PHASES.DEPART)
+            addEvent(`President leaves for visit to ${id}.`, 'news')
           }}
           onClose={() => setShowVisitRegionModal(false)}
         />
@@ -223,6 +225,7 @@ function App() {
           onAdvance={() => {
             const idx = VISIT_REGION_PHASE_ORDER.indexOf(visitRegionPhase)
             if (visitRegionPhase === VISIT_REGION_PHASES.IN_REGION) applyVisitRegion(visitRegionId)
+            if (visitRegionPhase === VISIT_REGION_PHASES.RETURN) addEvent('President returns to palace.', 'news')
             if (idx < 0 || idx >= VISIT_REGION_PHASE_ORDER.length - 1) {
               setVisitRegionPhase(null)
               setVisitRegionId(null)
@@ -267,6 +270,7 @@ function App() {
             setLaunchInfrastructureRegion(id)
             setShowLaunchInfrastructureModal(false)
             setLaunchInfrastructurePhase(LAUNCH_INFRASTRUCTURE_PHASES.DEPART)
+            addEvent(`President leaves for infrastructure launch in ${id}.`, 'news')
           }}
           onClose={() => setShowLaunchInfrastructureModal(false)}
         />
@@ -278,6 +282,7 @@ function App() {
           onAdvance={() => {
             const idx = LAUNCH_INFRASTRUCTURE_PHASE_ORDER.indexOf(launchInfrastructurePhase)
             if (launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.RIBBON_CUTTING) applyLaunchInfrastructure(launchInfrastructureRegion)
+            if (launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN) addEvent('President returns to palace.', 'news')
             if (idx < 0 || idx >= LAUNCH_INFRASTRUCTURE_PHASE_ORDER.length - 1) {
               setLaunchInfrastructurePhase(null)
               setLaunchInfrastructureRegion(null)
