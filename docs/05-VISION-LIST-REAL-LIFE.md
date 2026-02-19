@@ -132,6 +132,6 @@
 ## 4. Summary
 
 - **Done:** State of the Nation (full 3D), state visit (phase sequence + narrative cards), parliament as actor, budget pie, crisis response, calendar, cabinet meeting, international relations, opposition, regional approval, visit region, security briefing, press conference, **launch infrastructure** (pick region → narrative flow, regional +5%, national +1.5%, 6‑month cooldown), media headlines (quad-panel TV in office), office + palace + motorcade (3 cars) + Parliament. All desk activities now have flows.
-- **Implement later:** Palace (multiple rooms, security, doors), full motorcade (bikes, ambulance, special forces), airport, state visit 3D abroad, launch infrastructure 3D (site visit), visit region 3D, security briefing 3D, press conference 3D, news during trip, deputy-in-charge, and optional judiciary/opposition/appointments/treaties.
+- **Implement later:** Palace (multiple rooms, security, doors), full motorcade (bikes, ambulance, special forces), airport, state visit 3D abroad, launch infrastructure 3D (site visit), visit region 3D, security briefing 3D, press conference 3D, deputy-in-charge, and optional judiciary/opposition/appointments/treaties. **News during state visit:** departure and arrival events now push to the feed/TV (engine `addEvent`); optional: more beats during trip.
 
 This doc is the **vision list** for real-life-aligned, deep immersion; update it as we implement each item.

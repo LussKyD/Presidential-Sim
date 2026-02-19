@@ -387,6 +387,19 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
+  function addEvent(message, type = 'news') {
+    if (!state.events) state.events = []
+    const msg = String(message).trim()
+    if (!msg) return
+    state.events.push({
+      id: `event-${state.time.tick}-${Date.now()}`,
+      at: { ...state.time },
+      type: type || 'news',
+      message: msg,
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   function getState() {
     return clone(state)
   }
@@ -442,6 +455,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   return {
     getState,
     tick,
+    addEvent,
     applyPolicy,
     setBudgetPie,
     applyStateAddressOutcome,

@@ -46,7 +46,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, applyLaunchInfrastructure, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, applyLaunchInfrastructure, addEvent, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -182,6 +182,7 @@ function App() {
             setStateVisitCountry(id)
             setShowMeetForeignModal(false)
             setStateVisitPhase(STATE_VISIT_PHASES.HANDOVER)
+            addEvent(`President departs for ${getCountry(id)?.name ?? id}.`, 'state_visit')
           }}
           onClose={() => setShowMeetForeignModal(false)}
         />
@@ -193,6 +194,7 @@ function App() {
           leaderName={getCountry(stateVisitCountry)?.leader ?? ''}
           onAdvance={() => {
             const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
+            if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
