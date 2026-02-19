@@ -14,6 +14,7 @@ import {
 } from '../constants/baseValues'
 import { POLICY_DEFAULTS, POLICY_DEFS, BUDGET_PIE_IDS } from '../constants/policyEffects'
 import { REGION_IDS, getDefaultRegionalApproval } from '../constants/regions'
+import { COUNTRY_IDS, getDefaultRelations, getCountry } from '../constants/international'
 
 function normalizeBudgetPie(policies) {
   const sum = BUDGET_PIE_IDS.reduce((s, id) => s + (policies[id] ?? 0), 0)
@@ -61,6 +62,7 @@ function getDefaultState(seed = 1) {
     opposition: { strength: 0.35 },
     regions: getDefaultRegionalApproval(INITIAL_APPROVAL),
     desk: { meetings: [], callLog: [], diary: [], proposedEvents: [] },
+    international: { relations: getDefaultRelations(), lastMeetForeignTick: -999 },
     events: [],
   }
 }
@@ -82,6 +84,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
   if (!state.regions || typeof state.regions !== 'object') state.regions = { ...getDefaultRegionalApproval(def.population?.publicApproval ?? 0.5) }
   REGION_IDS.forEach((id) => { if (typeof state.regions[id] !== 'number') state.regions[id] = def.regions?.[id] ?? 0.5 })
   if (!state.desk || !Array.isArray(state.desk.meetings)) state.desk = { meetings: state.desk?.meetings ?? [], callLog: state.desk?.callLog ?? [], diary: state.desk?.diary ?? [], proposedEvents: state.desk?.proposedEvents ?? [] }
+  if (!state.international?.relations) state.international = { relations: { ...getDefaultRelations(), ...state.international?.relations }, lastMeetForeignTick: state.international?.lastMeetForeignTick ?? -999 }
+  COUNTRY_IDS.forEach((id) => { if (typeof state.international.relations[id] !== 'number') state.international.relations[id] = 0.5 })
 
   function applyPolicy(policyId, value) {
     const def = POLICY_DEFS.find((d) => d.id === policyId)
@@ -158,6 +162,20 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.regime?.status === 'in_power' && state.desk?.meetings?.length) {
       const due = state.desk.meetings.find((m) => !m.done && m.month === state.time.month && m.year === state.time.year)
       if (due) state.pendingMeeting = due
+    }
+
+    if (state.international?.relations) {
+      const avg = COUNTRY_IDS.reduce((s, id) => s + (state.international.relations[id] ?? 0.5), 0) / COUNTRY_IDS.length
+      state.shocks.foreignInterference = clamp(
+        (state.shocks.foreignInterference ?? 0.1) * 0.99 + (1 - avg) * 0.02,
+        0.05,
+        0.95
+      )
+      COUNTRY_IDS.forEach((id) => {
+        const r = state.international.relations[id] ?? 0.5
+        const noise = (rng() - 0.5) * 0.01
+        state.international.relations[id] = clamp(r + noise, 0.2, 0.85)
+      })
     }
 
     // One event per year so the feed isn’t flooded; crises add their own.
@@ -325,6 +343,23 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.pendingMeeting = null
   }
 
+  const MEET_FOREIGN_COOLDOWN_TICKS = 6
+  function applyMeetForeignLeader(countryId) {
+    if (state.regime?.status !== 'in_power' || !COUNTRY_IDS.includes(countryId)) return
+    const last = state.international?.lastMeetForeignTick ?? -999
+    if (state.time.tick - last < MEET_FOREIGN_COOLDOWN_TICKS) return
+    state.international.lastMeetForeignTick = state.time.tick
+    const r = state.international.relations[countryId] ?? 0.5
+    state.international.relations[countryId] = clamp(r + 0.08, 0.2, 0.9)
+    state.events.push({
+      id: `meet-foreign-${state.time.tick}-${countryId}`,
+      at: { ...state.time },
+      type: 'state_address',
+      message: `Bilateral meeting with ${getCountry(countryId)?.name ?? countryId} concluded. Relations improved.`,
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   return {
     getState,
     tick,
@@ -339,6 +374,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     addDiaryEntry,
     addProposedEvent,
     dismissMeeting,
+    applyMeetForeignLeader,
     policyDefs: POLICY_DEFS,
   }
 }

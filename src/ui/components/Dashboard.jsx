@@ -1,5 +1,6 @@
 import EconomyChart from './EconomyChart'
 import { REGION_IDS } from '../../core/constants/regions'
+import { COUNTRIES } from '../../core/constants/international'
 
 function formatPct(x) {
   if (typeof x !== 'number') return '—'
@@ -84,6 +85,27 @@ export default function Dashboard({ state }) {
         <Card title="Coup risk" value={formatPct(pol?.coupRisk)} />
         <Card title="Opposition" value={formatPct(state?.opposition?.strength)} sub="Election threat" />
       </div>
+
+      {state?.international?.relations && (
+        <div style={{ marginTop: 16, ...panelStyle }}>
+          <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5' }}>International relations</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+            {COUNTRIES.map((c) => {
+              const rel = state.international.relations[c.id]
+              const v = typeof rel === 'number' ? Math.round(rel * 100) : '—'
+              return (
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 100 }}>
+                  <span style={{ fontSize: 12, color: '#e7e9ea', width: 64 }}>{c.name}</span>
+                  <div style={{ flex: 1, height: 8, background: '#2f3336', borderRadius: 4, overflow: 'hidden' }}>
+                    <div style={{ width: `${typeof v === 'number' ? v : 0}%`, height: '100%', background: v >= 60 ? '#00ba7c' : v >= 40 ? '#f7931a' : '#f4212e', borderRadius: 4 }} />
+                  </div>
+                  <span style={{ fontSize: 12, color: '#8b98a5', width: 28, fontVariantNumeric: 'tabular-nums' }}>{typeof v === 'number' ? `${v}%` : v}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {state?.regions && (
         <div style={{ marginTop: 16, ...panelStyle }}>

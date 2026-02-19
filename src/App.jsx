@@ -8,6 +8,7 @@ import DeskPanel from './ui/components/DeskPanel'
 import CrisisResponsePanel from './ui/components/CrisisResponsePanel'
 import TabletPanel from './ui/components/TabletPanel'
 import MeetingModal from './ui/components/MeetingModal'
+import MeetForeignModal from './ui/components/MeetForeignModal'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
 import { STATE_ADDRESS_PHASES } from './core/constants/activities'
@@ -37,7 +38,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -48,6 +49,7 @@ function App() {
   const [stateAddressPhase, setStateAddressPhase] = useState(null)
   const [speechReady, setSpeechReady] = useState(false)
   const [tabletOpen, setTabletOpen] = useState(false)
+  const [showMeetForeignModal, setShowMeetForeignModal] = useState(false)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -155,6 +157,13 @@ function App() {
       {state?.pendingMeeting && (
         <MeetingModal meeting={state.pendingMeeting} onDismiss={dismissMeeting} />
       )}
+      {showMeetForeignModal && (
+        <MeetForeignModal
+          state={state}
+          onPick={(id) => { applyMeetForeignLeader(id); setShowMeetForeignModal(false) }}
+          onClose={() => setShowMeetForeignModal(false)}
+        />
+      )}
     <MainLayout view={view} onViewChange={setView}>
       {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
@@ -216,6 +225,8 @@ function App() {
             oppositionStrength={state?.opposition?.strength}
             onCabinetMeeting={applyCabinetMeetingOutcome}
             cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < 6}
+            onMeetForeignLeader={() => setShowMeetForeignModal(true)}
+            foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < 6}
           />
         </div>
       ) : (

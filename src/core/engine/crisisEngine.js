@@ -1,6 +1,7 @@
 /** Event/crisis triggers and effects. */
 import { clamp } from '../../utils/mathHelpers'
 import { REGION_IDS } from '../constants/regions'
+import { COUNTRY_IDS } from '../constants/international'
 
 const PROTEST_MESSAGES = [
   (r) => `Protest in ${r}: unrest over economy and corruption.`,
@@ -155,7 +156,7 @@ export function updateCrisisCheck(state, rng) {
     }
   }
 
-  // Diplomatic incident (low chance)
+  // Diplomatic incident (low chance) — hurts a random bilateral relation
   if (rng && rng() < 0.06) {
     state.events.push({
       id: `diplomatic-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
@@ -165,6 +166,10 @@ export function updateCrisisCheck(state, rng) {
     })
     state.population.publicApproval = clamp(population.publicApproval - 0.015, 0, 1)
     state.shocks.foreignInterference = clamp((state.shocks.foreignInterference || 0.1) + 0.05, 0, 1)
+    if (state.international?.relations && COUNTRY_IDS.length) {
+      const hit = COUNTRY_IDS[Math.floor(rng() * COUNTRY_IDS.length)]
+      state.international.relations[hit] = clamp((state.international.relations[hit] ?? 0.5) - 0.06, 0.2, 0.9)
+    }
   }
 
   // Cap event log length

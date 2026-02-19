@@ -51,6 +51,8 @@ export default function DeskPanel({
   oppositionStrength,
   onCabinetMeeting,
   cabinetCooldown,
+  onMeetForeignLeader,
+  foreignLeaderCooldown,
 }) {
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
@@ -140,7 +142,21 @@ export default function DeskPanel({
         >
           {ACTIVITY_LABELS[ACTIVITY_IDS.CABINET_MEETING]}{cabinetCooldown ? ' (cooldown)' : ''}
         </button>
-        {[ACTIVITY_IDS.MEET_FOREIGN_LEADER, ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
+        <button
+          type="button"
+          onClick={onMeetForeignLeader}
+          disabled={outOfPower || foreignLeaderCooldown}
+          style={{
+            ...btn,
+            background: foreignLeaderCooldown ? '#2f3336' : '#1d9bf0',
+            opacity: foreignLeaderCooldown ? 0.8 : 1,
+            textAlign: 'left',
+          }}
+          title={foreignLeaderCooldown ? 'Meet foreign leader cooldown 6 months' : 'Hold bilateral meeting (pick country)'}
+        >
+          {ACTIVITY_LABELS[ACTIVITY_IDS.MEET_FOREIGN_LEADER]}{foreignLeaderCooldown ? ' (cooldown)' : ''}
+        </button>
+        {[ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
           <button
             key={id}
             type="button"
