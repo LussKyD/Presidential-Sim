@@ -186,6 +186,7 @@
 | **Visit region** | Desk activity: pick region → multi-phase narrative flow (depart → motorcade → in region → return); regional approval +6%, national +1%; 6‑month cooldown. |
 | **Security briefing** | Desk activity: multi-phase narrative flow (enter briefing room → review intel → decision); coup risk −2%, event; 6‑month cooldown. |
 | **Press conference** | Desk activity: multi-phase narrative flow (prep → podium → Q&A → headline); approval +2% or −1% by current approval, event; 6‑month cooldown. |
+| **Launch infrastructure** | Desk activity: pick region → multi-phase narrative flow (depart → motorcade → at site → ribbon-cutting → return); regional +5%, national +1.5%, event; 6‑month cooldown. |
 
 ### 6.1 Still missing (next priorities)
 
@@ -194,6 +195,6 @@
 - **Press conference** — Done: desk activity with multi-phase narrative flow (prep → podium → Q&A → headline); approval effect and event. Later: 3D podium.
 - **International depth** — State visits, treaties, sanctions (optional).
 - **Judiciary** — Optional court events (e.g. election dispute, constitutional challenge).
-- **More activities** — Full 3D flows for: Launch infrastructure (only “Coming soon” left); 3D upgrade for Security briefing (briefing room), Press conference (podium).
+- **More activities** — 3D upgrades for: Launch infrastructure (site visit), Security briefing (briefing room), Press conference (podium).
 
 This doc can be updated as features are added or scope is re-prioritized.

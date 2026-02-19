@@ -103,5 +103,22 @@ export const PRESS_CONFERENCE_PHASE_ORDER = [
   PRESS_CONFERENCE_PHASES.HEADLINE,
 ]
 
+/** Launch infrastructure flow: depart → motorcade → at site → ribbon-cutting → return. */
+export const LAUNCH_INFRASTRUCTURE_PHASES = {
+  DEPART: 'depart',
+  MOTORCADE: 'motorcade',
+  AT_SITE: 'at_site',
+  RIBBON_CUTTING: 'ribbon_cutting',
+  RETURN: 'return',
+}
+
+export const LAUNCH_INFRASTRUCTURE_PHASE_ORDER = [
+  LAUNCH_INFRASTRUCTURE_PHASES.DEPART,
+  LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE,
+  LAUNCH_INFRASTRUCTURE_PHASES.AT_SITE,
+  LAUNCH_INFRASTRUCTURE_PHASES.RIBBON_CUTTING,
+  LAUNCH_INFRASTRUCTURE_PHASES.RETURN,
+]
+
 /** Which activities are implemented with full 3D flow (rest show "Coming soon"). */
 export const ACTIVITIES_WITH_FLOW = [ACTIVITY_IDS.STATE_OF_NATION]

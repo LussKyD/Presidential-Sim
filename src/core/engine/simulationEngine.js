@@ -34,7 +34,7 @@ const OPENING_OF_PARLIAMENT_MONTH = 6
 
 function getDefaultState(seed = 1) {
   return {
-    meta: { seed, lastVisitRegionTick: -999, lastSecurityBriefingTick: -999, lastPressConferenceTick: -999 },
+    meta: { seed, lastVisitRegionTick: -999, lastSecurityBriefingTick: -999, lastPressConferenceTick: -999, lastLaunchInfrastructureTick: -999 },
     time: { year: 2026, month: 1, tick: 0 },
     economy: {
       gdp: INITIAL_GDP,
@@ -75,6 +75,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (typeof state.meta.lastVisitRegionTick !== 'number') state.meta.lastVisitRegionTick = -999
     if (typeof state.meta.lastSecurityBriefingTick !== 'number') state.meta.lastSecurityBriefingTick = -999
     if (typeof state.meta.lastPressConferenceTick !== 'number') state.meta.lastPressConferenceTick = -999
+    if (typeof state.meta.lastLaunchInfrastructureTick !== 'number') state.meta.lastLaunchInfrastructureTick = -999
   }
   const def = getDefaultState()
   if (!Array.isArray(state.economy?.history)) state.economy = { ...def.economy, ...state.economy, history: state.economy?.history || [] }
@@ -368,6 +369,24 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
+  const LAUNCH_INFRASTRUCTURE_COOLDOWN_TICKS = 6
+  function applyLaunchInfrastructure(regionId) {
+    if (state.regime?.status !== 'in_power' || !REGION_IDS.includes(regionId)) return
+    const last = state.meta?.lastLaunchInfrastructureTick ?? -999
+    if (state.time.tick - last < LAUNCH_INFRASTRUCTURE_COOLDOWN_TICKS) return
+    state.meta.lastLaunchInfrastructureTick = state.time.tick
+    const current = state.regions?.[regionId] ?? 0.5
+    state.regions[regionId] = clamp(current + 0.05, 0.05, 0.95)
+    state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.015, 0, 1)
+    state.events.push({
+      id: `launch-infra-${state.time.tick}-${regionId}`,
+      at: { ...state.time },
+      type: 'launch_infrastructure',
+      message: `Infrastructure project launched in ${regionId}. Regional support and approval rise.`,
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   function getState() {
     return clone(state)
   }
@@ -438,6 +457,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     applyVisitRegion,
     applySecurityBriefingOutcome,
     applyPressConferenceOutcome,
+    applyLaunchInfrastructure,
     policyDefs: POLICY_DEFS,
   }
 }

@@ -14,9 +14,11 @@ import VisitRegionModal from './ui/components/VisitRegionModal'
 import VisitRegionView from './ui/components/VisitRegionView'
 import SecurityBriefingView from './ui/components/SecurityBriefingView'
 import PressConferenceView from './ui/components/PressConferenceView'
+import LaunchInfrastructureModal from './ui/components/LaunchInfrastructureModal'
+import LaunchInfrastructureView from './ui/components/LaunchInfrastructureView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
-import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER, SECURITY_BRIEFING_PHASES, SECURITY_BRIEFING_PHASE_ORDER, PRESS_CONFERENCE_PHASES, PRESS_CONFERENCE_PHASE_ORDER } from './core/constants/activities'
+import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER, SECURITY_BRIEFING_PHASES, SECURITY_BRIEFING_PHASE_ORDER, PRESS_CONFERENCE_PHASES, PRESS_CONFERENCE_PHASE_ORDER, LAUNCH_INFRASTRUCTURE_PHASES, LAUNCH_INFRASTRUCTURE_PHASE_ORDER } from './core/constants/activities'
 import { getCountry } from './core/constants/international'
 
 const SPEEDS = [
@@ -44,7 +46,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, applySecurityBriefingOutcome, applyPressConferenceOutcome, applyLaunchInfrastructure, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -63,6 +65,9 @@ function App() {
   const [visitRegionId, setVisitRegionId] = useState(null)
   const [securityBriefingPhase, setSecurityBriefingPhase] = useState(null)
   const [pressConferencePhase, setPressConferencePhase] = useState(null)
+  const [showLaunchInfrastructureModal, setShowLaunchInfrastructureModal] = useState(false)
+  const [launchInfrastructurePhase, setLaunchInfrastructurePhase] = useState(null)
+  const [launchInfrastructureRegion, setLaunchInfrastructureRegion] = useState(null)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -253,6 +258,33 @@ function App() {
           }}
         />
       )}
+      {showLaunchInfrastructureModal && (
+        <LaunchInfrastructureModal
+          state={state}
+          onPick={(id) => {
+            setLaunchInfrastructureRegion(id)
+            setShowLaunchInfrastructureModal(false)
+            setLaunchInfrastructurePhase(LAUNCH_INFRASTRUCTURE_PHASES.DEPART)
+          }}
+          onClose={() => setShowLaunchInfrastructureModal(false)}
+        />
+      )}
+      {launchInfrastructurePhase && (
+        <LaunchInfrastructureView
+          phase={launchInfrastructurePhase}
+          regionName={launchInfrastructureRegion ?? ''}
+          onAdvance={() => {
+            const idx = LAUNCH_INFRASTRUCTURE_PHASE_ORDER.indexOf(launchInfrastructurePhase)
+            if (launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.RIBBON_CUTTING) applyLaunchInfrastructure(launchInfrastructureRegion)
+            if (idx < 0 || idx >= LAUNCH_INFRASTRUCTURE_PHASE_ORDER.length - 1) {
+              setLaunchInfrastructurePhase(null)
+              setLaunchInfrastructureRegion(null)
+            } else {
+              setLaunchInfrastructurePhase(LAUNCH_INFRASTRUCTURE_PHASE_ORDER[idx + 1])
+            }
+          }}
+        />
+      )}
     <MainLayout view={view} onViewChange={setView}>
       {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
@@ -328,6 +360,10 @@ function App() {
             onPressConference={() => setPressConferencePhase(PRESS_CONFERENCE_PHASES.PREP)}
             pressConferenceCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastPressConferenceTick ?? -999) < 6}
             pressConferencePhase={pressConferencePhase}
+            onLaunchInfrastructure={() => setShowLaunchInfrastructureModal(true)}
+            launchInfrastructureCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastLaunchInfrastructureTick ?? -999) < 6}
+            launchInfrastructurePhase={launchInfrastructurePhase}
+            launchInfrastructureRegion={launchInfrastructureRegion}
           />
         </div>
       ) : (

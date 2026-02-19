@@ -66,11 +66,16 @@ export default function DeskPanel({
   onPressConference,
   pressConferenceCooldown,
   pressConferencePhase,
+  onLaunchInfrastructure,
+  launchInfrastructureCooldown,
+  launchInfrastructurePhase,
+  launchInfrastructureRegion,
 }) {
   const stateVisitActive = !!stateVisitPhase
   const visitRegionActive = !!visitRegionPhase
   const securityBriefingActive = !!securityBriefingPhase
   const pressConferenceActive = !!pressConferencePhase
+  const launchInfrastructureActive = !!launchInfrastructurePhase
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
@@ -130,7 +135,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onStateAddress}
-          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive || !!pressConferenceActive}
+          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive || !!pressConferenceActive || !!launchInfrastructureActive}
           style={{
             background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
             color: '#0f1419',
@@ -138,7 +143,7 @@ export default function DeskPanel({
             padding: '0.5rem 0.75rem',
             borderRadius: 8,
             fontWeight: 700,
-            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive || pressConferenceActive ? 'not-allowed' : 'pointer',
+            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive || pressConferenceActive || launchInfrastructureActive ? 'not-allowed' : 'pointer',
             fontSize: 12,
             textAlign: 'left',
           }}
@@ -162,7 +167,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onMeetForeignLeader}
-          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase}
+          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
           style={{
             ...btn,
             background: foreignLeaderCooldown || stateVisitPhase ? '#2f3336' : '#1d9bf0',
@@ -176,7 +181,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onVisitRegion}
-          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase}
+          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
           style={{
             ...btn,
             background: visitRegionCooldown || visitRegionPhase ? '#2f3336' : '#1d9bf0',
@@ -190,7 +195,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onSecurityBriefing}
-          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase || !!pressConferencePhase}
+          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
           style={{
             ...btn,
             background: securityBriefingCooldown || securityBriefingPhase ? '#2f3336' : '#1d9bf0',
@@ -204,7 +209,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onPressConference}
-          disabled={outOfPower || pressConferenceCooldown || !!pressConferencePhase}
+          disabled={outOfPower || pressConferenceCooldown || !!pressConferencePhase || !!launchInfrastructurePhase}
           style={{
             ...btn,
             background: pressConferenceCooldown || pressConferencePhase ? '#2f3336' : '#1d9bf0',
@@ -215,26 +220,20 @@ export default function DeskPanel({
         >
           {pressConferencePhase ? 'Press conference…' : ACTIVITY_LABELS[ACTIVITY_IDS.PRESS_CONFERENCE]}{!pressConferencePhase && pressConferenceCooldown ? ' (cooldown)' : ''}
         </button>
-        {[ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE].map((id) => (
-          <button
-            key={id}
-            type="button"
-            disabled
-            style={{
-              background: '#2f3336',
-              color: '#6e767d',
-              border: 'none',
-              padding: '0.45rem 0.75rem',
-              borderRadius: 8,
-              fontSize: 12,
-              textAlign: 'left',
-              cursor: 'not-allowed',
-            }}
-            title="Coming soon"
-          >
-            {ACTIVITY_LABELS[id]} <span style={{ fontSize: 10 }}>(soon)</span>
-          </button>
-        ))}
+        <button
+          type="button"
+          onClick={onLaunchInfrastructure}
+          disabled={outOfPower || launchInfrastructureCooldown || !!launchInfrastructurePhase}
+          style={{
+            ...btn,
+            background: launchInfrastructureCooldown || launchInfrastructurePhase ? '#2f3336' : '#1d9bf0',
+            opacity: launchInfrastructureCooldown || launchInfrastructurePhase ? 0.8 : 1,
+            textAlign: 'left',
+          }}
+          title={launchInfrastructurePhase ? 'Infrastructure launch in progress' : launchInfrastructureCooldown ? 'Launch infrastructure cooldown 6 months' : 'Site visit and ribbon-cutting in a region'}
+        >
+          {launchInfrastructurePhase ? `Launch in ${launchInfrastructureRegion ?? '…'}…` : ACTIVITY_LABELS[ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE]}{!launchInfrastructurePhase && launchInfrastructureCooldown ? ' (cooldown)' : ''}
+        </button>
       </div>
 
       {phaseLabel && (
