@@ -514,7 +514,7 @@ export default function WorldView({
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
   const date = state?.time ? `${state.time.month}/${state.time.year}` : '—'
   const lastEvent = state?.events?.length ? state.events[state.events.length - 1] : null
-  const showTvHeadline = viewMode === 'office' && !activityPhase && lastEvent
+  const showTicker = viewMode === 'office' && !activityPhase
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
@@ -523,29 +523,26 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
       </div>
-      {viewMode === 'office' && !activityPhase && (
-        <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: 320, pointerEvents: 'none', background: '#0a0a0c', border: '12px solid #1a1a1a', borderRadius: 8, boxShadow: 'inset 0 0 0 2px #2f3336, 0 8px 24px rgba(0,0,0,0.5)' }}>
-          <div style={{ display: 'flex', gap: 0, padding: '6px 8px', background: '#111', borderBottom: '1px solid #2f3336', fontSize: 9, color: '#6e767d' }}>
+      {showTicker && (
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'stretch', background: 'linear-gradient(to top, #0a0a0c 0%, #111 100%)', borderTop: '2px solid #1a1a1a', boxShadow: '0 -2px 12px rgba(0,0,0,0.4)', pointerEvents: 'none' }}>
+          <div style={{ display: 'flex', gap: 0, padding: '6px 10px', background: '#111', borderRight: '1px solid #2f3336', fontSize: 9, color: '#6e767d', alignItems: 'center' }}>
             {TV_STATIONS.map((s, i) => (
-              <span key={s} style={{ flex: 1, textAlign: 'center', color: i === 0 ? '#1d9bf0' : '#6e767d', fontWeight: i === 0 ? 700 : 400 }}>{s}</span>
+              <span key={s} style={{ marginRight: 10, color: i === 0 ? '#1d9bf0' : '#6e767d', fontWeight: i === 0 ? 700 : 400 }}>{s}</span>
             ))}
           </div>
-          <div style={{ minHeight: 88, padding: '10px 12px', background: '#0f1419' }}>
-            <div style={{ flex: 1, height: 48 }} />
-            <div style={{ fontSize: 11, color: '#e7e9ea', lineHeight: 1.35, borderTop: '1px solid #2f3336', paddingTop: 8, width: '100%' }}>
-              {lastEvent ? (
-                <>
-                  <span style={{ color: '#f4212e', fontWeight: 700, marginRight: 6 }}>LIVE</span>
-                  {lastEvent.message}
-                </>
-              ) : (
-                <span style={{ color: '#6e767d' }}>No headlines</span>
-              )}
-            </div>
+          <div style={{ flex: 1, padding: '6px 12px', fontSize: 12, color: '#e7e9ea', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+            {lastEvent ? (
+              <>
+                <span style={{ color: '#f4212e', fontWeight: 700, marginRight: 8, flexShrink: 0 }}>LIVE</span>
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastEvent.message}</span>
+              </>
+            ) : (
+              <span style={{ color: '#6e767d' }}>No headlines</span>
+            )}
           </div>
         </div>
       )}
-      <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
+      <div style={{ position: 'absolute', bottom: showTicker ? 40 : 10, left: 10, color: '#6e767d', fontSize: 11 }}>
         {viewMode === 'office' ? "First-person: you're at the desk · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
       </div>
     </div>
