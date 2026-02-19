@@ -91,6 +91,7 @@ export default function Dashboard({ state, onOpenDossier }) {
         <Card title="Unemployment" value={formatPct(econ?.unemployment)} />
         <Card title="Approval" value={formatPct(pop?.publicApproval)} titleAttr="Public support %" />
         <Card title="Coup risk" value={formatPct(pol?.coupRisk)} titleAttr="Military/loyalty coup risk" />
+        <Card title="Parliament" value={formatPct(state?.parliament?.support)} titleAttr="Parliament support for government" />
         <Card title="Opposition" value={formatPct(state?.opposition?.strength)} sub="Election threat" titleAttr="Opposition strength / election threat" />
       </div>
 

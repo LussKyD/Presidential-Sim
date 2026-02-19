@@ -518,6 +518,8 @@ export default function WorldView({
 
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
+  const coup = state?.politics?.coupRisk
+  const coupPct = typeof coup === 'number' ? Math.round(coup * 100) : '—'
   const date = state?.time ? formatGameDate(state.time) : '—'
   const events = state?.events ?? []
   const lastEvent = events.length ? events[events.length - 1] : null
@@ -534,7 +536,7 @@ export default function WorldView({
       <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: 380 }} />
       <div style={{ position: 'absolute', top: 10, left: 10, right: 10, display: 'flex', justifyContent: 'space-between', pointerEvents: 'none' }}>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
-        <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}%</span>
+        <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}% · Coup: {coupPct}%</span>
       </div>
       {showOfficeTv && (
         <div style={{ position: 'absolute', top: '22%', left: '50%', transform: 'translate(-50%, -50%)', width: 320, maxWidth: '85vw', zIndex: 5, pointerEvents: 'none' }}>

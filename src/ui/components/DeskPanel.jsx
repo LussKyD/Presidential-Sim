@@ -150,6 +150,13 @@ export default function DeskPanel({
             fontSize: 12,
             textAlign: 'left',
           }}
+          title={
+            stateAddressPhase
+              ? 'State of the Nation in progress'
+              : stateAddressCooldown
+                ? 'Annual State of the Nation — 12‑month cooldown between addresses'
+                : 'Deliver State of the Nation address in Parliament'
+          }
         >
           {stateAddressCooldown ? `State of the Nation (${stateAddressCooldown} mo)` : 'State of the Nation Address'}
         </button>

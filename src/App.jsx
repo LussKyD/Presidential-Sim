@@ -152,10 +152,14 @@ function App() {
 
   // Speech outcome is applied when user clicks "Leave chamber" in advanceStateAddress
 
-  // Safety: if we're in WALK_TO_OFFICE and phase complete never fires (e.g. tab switch), clear after 6s so desk is unblocked
+  // Safety: if any non-speech state-address phase hangs (e.g. tab switch stops 3D animation),
+  // clear it after a grace period so the desk can't stay blocked forever.
   useEffect(() => {
-    if (stateAddressPhase !== STATE_ADDRESS_PHASES.WALK_TO_OFFICE) return
-    const t = window.setTimeout(() => setStateAddressPhase((p) => (p === STATE_ADDRESS_PHASES.WALK_TO_OFFICE ? null : p)), 6000)
+    if (!stateAddressPhase || stateAddressPhase === STATE_ADDRESS_PHASES.SPEECH) return
+    const t = window.setTimeout(
+      () => setStateAddressPhase((p) => (p === stateAddressPhase ? null : p)),
+      20000,
+    )
     return () => clearTimeout(t)
   }, [stateAddressPhase])
 
