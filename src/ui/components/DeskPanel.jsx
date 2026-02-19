@@ -63,10 +63,14 @@ export default function DeskPanel({
   onSecurityBriefing,
   securityBriefingCooldown,
   securityBriefingPhase,
+  onPressConference,
+  pressConferenceCooldown,
+  pressConferencePhase,
 }) {
   const stateVisitActive = !!stateVisitPhase
   const visitRegionActive = !!visitRegionPhase
   const securityBriefingActive = !!securityBriefingPhase
+  const pressConferenceActive = !!pressConferencePhase
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
@@ -126,7 +130,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onStateAddress}
-          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive}
+          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive || !!pressConferenceActive}
           style={{
             background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
             color: '#0f1419',
@@ -134,7 +138,7 @@ export default function DeskPanel({
             padding: '0.5rem 0.75rem',
             borderRadius: 8,
             fontWeight: 700,
-            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive ? 'not-allowed' : 'pointer',
+            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive || pressConferenceActive ? 'not-allowed' : 'pointer',
             fontSize: 12,
             textAlign: 'left',
           }}
@@ -158,7 +162,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onMeetForeignLeader}
-          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase}
+          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase}
           style={{
             ...btn,
             background: foreignLeaderCooldown || stateVisitPhase ? '#2f3336' : '#1d9bf0',
@@ -172,7 +176,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onVisitRegion}
-          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase}
+          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase}
           style={{
             ...btn,
             background: visitRegionCooldown || visitRegionPhase ? '#2f3336' : '#1d9bf0',
@@ -186,7 +190,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onSecurityBriefing}
-          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase}
+          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase || !!pressConferencePhase}
           style={{
             ...btn,
             background: securityBriefingCooldown || securityBriefingPhase ? '#2f3336' : '#1d9bf0',
@@ -196,6 +200,20 @@ export default function DeskPanel({
           title={securityBriefingPhase ? 'Security briefing in progress' : securityBriefingCooldown ? 'Security briefing cooldown 6 months' : 'Receive intel and align threat posture'}
         >
           {securityBriefingPhase ? 'Security briefing…' : ACTIVITY_LABELS[ACTIVITY_IDS.SECURITY_BRIEFING]}{!securityBriefingPhase && securityBriefingCooldown ? ' (cooldown)' : ''}
+        </button>
+        <button
+          type="button"
+          onClick={onPressConference}
+          disabled={outOfPower || pressConferenceCooldown || !!pressConferencePhase}
+          style={{
+            ...btn,
+            background: pressConferenceCooldown || pressConferencePhase ? '#2f3336' : '#1d9bf0',
+            opacity: pressConferenceCooldown || pressConferencePhase ? 0.8 : 1,
+            textAlign: 'left',
+          }}
+          title={pressConferencePhase ? 'Press conference in progress' : pressConferenceCooldown ? 'Press conference cooldown 6 months' : 'Address the press and shape the narrative'}
+        >
+          {pressConferencePhase ? 'Press conference…' : ACTIVITY_LABELS[ACTIVITY_IDS.PRESS_CONFERENCE]}{!pressConferencePhase && pressConferenceCooldown ? ' (cooldown)' : ''}
         </button>
         {[ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE].map((id) => (
           <button

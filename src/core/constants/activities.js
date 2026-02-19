@@ -88,5 +88,20 @@ export const SECURITY_BRIEFING_PHASE_ORDER = [
   SECURITY_BRIEFING_PHASES.DECISION,
 ]
 
+/** Press conference flow: prep → podium → Q&A → headline. */
+export const PRESS_CONFERENCE_PHASES = {
+  PREP: 'prep',
+  PODIUM: 'podium',
+  Q_AND_A: 'q_and_a',
+  HEADLINE: 'headline',
+}
+
+export const PRESS_CONFERENCE_PHASE_ORDER = [
+  PRESS_CONFERENCE_PHASES.PREP,
+  PRESS_CONFERENCE_PHASES.PODIUM,
+  PRESS_CONFERENCE_PHASES.Q_AND_A,
+  PRESS_CONFERENCE_PHASES.HEADLINE,
+]
+
 /** Which activities are implemented with full 3D flow (rest show "Coming soon"). */
 export const ACTIVITIES_WITH_FLOW = [ACTIVITY_IDS.STATE_OF_NATION]
