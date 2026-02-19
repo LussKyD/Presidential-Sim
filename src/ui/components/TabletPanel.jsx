@@ -142,6 +142,23 @@ export default function TabletPanel({
           )}
           {tab === TABS.CALENDAR && (
             <>
+              {(() => {
+                const curM = time?.month ?? 1
+                const curY = time?.year ?? 2026
+                const budgetM = calendar?.budgetMonth ?? 3
+                const openM = calendar?.openingMonth ?? 6
+                const nextBudget = curM < budgetM ? { month: budgetM, year: curY, label: 'Budget day' } : { month: budgetM, year: curY + 1, label: 'Budget day' }
+                const nextOpen = curM < openM ? { month: openM, year: curY, label: 'Opening of Parliament' } : { month: openM, year: curY + 1, label: 'Opening of Parliament' }
+                const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                const first = (nextBudget.year < nextOpen.year || (nextBudget.year === nextOpen.year && nextBudget.month < nextOpen.month))
+                  ? nextBudget
+                  : nextOpen
+                return (
+                  <div style={{ marginBottom: 12, padding: 8, background: '#0f1419', borderRadius: 8, border: '1px solid #2f3336', fontSize: 12, color: '#e7e9ea' }}>
+                    <span style={{ color: '#6e767d' }}>Next: </span>{first.label} — {monthNames[first.month]} {first.year}
+                  </div>
+                )
+              })()}
               <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5', fontSize: 12 }}>Upcoming &amp; scheduled</div>
               <ul style={{ margin: 0, paddingLeft: 18, marginBottom: 16, fontSize: 12, color: '#e7e9ea' }}>
                 {calendarEntries.length === 0 && <li style={{ color: '#8b98a5' }}>No scheduled events.</li>}

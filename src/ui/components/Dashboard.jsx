@@ -13,9 +13,9 @@ function formatNum(x) {
   return x.toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
 
-function Card({ title, value, sub }) {
+function Card({ title, value, sub, titleAttr }) {
   return (
-    <div style={cardStyle}>
+    <div style={cardStyle} title={titleAttr}>
       <div style={{ color: '#8b98a5', fontSize: 12, marginBottom: 6 }}>{title}</div>
       <div style={{ fontSize: 22, fontWeight: 800 }}>{value}</div>
       {sub ? <div style={{ color: '#8b98a5', fontSize: 12, marginTop: 6 }}>{sub}</div> : null}
@@ -89,9 +89,9 @@ export default function Dashboard({ state, onOpenDossier }) {
         <Card title="GDP" value={formatNum(econ?.gdp)} sub={econ ? `Growth: ${formatPct(econ.gdpGrowth)}` : ''} />
         <Card title="Inflation" value={formatPct(econ?.inflation)} />
         <Card title="Unemployment" value={formatPct(econ?.unemployment)} />
-        <Card title="Approval" value={formatPct(pop?.publicApproval)} />
-        <Card title="Coup risk" value={formatPct(pol?.coupRisk)} />
-        <Card title="Opposition" value={formatPct(state?.opposition?.strength)} sub="Election threat" />
+        <Card title="Approval" value={formatPct(pop?.publicApproval)} titleAttr="Public support %" />
+        <Card title="Coup risk" value={formatPct(pol?.coupRisk)} titleAttr="Military/loyalty coup risk" />
+        <Card title="Opposition" value={formatPct(state?.opposition?.strength)} sub="Election threat" titleAttr="Opposition strength / election threat" />
       </div>
 
       {state?.international?.relations && (

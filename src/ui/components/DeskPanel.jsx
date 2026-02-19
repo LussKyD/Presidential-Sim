@@ -348,6 +348,7 @@ export default function DeskPanel({
                       {initial}
                     </div>
                     <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</span>
+                    {d.at && <span style={{ fontSize: 10, color: '#6e767d', flexShrink: 0 }}>{d.at.month}/{d.at.year}</span>}
                   </button>
                 )
               })}

@@ -96,7 +96,8 @@ function App() {
     const elapsedDays = currentTick - lastStateAddressTick
     const elapsedMonths = Math.floor(elapsedDays / 7)
     if (elapsedMonths >= STATE_ADDRESS_COOLDOWN_MONTHS) return 0
-    return STATE_ADDRESS_COOLDOWN_MONTHS - elapsedMonths
+    const remaining = STATE_ADDRESS_COOLDOWN_MONTHS - elapsedMonths
+    return Math.min(STATE_ADDRESS_COOLDOWN_MONTHS, Math.max(0, remaining))
   })()
 
   function startStateAddress() {
@@ -150,6 +151,13 @@ function App() {
   }
 
   // Speech outcome is applied when user clicks "Leave chamber" in advanceStateAddress
+
+  // Safety: if we're in WALK_TO_OFFICE and phase complete never fires (e.g. tab switch), clear after 6s so desk is unblocked
+  useEffect(() => {
+    if (stateAddressPhase !== STATE_ADDRESS_PHASES.WALK_TO_OFFICE) return
+    const t = window.setTimeout(() => setStateAddressPhase((p) => (p === STATE_ADDRESS_PHASES.WALK_TO_OFFICE ? null : p)), 6000)
+    return () => clearTimeout(t)
+  }, [stateAddressPhase])
 
   useEffect(() => {
     const onKeyDown = (e) => {

@@ -42,7 +42,7 @@ export default function PolicyPanel({ policies, values, onChange, presets, onPre
         {policies.map((p) => {
           const v = Number(values?.[p.id] ?? p.default ?? 0)
           return (
-            <label key={p.id} style={{ display: 'block' }}>
+            <label key={p.id} style={{ display: 'block' }} title={p.affects ? `${p.label} — ${p.affects}` : p.label}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                 <span style={{ color: '#e7e9ea', fontWeight: 600 }}>{p.label}</span>
                 <span style={{ color: '#8b98a5', fontVariantNumeric: 'tabular-nums' }}>

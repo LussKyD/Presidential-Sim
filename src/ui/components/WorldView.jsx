@@ -521,8 +521,13 @@ export default function WorldView({
   const date = state?.time ? formatGameDate(state.time) : '—'
   const events = state?.events ?? []
   const lastEvent = events.length ? events[events.length - 1] : null
-  const recentMessages = [...events].reverse().slice(0, 4).map((e) => e.message)
+  const recentEventsForTv = [...events].reverse().slice(0, 4)
   const showOfficeTv = viewMode === 'office' && !activityPhase
+  function shortDate(at) {
+    if (!at) return ''
+    const name = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(at.month ?? 1) - 1]
+    return name ? `${name} ${at.day ?? 1}` : `${at.month}/${at.year}`
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
@@ -539,9 +544,12 @@ export default function WorldView({
                 <div style={{ padding: '4px 6px', background: '#16181c', borderBottom: '1px solid #2f3336', fontSize: 9, fontWeight: 700, color: i === 0 ? '#1d9bf0' : '#8b98a5' }}>
                   {ch.label}
                 </div>
-                <div style={{ flex: 1, padding: '6px 8px', fontSize: 10, color: '#e7e9ea', lineHeight: 1.3, display: 'flex', alignItems: 'center' }}>
-                  {recentMessages[i] ? (
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{i === 0 && lastEvent ? `LIVE ${recentMessages[i]}` : recentMessages[i]}</span>
+                <div style={{ flex: 1, padding: '6px 8px', fontSize: 10, color: '#e7e9ea', lineHeight: 1.3, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+                  {recentEventsForTv[i] ? (
+                    <>
+                      <span style={{ fontSize: 9, color: '#6e767d' }}>{shortDate(recentEventsForTv[i].at)}</span>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{i === 0 && lastEvent ? `LIVE ${recentEventsForTv[i].message}` : recentEventsForTv[i].message}</span>
+                    </>
                   ) : (
                     <span style={{ color: '#6e767d' }}>—</span>
                   )}
@@ -551,8 +559,8 @@ export default function WorldView({
           </div>
         </div>
       )}
-      <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#6e767d', fontSize: 11 }}>
-        {viewMode === 'office' ? "First-person: you're at the desk · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
+      <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#8b98a5', fontSize: 12 }}>
+        {viewMode === 'office' ? "You're at the desk — Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
       </div>
     </div>
   )

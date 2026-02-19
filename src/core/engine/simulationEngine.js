@@ -80,10 +80,15 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.time.day = 1
     state.time.month = oldTicks === 0 ? 1 : (oldTicks % 12 || 12)
     state.time.year = 2026 + (oldTicks === 0 ? 0 : Math.floor((oldTicks - 1) / 12))
+    // Convert last-activity ticks from month-ticks to day-ticks so cooldowns are correct.
+    if (state.meta && typeof state.meta.lastStateAddressTick === 'number') {
+      state.meta.lastStateAddressTick = state.meta.lastStateAddressTick * DAYS_PER_MONTH
+    }
   }
   if (state.time && state.time.day == null) state.time.day = 1
   if (state.meta) {
     state.meta.seed = seed
+    if (typeof state.meta.lastStateAddressTick !== 'number') state.meta.lastStateAddressTick = -999
     if (typeof state.meta.lastVisitRegionTick !== 'number') state.meta.lastVisitRegionTick = -999
     if (typeof state.meta.lastSecurityBriefingTick !== 'number') state.meta.lastSecurityBriefingTick = -999
     if (typeof state.meta.lastPressConferenceTick !== 'number') state.meta.lastPressConferenceTick = -999
