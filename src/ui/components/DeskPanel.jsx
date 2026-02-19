@@ -56,8 +56,13 @@ export default function DeskPanel({
   foreignLeaderCooldown,
   stateVisitPhase,
   stateVisitCountry,
+  onVisitRegion,
+  visitRegionCooldown,
+  visitRegionPhase,
+  visitRegionId,
 }) {
   const stateVisitActive = !!stateVisitPhase
+  const visitRegionActive = !!visitRegionPhase
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
@@ -117,7 +122,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onStateAddress}
-          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive}
+          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive}
           style={{
             background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
             color: '#0f1419',
@@ -125,7 +130,7 @@ export default function DeskPanel({
             padding: '0.5rem 0.75rem',
             borderRadius: 8,
             fontWeight: 700,
-            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive ? 'not-allowed' : 'pointer',
+            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive ? 'not-allowed' : 'pointer',
             fontSize: 12,
             textAlign: 'left',
           }}
@@ -149,7 +154,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onMeetForeignLeader}
-          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase}
+          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase}
           style={{
             ...btn,
             background: foreignLeaderCooldown || stateVisitPhase ? '#2f3336' : '#1d9bf0',
@@ -159,6 +164,20 @@ export default function DeskPanel({
           title={stateVisitPhase ? 'State visit in progress' : foreignLeaderCooldown ? 'Meet foreign leader cooldown 6 months' : 'Hold bilateral meeting (pick country)'}
         >
           {stateVisitPhase ? `State visit to ${getCountry(stateVisitCountry)?.name ?? '…'}…` : ACTIVITY_LABELS[ACTIVITY_IDS.MEET_FOREIGN_LEADER]}{!stateVisitPhase && foreignLeaderCooldown ? ' (cooldown)' : ''}
+        </button>
+        <button
+          type="button"
+          onClick={onVisitRegion}
+          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase}
+          style={{
+            ...btn,
+            background: visitRegionCooldown || visitRegionPhase ? '#2f3336' : '#1d9bf0',
+            opacity: visitRegionCooldown || visitRegionPhase ? 0.8 : 1,
+            textAlign: 'left',
+          }}
+          title={visitRegionPhase ? 'Regional visit in progress' : visitRegionCooldown ? 'Visit region cooldown 6 months' : 'Visit a region to boost local approval'}
+        >
+          {visitRegionPhase ? `Visit to ${visitRegionId ?? '…'}…` : ACTIVITY_LABELS[ACTIVITY_IDS.VISIT_REGION]}{!visitRegionPhase && visitRegionCooldown ? ' (cooldown)' : ''}
         </button>
         {[ACTIVITY_IDS.LAUNCH_INFRASTRUCTURE, ACTIVITY_IDS.SECURITY_BRIEFING].map((id) => (
           <button

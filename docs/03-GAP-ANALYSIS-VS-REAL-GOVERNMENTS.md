@@ -182,12 +182,12 @@
 | **Opposition** | Opposition strength (0–1) drifts with approval; elections are you vs opposition (approval vs opposition + random swing). Scandals, protests, crackdowns boost opposition; state address, budget passed, dialogue/investigate nudge it down. Shown in Dashboard and Desk. |
 | **Regional approval** | Five regions (Capital, North, South, East, West); each has approval 0–1, drifting toward national with variance. Protests hit the affected region; crisis response (dialogue/crackdown/ignore) changes that region. Dashboard shows regional approval bars. |
 | **Media as headlines** | Event feed styled as "Front page"; in office view, TV frame with stations and headlines inside. |
-| **International** | Three bilateral relations (Norden, Sudland, Eastalia); drift and diplomatic incidents lower a random relation; low relations raise foreign-interference. "Meet foreign leader" desk activity: pick country, 6‑month cooldown, improves relation. Dashboard shows relation bars. |
+| **International** | Three bilateral relations (Norden, Sudland, Eastalia); drift and diplomatic incidents lower a random relation; low relations raise foreign-interference. "Meet foreign leader" desk activity: pick country, 6‑month cooldown, improves relation; immersive state-visit flow (narrative phases). Dashboard shows relation bars. |
 
 ### 6.1 Still missing (next priorities)
 
 - **Opposition depth** — Optional: named opposition leader, coalition threshold, “opposition tables motion” events.
-- **Visit region** — Optional activity: travel to a region to boost approval there.
+- **Visit region** — Done: desk activity with multi-phase narrative flow (depart → motorcade → in region → return); regional + national approval boost, 6‑month cooldown. Later: 3D motorcade to region.
 - **Press conference** — Optional activity to set narrative / respond to media.
 - **International depth** — State visits, treaties, sanctions (optional).
 - **Judiciary** — Optional court events (e.g. election dispute, constitutional challenge).

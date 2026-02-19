@@ -34,7 +34,7 @@ const OPENING_OF_PARLIAMENT_MONTH = 6
 
 function getDefaultState(seed = 1) {
   return {
-    meta: { seed },
+    meta: { seed, lastVisitRegionTick: -999 },
     time: { year: 2026, month: 1, tick: 0 },
     economy: {
       gdp: INITIAL_GDP,
@@ -70,7 +70,10 @@ function getDefaultState(seed = 1) {
 export function createSimulationEngine({ seed = 1, initialState } = {}) {
   const rng = createSeededRandom(seed)
   const state = initialState ? clone(initialState) : getDefaultState(seed)
-  if (state.meta) state.meta.seed = seed
+  if (state.meta) {
+    state.meta.seed = seed
+    if (typeof state.meta.lastVisitRegionTick !== 'number') state.meta.lastVisitRegionTick = -999
+  }
   const def = getDefaultState()
   if (!Array.isArray(state.economy?.history)) state.economy = { ...def.economy, ...state.economy, history: state.economy?.history || [] }
   if (!state.regime) state.regime = { ...def.regime }
@@ -308,6 +311,24 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
   }
 
+  const VISIT_REGION_COOLDOWN_TICKS = 6
+  function applyVisitRegion(regionId) {
+    if (state.regime?.status !== 'in_power' || !REGION_IDS.includes(regionId)) return
+    const last = state.meta?.lastVisitRegionTick ?? -999
+    if (state.time.tick - last < VISIT_REGION_COOLDOWN_TICKS) return
+    state.meta.lastVisitRegionTick = state.time.tick
+    const current = state.regions?.[regionId] ?? 0.5
+    state.regions[regionId] = clamp(current + 0.06, 0.05, 0.95)
+    state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.01, 0, 1)
+    state.events.push({
+      id: `visit-region-${state.time.tick}-${regionId}`,
+      at: { ...state.time },
+      type: 'visit_region',
+      message: `President visited ${regionId}. Regional support strengthened.`,
+    })
+    if (state.events.length > 60) state.events.splice(0, state.events.length - 60)
+  }
+
   function getState() {
     return clone(state)
   }
@@ -375,6 +396,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     addProposedEvent,
     dismissMeeting,
     applyMeetForeignLeader,
+    applyVisitRegion,
     policyDefs: POLICY_DEFS,
   }
 }

@@ -10,9 +10,11 @@ import TabletPanel from './ui/components/TabletPanel'
 import MeetingModal from './ui/components/MeetingModal'
 import MeetForeignModal from './ui/components/MeetForeignModal'
 import StateVisitView from './ui/components/StateVisitView'
+import VisitRegionModal from './ui/components/VisitRegionModal'
+import VisitRegionView from './ui/components/VisitRegionView'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
-import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER } from './core/constants/activities'
+import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, STATE_VISIT_PHASE_ORDER, VISIT_REGION_PHASES, VISIT_REGION_PHASE_ORDER } from './core/constants/activities'
 import { getCountry } from './core/constants/international'
 
 const SPEEDS = [
@@ -40,7 +42,7 @@ function App() {
   const [initialSave, setInitialSave] = useState(() => getStoredSave())
   const [showHowToPlay, setShowHowToPlay] = useState(false)
 
-  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, isRunning, toggleRunning, tick } = useSimulation({
+  const { state, engine, applyPolicy, setBudgetPie, applyStateAddressOutcome, tableBudget, respondToCrisis, applyCabinetMeetingOutcome, scheduleMeeting, logCall, addDiaryEntry, addProposedEvent, dismissMeeting, applyMeetForeignLeader, applyVisitRegion, isRunning, toggleRunning, tick } = useSimulation({
     tickMs: 2000 / speed,
     seed,
     gameKey,
@@ -54,6 +56,9 @@ function App() {
   const [showMeetForeignModal, setShowMeetForeignModal] = useState(false)
   const [stateVisitPhase, setStateVisitPhase] = useState(null)
   const [stateVisitCountry, setStateVisitCountry] = useState(null)
+  const [showVisitRegionModal, setShowVisitRegionModal] = useState(false)
+  const [visitRegionPhase, setVisitRegionPhase] = useState(null)
+  const [visitRegionId, setVisitRegionId] = useState(null)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -189,6 +194,33 @@ function App() {
           }}
         />
       )}
+      {showVisitRegionModal && (
+        <VisitRegionModal
+          state={state}
+          onPick={(id) => {
+            setVisitRegionId(id)
+            setShowVisitRegionModal(false)
+            setVisitRegionPhase(VISIT_REGION_PHASES.DEPART)
+          }}
+          onClose={() => setShowVisitRegionModal(false)}
+        />
+      )}
+      {visitRegionPhase && (
+        <VisitRegionView
+          phase={visitRegionPhase}
+          regionName={visitRegionId ?? ''}
+          onAdvance={() => {
+            const idx = VISIT_REGION_PHASE_ORDER.indexOf(visitRegionPhase)
+            if (visitRegionPhase === VISIT_REGION_PHASES.IN_REGION) applyVisitRegion(visitRegionId)
+            if (idx < 0 || idx >= VISIT_REGION_PHASE_ORDER.length - 1) {
+              setVisitRegionPhase(null)
+              setVisitRegionId(null)
+            } else {
+              setVisitRegionPhase(VISIT_REGION_PHASE_ORDER[idx + 1])
+            }
+          }}
+        />
+      )}
     <MainLayout view={view} onViewChange={setView}>
       {pendingCrisis && <CrisisResponsePanel pending={pendingCrisis} onRespond={respondToCrisis} />}
       {outOfPower && (
@@ -254,6 +286,10 @@ function App() {
             foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < 6}
             stateVisitPhase={stateVisitPhase}
             stateVisitCountry={stateVisitCountry}
+            onVisitRegion={() => setShowVisitRegionModal(true)}
+            visitRegionCooldown={(state?.time?.tick ?? 0) - (state?.meta?.lastVisitRegionTick ?? -999) < 6}
+            visitRegionPhase={visitRegionPhase}
+            visitRegionId={visitRegionId}
           />
         </div>
       ) : (
