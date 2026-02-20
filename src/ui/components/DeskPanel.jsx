@@ -51,8 +51,9 @@ export default function DeskPanel({
   budgetDue,
   parliamentSupport,
   oppositionStrength,
-  onCabinetMeeting,
+  onStartCabinetMeeting,
   cabinetCooldown,
+  cabinetMeetingActive,
   onMeetForeignLeader,
   foreignLeaderCooldown,
   stateVisitPhase,
@@ -78,6 +79,7 @@ export default function DeskPanel({
   const securityBriefingActive = !!securityBriefingPhase
   const pressConferenceActive = !!pressConferencePhase
   const launchInfrastructureActive = !!launchInfrastructurePhase
+  const cabinetActive = !!cabinetMeetingActive
   const [policiesOpen, setPoliciesOpen] = useState(false)
   const approval = state?.population?.publicApproval
   const approvalPct = typeof approval === 'number' ? Math.round(approval * 100) : '—'
@@ -151,7 +153,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onStateAddress}
-          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive || !!pressConferenceActive || !!launchInfrastructureActive}
+          disabled={outOfPower || stateAddressCooldown || !!stateAddressPhase || !!stateVisitActive || !!visitRegionActive || !!securityBriefingActive || !!pressConferenceActive || !!launchInfrastructureActive || cabinetActive}
           style={{
             background: stateAddressCooldown ? '#2f3336' : '#1d9bf0',
             color: '#0f1419',
@@ -159,7 +161,7 @@ export default function DeskPanel({
             padding: '0.5rem 0.75rem',
             borderRadius: 8,
             fontWeight: 700,
-            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive || pressConferenceActive || launchInfrastructureActive ? 'not-allowed' : 'pointer',
+            cursor: stateAddressCooldown || stateAddressPhase || stateVisitActive || visitRegionActive || securityBriefingActive || pressConferenceActive || launchInfrastructureActive || cabinetActive ? 'not-allowed' : 'pointer',
             fontSize: 12,
             textAlign: 'left',
           }}
@@ -175,12 +177,12 @@ export default function DeskPanel({
         </button>
         <button
           type="button"
-          onClick={() => onCabinetMeeting?.(approval >= 0.45)}
-          disabled={outOfPower || cabinetCooldown}
+          onClick={() => onStartCabinetMeeting?.()}
+          disabled={outOfPower || cabinetCooldown || !!cabinetMeetingActive}
           style={{
             ...btn,
-            background: cabinetCooldown ? '#2f3336' : '#1d9bf0',
-            opacity: cabinetCooldown ? 0.8 : 1,
+            background: cabinetCooldown || cabinetMeetingActive ? '#2f3336' : '#1d9bf0',
+            opacity: cabinetCooldown || cabinetMeetingActive ? 0.8 : 1,
             textAlign: 'left',
           }}
           title={cabinetCooldown ? 'Cabinet cooldown 6 months' : 'Hold cabinet meeting'}
@@ -190,7 +192,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onMeetForeignLeader}
-          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
+          disabled={outOfPower || foreignLeaderCooldown || !!stateVisitPhase || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase || cabinetActive}
           style={{
             ...btn,
             background: foreignLeaderCooldown || stateVisitPhase ? '#2f3336' : '#1d9bf0',
@@ -204,7 +206,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onVisitRegion}
-          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
+          disabled={outOfPower || visitRegionCooldown || !!visitRegionPhase || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase || cabinetActive}
           style={{
             ...btn,
             background: visitRegionCooldown || visitRegionPhase ? '#2f3336' : '#1d9bf0',
@@ -218,7 +220,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onSecurityBriefing}
-          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase}
+          disabled={outOfPower || securityBriefingCooldown || !!securityBriefingPhase || !!pressConferencePhase || !!launchInfrastructurePhase || cabinetActive}
           style={{
             ...btn,
             background: securityBriefingCooldown || securityBriefingPhase ? '#2f3336' : '#1d9bf0',
@@ -232,7 +234,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onPressConference}
-          disabled={outOfPower || pressConferenceCooldown || !!pressConferencePhase || !!launchInfrastructurePhase}
+          disabled={outOfPower || pressConferenceCooldown || !!pressConferencePhase || !!launchInfrastructurePhase || cabinetActive}
           style={{
             ...btn,
             background: pressConferenceCooldown || pressConferencePhase ? '#2f3336' : '#1d9bf0',
@@ -246,7 +248,7 @@ export default function DeskPanel({
         <button
           type="button"
           onClick={onLaunchInfrastructure}
-          disabled={outOfPower || launchInfrastructureCooldown || !!launchInfrastructurePhase}
+          disabled={outOfPower || launchInfrastructureCooldown || !!launchInfrastructurePhase || cabinetActive}
           style={{
             ...btn,
             background: launchInfrastructureCooldown || launchInfrastructurePhase ? '#2f3336' : '#1d9bf0',
@@ -259,7 +261,7 @@ export default function DeskPanel({
         </button>
       </div>
 
-      {!outOfPower && !budgetDue && stateAddressCooldown && cabinetCooldown && foreignLeaderCooldown && visitRegionCooldown && securityBriefingCooldown && pressConferenceCooldown && launchInfrastructureCooldown && !stateAddressPhase && !stateVisitActive && !visitRegionActive && !securityBriefingActive && !pressConferenceActive && !launchInfrastructureActive && (
+      {!outOfPower && !budgetDue && stateAddressCooldown && cabinetCooldown && foreignLeaderCooldown && visitRegionCooldown && securityBriefingCooldown && pressConferenceCooldown && launchInfrastructureCooldown && !stateAddressPhase && !stateVisitActive && !visitRegionActive && !securityBriefingActive && !pressConferenceActive && !launchInfrastructureActive && !cabinetActive && (
         <div style={{ fontSize: 11, color: '#6e767d', marginTop: 4 }} title="Step or run the sim to advance time">All activities on cooldown — advance days to refresh.</div>
       )}
 

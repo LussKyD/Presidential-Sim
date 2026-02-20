@@ -24,7 +24,7 @@ export default function SecurityBriefingView({ phase, onAdvance }) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'linear-gradient(180deg, #0f1419 0%, #1a1f26 50%, #0f1419 100%)',
+        background: 'rgba(0,0,0,0.6)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

@@ -16,6 +16,7 @@ import SecurityBriefingView from './ui/components/SecurityBriefingView'
 import PressConferenceView from './ui/components/PressConferenceView'
 import LaunchInfrastructureModal from './ui/components/LaunchInfrastructureModal'
 import LaunchInfrastructureView from './ui/components/LaunchInfrastructureView'
+import CabinetMeetingView from './ui/components/CabinetMeetingView'
 import DossierModal from './ui/components/DossierModal'
 import { useSimulation, SAVE_KEY } from './ui/hooks/useSimulation'
 import { POLICY_PRESETS, BUDGET_PIE_IDS } from './core/constants/policyEffects'
@@ -68,6 +69,7 @@ function App() {
   const [visitRegionId, setVisitRegionId] = useState(null)
   const [securityBriefingPhase, setSecurityBriefingPhase] = useState(null)
   const [pressConferencePhase, setPressConferencePhase] = useState(null)
+  const [cabinetMeetingActive, setCabinetMeetingActive] = useState(false)
   const [showLaunchInfrastructureModal, setShowLaunchInfrastructureModal] = useState(false)
   const [launchInfrastructurePhase, setLaunchInfrastructurePhase] = useState(null)
   const [launchInfrastructureRegion, setLaunchInfrastructureRegion] = useState(null)
@@ -265,6 +267,14 @@ function App() {
           }}
         />
       )}
+      {cabinetMeetingActive && (
+        <CabinetMeetingView
+          onChoose={(success) => {
+            applyCabinetMeetingOutcome(success)
+            setCabinetMeetingActive(false)
+          }}
+        />
+      )}
       {pressConferencePhase && (
         <PressConferenceView
           phase={pressConferencePhase}
@@ -365,6 +375,9 @@ function App() {
                   setStateVisitCountry(null)
                 }
               }}
+              securityBriefingPhase={securityBriefingPhase}
+              pressConferencePhase={pressConferencePhase}
+              cabinetMeetingActive={cabinetMeetingActive}
             />
           </div>
           <DeskPanel
@@ -390,8 +403,9 @@ function App() {
             budgetDue={state?.calendar?.budgetDue}
             parliamentSupport={state?.parliament?.support}
             oppositionStrength={state?.opposition?.strength}
-            onCabinetMeeting={applyCabinetMeetingOutcome}
+            onStartCabinetMeeting={() => setCabinetMeetingActive(true)}
             cabinetCooldown={state?.meta?.lastCabinetTick != null && (state?.time?.tick ?? 0) - state.meta.lastCabinetTick < SIX_MONTHS_IN_DAYS}
+            cabinetMeetingActive={cabinetMeetingActive}
             onMeetForeignLeader={() => setShowMeetForeignModal(true)}
             foreignLeaderCooldown={(state?.time?.tick ?? 0) - (state?.international?.lastMeetForeignTick ?? -999) < SIX_MONTHS_IN_DAYS}
             stateVisitPhase={stateVisitPhase}

@@ -47,10 +47,16 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   onResetView,
   stateVisitPhase,
   onStateVisitPhaseComplete,
+  securityBriefingPhase,
+  pressConferencePhase,
+  cabinetMeetingActive,
 }, ref) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
   const stateVisitPhaseRef = useRef(stateVisitPhase)
+  const securityBriefingPhaseRef = useRef(securityBriefingPhase)
+  const pressConferencePhaseRef = useRef(pressConferencePhase)
+  const cabinetMeetingActiveRef = useRef(cabinetMeetingActive)
   const viewModeRef = useRef(viewMode)
   const phaseStartRef = useRef(null)
   const onPhaseCompleteRef = useRef(onPhaseComplete)
@@ -77,6 +83,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   stateRef.current = state
   activityPhaseRef.current = activityPhase
   stateVisitPhaseRef.current = stateVisitPhase
+  securityBriefingPhaseRef.current = securityBriefingPhase
+  pressConferencePhaseRef.current = pressConferencePhase
+  cabinetMeetingActiveRef.current = cabinetMeetingActive
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
   onStateVisitPhaseCompleteRef.current = onStateVisitPhaseComplete
@@ -344,6 +353,72 @@ const WorldViewInner = forwardRef(function WorldViewInner({
     }
     scene.add(chamberGroup)
 
+    // ---- Briefing room (security briefing / cabinet): table, chairs, screen ----
+    const BRIEFING_ROOM_POS = { x: 6, z: -4 }
+    const briefingRoomGroup = new THREE.Group()
+    briefingRoomGroup.position.set(BRIEFING_ROOM_POS.x, 0, BRIEFING_ROOM_POS.z)
+    const briefFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(5, 4),
+      new THREE.MeshStandardMaterial({ color: 0x1a1f26 })
+    )
+    briefFloor.rotation.x = -Math.PI / 2
+    briefingRoomGroup.add(briefFloor)
+    const briefWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(5, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0x252a33 })
+    )
+    briefWall.position.z = -2
+    briefingRoomGroup.add(briefWall)
+    const briefTable = new THREE.Mesh(
+      new THREE.BoxGeometry(2.2, 0.08, 1),
+      new THREE.MeshStandardMaterial({ color: 0x4a5568 })
+    )
+    briefTable.position.set(0, 0.4, 0)
+    briefingRoomGroup.add(briefTable)
+    const briefScreen = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.6, 0.9),
+      new THREE.MeshStandardMaterial({ color: 0x0f1419 })
+    )
+    briefScreen.position.set(0, 1.35, -1.85)
+    briefingRoomGroup.add(briefScreen)
+    for (let i = -1; i <= 1; i++) {
+      const chair = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 0.35), new THREE.MeshStandardMaterial({ color: 0x374151 }))
+      chair.position.set(i * 0.7, 0.225, 0.6)
+      briefingRoomGroup.add(chair)
+    }
+    scene.add(briefingRoomGroup)
+
+    // ---- Podium room (press conference): podium, audience seats ----
+    const PODIUM_ROOM_POS = { x: 6, z: 2 }
+    const podiumRoomGroup = new THREE.Group()
+    podiumRoomGroup.position.set(PODIUM_ROOM_POS.x, 0, PODIUM_ROOM_POS.z)
+    const podiumFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(6, 5),
+      new THREE.MeshStandardMaterial({ color: 0x1a1f26 })
+    )
+    podiumFloor.rotation.x = -Math.PI / 2
+    podiumRoomGroup.add(podiumFloor)
+    const podiumWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(6, 2.5),
+      new THREE.MeshStandardMaterial({ color: 0x252a33 })
+    )
+    podiumWall.position.z = -2.5
+    podiumRoomGroup.add(podiumWall)
+    const pressPodium = new THREE.Mesh(
+      new THREE.BoxGeometry(1.4, 0.6, 0.8),
+      new THREE.MeshStandardMaterial({ color: 0x4a5568 })
+    )
+    pressPodium.position.set(0, 0.3, -0.8)
+    podiumRoomGroup.add(pressPodium)
+    for (let row = 0; row < 3; row++) {
+      for (let col = -2; col <= 2; col++) {
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.3), new THREE.MeshStandardMaterial({ color: 0x374151 }))
+        seat.position.set(col * 0.5, 0.2, 0.5 + row * 0.5)
+        podiumRoomGroup.add(seat)
+      }
+    }
+    scene.add(podiumRoomGroup)
+
     // Motorcade: limo + escorts (start at driveway, drive to parliament)
     const carGeo = new THREE.BoxGeometry(0.9, 0.45, 1.8)
     const limo = new THREE.Mesh(carGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.4, roughness: 0.4 }))
@@ -512,6 +587,53 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       } else {
         airportTerminal.visible = false
         airportTarmac.visible = false
+      }
+
+      const inBriefingRoom = !!securityBriefingPhaseRef.current || !!cabinetMeetingActiveRef.current
+      const inPodiumRoom = !!pressConferencePhaseRef.current
+      if (inBriefingRoom) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        briefingRoomGroup.visible = true
+        podiumRoomGroup.visible = false
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(BRIEFING_ROOM_POS.x, 1.5, BRIEFING_ROOM_POS.z + 1.8), 0.1)
+        controls.target.lerp(new THREE.Vector3(BRIEFING_ROOM_POS.x, 1, BRIEFING_ROOM_POS.z), 0.1)
+      } else if (inPodiumRoom) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = true
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(PODIUM_ROOM_POS.x, 1.5, PODIUM_ROOM_POS.z + 2.2), 0.1)
+        controls.target.lerp(new THREE.Vector3(PODIUM_ROOM_POS.x, 1, PODIUM_ROOM_POS.z - 0.8), 0.1)
+      } else {
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = false
       }
 
       if (phase === STATE_ADDRESS_PHASES.WALK_TO_CARS) {
@@ -706,7 +828,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
             onStateVisitPhaseCompleteRef.current?.()
           }
         }
-      } else {
+      } else if (!inBriefingRoom && !inPodiumRoom) {
         if (vm === 'office') {
           mapCameraInitializedRef.current = false
           controls.enabled = true
