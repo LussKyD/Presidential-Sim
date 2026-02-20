@@ -73,6 +73,7 @@ function App() {
   const [showLaunchInfrastructureModal, setShowLaunchInfrastructureModal] = useState(false)
   const [launchInfrastructurePhase, setLaunchInfrastructurePhase] = useState(null)
   const [launchInfrastructureRegion, setLaunchInfrastructureRegion] = useState(null)
+  const [budgetDayChamberActive, setBudgetDayChamberActive] = useState(false)
   const worldViewRef = useRef(null)
 
   function startNewGame() {
@@ -205,6 +206,24 @@ function App() {
           }}
           onClose={() => setShowMeetForeignModal(false)}
         />
+      )}
+      {budgetDayChamberActive && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1001, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 24, pointerEvents: 'none' }}>
+          <div style={{ pointerEvents: 'auto', maxWidth: 420, width: '100%', background: 'rgba(22,24,28,0.92)', border: '1px solid #2f3336', borderRadius: 16, padding: 24, boxShadow: '0 12px 48px rgba(0,0,0,0.5)' }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8b98a5', marginBottom: 6 }}>Budget day</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#e7e9ea', marginBottom: 16 }}>Table your budget before Parliament</div>
+            <button
+              type="button"
+              onClick={() => {
+                tableBudget()
+                setBudgetDayChamberActive(false)
+              }}
+              style={{ padding: '12px 24px', background: '#059669', color: '#0f1419', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >
+              Table budget
+            </button>
+          </div>
+        </div>
       )}
       {stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 1001, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 24, pointerEvents: 'none' }}>
@@ -416,6 +435,7 @@ function App() {
                   setLaunchInfrastructureRegion(null)
                 }
               }}
+              budgetDayChamberActive={budgetDayChamberActive}
             />
           </div>
           <DeskPanel
@@ -439,6 +459,7 @@ function App() {
             speeds={SPEEDS}
             tableBudget={tableBudget}
             budgetDue={state?.calendar?.budgetDue}
+            onStartBudgetDayChamber={state?.calendar?.budgetDue ? () => setBudgetDayChamberActive(true) : undefined}
             parliamentSupport={state?.parliament?.support}
             oppositionStrength={state?.opposition?.strength}
             onStartCabinetMeeting={() => setCabinetMeetingActive(true)}

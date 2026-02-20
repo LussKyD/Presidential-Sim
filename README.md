@@ -31,8 +31,8 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 
 ## Status
 
-- **Current:** Phases 0–6 complete — simulation engine (1 tick = 1 day, 7 days/month), dashboard, events (protest/scandal/diplomatic/coup/election, plus approval bounce and economic praise), economy chart, approval/coup drivers, term summary, tick speed, save/load, New game, policy presets, 3D Map view (Three.js) with Reset view, expanded How to play, event templates doc.
-- **Next:** Balance tuning, more event variety, or expand 3D (e.g. motorcade feel).
+- **Current:** **Final mission complete** (see [06-FINAL-MISSION-DEV-PLAN.md](docs/06-FINAL-MISSION-DEV-PLAN.md)). Fully functional: balance pass, save/load, calendar, crises, parliament (table budget), international (state visit), regions. Immersive: State of the Nation 3D (office → motorcade → Parliament chamber → speech → return); state visit 3D (motorcade to airport, return); visit region & launch infra 3D (motorcade to site, return); briefing room (security/cabinet), podium room (press), foreign palace meeting room, residence wing; Budget day 3D chamber beat; full motorcade (lead car, outriders); opposition motion of no confidence & court challenge events. Office, Map, Residence views; event feed, dossiers, term summary.
+- **Next:** Polish (UX, copy), balance tuning, more event variety, or optional I5 extras.
 
 ---
 
@@ -59,5 +59,5 @@ Open `http://localhost:5173`. For correct asset paths when testing the built sit
 - **Stack:** React, Vite, static export
 - **Simulation:** Pure JS (economy, population, politics, crisis, event bus)
 - **Charts:** In-app SVG (economy over time)
-- **3D:** Three.js (Map view: capital city with Palace, Parliament, Media, Military, Bank)
+- **3D:** Three.js — office, palace exterior, Parliament chamber, motorcade (limo, escorts, lead car, bikes), airport, regional site, briefing room, podium room, foreign meeting room, residence wing; Map view (capital); Budget day chamber view.
 - **Hosting:** GitHub Pages

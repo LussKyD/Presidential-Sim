@@ -49,6 +49,7 @@ export default function DeskPanel({
   speeds,
   tableBudget,
   budgetDue,
+  onStartBudgetDayChamber,
   parliamentSupport,
   oppositionStrength,
   onStartCabinetMeeting,
@@ -140,9 +141,10 @@ export default function DeskPanel({
       {budgetDue && (
         <button
           type="button"
-          onClick={tableBudget}
+          onClick={onStartBudgetDayChamber ?? tableBudget}
           disabled={outOfPower}
           style={{ ...btn, background: '#059669', width: '100%' }}
+          title={onStartBudgetDayChamber ? 'Go to Parliament chamber to table budget' : 'Table budget'}
         >
           Table budget in Parliament
         </button>

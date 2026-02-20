@@ -93,6 +93,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (typeof state.meta.lastSecurityBriefingTick !== 'number') state.meta.lastSecurityBriefingTick = -999
     if (typeof state.meta.lastPressConferenceTick !== 'number') state.meta.lastPressConferenceTick = -999
     if (typeof state.meta.lastLaunchInfrastructureTick !== 'number') state.meta.lastLaunchInfrastructureTick = -999
+    if (typeof state.meta.lastMotionOfNoConfidenceTick !== 'number') state.meta.lastMotionOfNoConfidenceTick = -999
+    if (typeof state.meta.lastCourtChallengeTick !== 'number') state.meta.lastCourtChallengeTick = -999
   }
   const def = getDefaultState()
   if (!Array.isArray(state.economy?.history)) state.economy = { ...def.economy, ...state.economy, history: state.economy?.history || [] }
@@ -171,6 +173,40 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
       if (state.time.month === state.calendar.openingMonth) {
         const openDossier = addDossier({ countryId: null, type: 'calendar', title: 'Opening of Parliament brief', summary: 'Opening of Parliament. Session begins.', details: 'New session convened. Legislative agenda set.', at: state.time })
         state.events.push({ id: `opening-${state.time.tick}`, at: { ...state.time }, type: 'calendar', message: 'Opening of Parliament. Session begins.', dossierId: openDossier?.id })
+      }
+    }
+
+    // ----- Opposition / judiciary (I5.4): motion of no confidence; court challenge -----
+    if (state.regime?.status === 'in_power' && state.time.day === 1) {
+      const oppStrength = state.opposition?.strength ?? 0.35
+      const parlSupport = state.parliament?.support ?? 0.55
+      const lastMotion = state.meta?.lastMotionOfNoConfidenceTick ?? -999
+      const lastCourt = state.meta?.lastCourtChallengeTick ?? -999
+      const motionCooldown = COOLDOWN_MONTHS_TO_TICKS(10)
+      const courtCooldown = COOLDOWN_MONTHS_TO_TICKS(8)
+      if (oppStrength > 0.48 && parlSupport < 0.58 && state.time.tick - lastMotion >= motionCooldown && rng() < 0.055) {
+        state.meta.lastMotionOfNoConfidenceTick = state.time.tick
+        const roll = rng()
+        const defeated = roll < parlSupport
+        if (defeated) {
+          if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) - 0.02, 0.1, 0.9)
+          const dossier = addDossier({ countryId: null, type: 'opposition_motion', title: 'Motion of no confidence brief', summary: 'Opposition tabled a motion of no confidence. Parliament voted it down.', details: 'The opposition failed to muster a majority. Government survives. Opposition weakened.', at: state.time })
+          state.events.push({ id: `motion-${state.time.tick}`, at: { ...state.time }, type: 'opposition_motion', message: 'Motion of no confidence defeated. Government survives.', dossierId: dossier?.id })
+        } else {
+          state.population.publicApproval = clamp(state.population.publicApproval - 0.04, 0, 1)
+          state.politics.coupRisk = clamp(state.politics.coupRisk + 0.02, 0, 1)
+          if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + 0.025, 0.1, 0.9)
+          if (state.parliament) state.parliament.support = clamp((state.parliament.support || 0.55) - 0.03, 0.1, 0.95)
+          const dossier = addDossier({ countryId: null, type: 'opposition_motion', title: 'Motion of no confidence brief', summary: 'Opposition tabled a motion of no confidence. Parliament carried it.', details: 'The motion passed. Government severely weakened. Approval and parliament support fell.', at: state.time })
+          state.events.push({ id: `motion-${state.time.tick}`, at: { ...state.time }, type: 'opposition_motion', message: 'Motion of no confidence carried. Government weakened.', dossierId: dossier?.id })
+        }
+      }
+      const scandal = state.shocks?.scandalLevel ?? 0
+      if (state.time.tick - lastCourt >= courtCooldown && (scandal > 0.25 ? rng() < 0.12 : rng() < 0.04)) {
+        state.meta.lastCourtChallengeTick = state.time.tick
+        state.population.publicApproval = clamp(state.population.publicApproval - 0.015, 0, 1)
+        const dossier = addDossier({ countryId: null, type: 'judiciary', title: 'Court ruling brief', summary: 'Supreme Court ruled against the government on a procedural challenge.', details: 'The court found in favour of the plaintiffs. Minor political damage. No policy change required.', at: state.time })
+        state.events.push({ id: `court-${state.time.tick}`, at: { ...state.time }, type: 'judiciary', message: 'Court rules against government on procedural challenge.', dossierId: dossier?.id })
       }
     }
 

@@ -133,19 +133,19 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 |---|------|--------|
 | I5.1 | **Full motorcade** | Done: lead security car + 2 motorcycle outriders; follow path in all motorcade phases. |
 | I5.2 | **Palace: multiple rooms** | Done: residence wing 3D room (bed, table, lamp); Sidebar "Residence" view. Briefing/cabinet and podium already separate rooms. |
-| I5.3 | **Opening of Parliament / Budget day** | Optional short 3D beat in chamber (speech or ceremony). |
-| I5.4 | **Opposition motion / judiciary** | Optional events (motion of no confidence; court challenge); see vision list. |
+| I5.3 | **Opening of Parliament / Budget day** | Done: Budget day — click "Table budget in Parliament" opens 3D chamber view + overlay "Table budget"; confirm tables budget. |
+| I5.4 | **Opposition motion / judiciary** | Done: motion of no confidence (when opposition strong, parliament weak; pass/fail with outcomes); court challenge (scandal or random; small approval hit). Dossiers + event feed. |
 
 ---
 
 ## 4. Implementation Order (Summary)
 
-1. **F1** — Fully functional: balance, save/load, copy/UX.
-2. **I1** — State visit 3D: motorcade to airport, airport, plane beat, return.
-3. **I2** — Domestic 3D rooms: briefing/cabinet, podium.
-4. **I3** — Visit region & Launch infra: 3D motorcade to site, site beat, return.
-5. **I4** — Foreign meeting room, news during trip, deputy-in-charge.
-6. **I5** (optional) — Motorcade detail, palace rooms, calendar 3D beats, opposition/judiciary.
+1. **F1** — Fully functional: balance, save/load, copy/UX. Done.
+2. **I1** — State visit 3D: motorcade to airport, airport, return. Done.
+3. **I2** — Domestic 3D rooms: briefing/cabinet, podium. Done.
+4. **I3** — Visit region & Launch infra: 3D motorcade to site, return. Done.
+5. **I4** — Foreign meeting room, news during trip, deputy-in-charge. Done.
+6. **I5** (optional) — Motorcade detail, palace rooms, Budget day chamber, opposition/judiciary. Done.
 
 ---
 
@@ -157,7 +157,13 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 
 ---
 
-## 6. References
+## 6. What's Next (optional polish)
+
+- Balance tuning per playtesting; more event phrasings; optional plane interior for state visit; Opening of Parliament 3D ceremony.
+
+---
+
+## 7. References
 
 - **01-PROJECT-ANALYSIS.md** — Scope, risks, success criteria.
 - **02-ACHIEVEMENT-ROADMAP.md** — Phases 0–6 (done).
@@ -165,4 +171,4 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 - **04-IMMERSION-VISION.md** — Activities as experiences, not popups; state visit phases.
 - **05-VISION-LIST-REAL-LIFE.md** — Done vs “to implement later” by category; suggested order.
 
-Update this doc as phases are completed or priorities change.
+Update this doc as phases are completed or priorities change. **Final mission status: complete (F1 + I1–I5).**

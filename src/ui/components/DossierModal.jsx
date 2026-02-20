@@ -32,7 +32,7 @@ function CountrySeal({ countryId, name }) {
   )
 }
 
-const TYPE_LABELS = { parliament: 'PARLIAMENT', cabinet: 'CABINET', state_address: 'STATE ADDRESS', visit_region: 'VISIT', security_briefing: 'SECURITY', press_conference: 'PRESS', launch_infrastructure: 'INFRA', regional_summary: 'REGIONS', crisis_response: 'CRISIS', calendar: 'CALENDAR', deputy_handover: 'HANDOVER', state_visit: 'STATE VISIT', brief: 'BRIEF' }
+const TYPE_LABELS = { parliament: 'PARLIAMENT', cabinet: 'CABINET', state_address: 'STATE ADDRESS', visit_region: 'VISIT', security_briefing: 'SECURITY', press_conference: 'PRESS', launch_infrastructure: 'INFRA', regional_summary: 'REGIONS', crisis_response: 'CRISIS', calendar: 'CALENDAR', deputy_handover: 'HANDOVER', state_visit: 'STATE VISIT', brief: 'BRIEF', opposition_motion: 'OPPOSITION', judiciary: 'JUDICIARY' }
 
 export default function DossierModal({ dossier, onClose }) {
   useEffect(() => {

@@ -57,6 +57,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   launchInfrastructurePhase,
   onVisitRegionPhaseComplete,
   onLaunchInfrastructurePhaseComplete,
+  budgetDayChamberActive,
 }, ref) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
@@ -68,6 +69,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   const launchInfrastructurePhaseRef = useRef(launchInfrastructurePhase)
   const onVisitRegionPhaseCompleteRef = useRef(onVisitRegionPhaseComplete)
   const onLaunchInfrastructurePhaseCompleteRef = useRef(onLaunchInfrastructurePhaseComplete)
+  const budgetDayChamberActiveRef = useRef(budgetDayChamberActive)
   const sitePhaseStartRef = useRef(null)
   const viewModeRef = useRef(viewMode)
   const phaseStartRef = useRef(null)
@@ -102,6 +104,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   launchInfrastructurePhaseRef.current = launchInfrastructurePhase
   onVisitRegionPhaseCompleteRef.current = onVisitRegionPhaseComplete
   onLaunchInfrastructurePhaseCompleteRef.current = onLaunchInfrastructurePhaseComplete
+  budgetDayChamberActiveRef.current = budgetDayChamberActive
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
   onStateVisitPhaseCompleteRef.current = onStateVisitPhaseComplete
@@ -761,6 +764,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       const inPodiumRoom = !!pressConferencePhaseRef.current
       const inForeignPalaceMeeting = svPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE
       const inResidenceView = vm === 'residence' && !phase && !showStateVisitExterior && !showSiteExterior && !inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting
+      const inBudgetDayChamber = !!budgetDayChamberActiveRef.current
       if (inBriefingRoom) {
         officeGroup.visible = false
         ground.visible = false
@@ -865,6 +869,32 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         controls.enabled = false
         camera.position.lerp(new THREE.Vector3(RESIDENCE_POS.x, 1.4, RESIDENCE_POS.z + 1.6), 0.1)
         controls.target.lerp(new THREE.Vector3(RESIDENCE_POS.x, 0.8, RESIDENCE_POS.z), 0.1)
+      } else if (inBudgetDayChamber) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = true
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        siteGroup.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = false
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(CHAMBER_VIEW.x, CHAMBER_VIEW.y, CHAMBER_VIEW.z), 0.1)
+        controls.target.lerp(new THREE.Vector3(PARLIAMENT_POS.x, 1, PARLIAMENT_POS.z + 1), 0.1)
       } else {
         briefingRoomGroup.visible = false
         podiumRoomGroup.visible = false
@@ -1145,7 +1175,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
             else onLaunchInfrastructurePhaseCompleteRef.current?.()
           }
         }
-      } else if (!inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting && !inResidenceView) {
+      } else if (!inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting && !inResidenceView && !inBudgetDayChamber) {
         if (vm === 'office') {
           mapCameraInitializedRef.current = false
           controls.enabled = true
