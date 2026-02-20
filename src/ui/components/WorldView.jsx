@@ -1,7 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES } from '../../core/constants/activities'
+import { STATE_ADDRESS_PHASES, STATE_VISIT_PHASES, VISIT_REGION_PHASES, LAUNCH_INFRASTRUCTURE_PHASES } from '../../core/constants/activities'
 import { REGION_IDS } from '../../core/constants/regions'
 import { formatGameDate } from '../../utils/dateFormat'
 
@@ -20,6 +20,9 @@ const CHAMBER_VIEW = { x: -8, y: 1.6, z: 5.5 }
 // State visit: airport (3D destination for motorcade)
 const AIRPORT_POS = { x: 10, z: 8 }
 const MOTORCADE_TO_AIRPORT_MS = 5500
+// Visit region / Launch infra: generic "site" (region or project site)
+const SITE_POS = { x: -10, z: 6 }
+const MOTORCADE_TO_SITE_MS = 5000
 
 const WALK_DURATION_MS = 2500
 const MOTORCADE_DURATION_MS = 6000
@@ -50,6 +53,10 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   securityBriefingPhase,
   pressConferencePhase,
   cabinetMeetingActive,
+  visitRegionPhase,
+  launchInfrastructurePhase,
+  onVisitRegionPhaseComplete,
+  onLaunchInfrastructurePhaseComplete,
 }, ref) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
@@ -57,6 +64,11 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   const securityBriefingPhaseRef = useRef(securityBriefingPhase)
   const pressConferencePhaseRef = useRef(pressConferencePhase)
   const cabinetMeetingActiveRef = useRef(cabinetMeetingActive)
+  const visitRegionPhaseRef = useRef(visitRegionPhase)
+  const launchInfrastructurePhaseRef = useRef(launchInfrastructurePhase)
+  const onVisitRegionPhaseCompleteRef = useRef(onVisitRegionPhaseComplete)
+  const onLaunchInfrastructurePhaseCompleteRef = useRef(onLaunchInfrastructurePhaseComplete)
+  const sitePhaseStartRef = useRef(null)
   const viewModeRef = useRef(viewMode)
   const phaseStartRef = useRef(null)
   const onPhaseCompleteRef = useRef(onPhaseComplete)
@@ -86,6 +98,10 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   securityBriefingPhaseRef.current = securityBriefingPhase
   pressConferencePhaseRef.current = pressConferencePhase
   cabinetMeetingActiveRef.current = cabinetMeetingActive
+  visitRegionPhaseRef.current = visitRegionPhase
+  launchInfrastructurePhaseRef.current = launchInfrastructurePhase
+  onVisitRegionPhaseCompleteRef.current = onVisitRegionPhaseComplete
+  onLaunchInfrastructurePhaseCompleteRef.current = onLaunchInfrastructurePhaseComplete
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
   onStateVisitPhaseCompleteRef.current = onStateVisitPhaseComplete
@@ -323,6 +339,22 @@ const WorldViewInner = forwardRef(function WorldViewInner({
     airportTarmac.position.set(AIRPORT_POS.x, 0.01, AIRPORT_POS.z)
     scene.add(airportTarmac)
 
+    // Site (visit region / launch infra): generic landmark — platform + small structure
+    const siteGroup = new THREE.Group()
+    const sitePlatform = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 0.15, 3),
+      new THREE.MeshStandardMaterial({ color: 0x374151 })
+    )
+    sitePlatform.position.set(SITE_POS.x, 0.075, SITE_POS.z)
+    siteGroup.add(sitePlatform)
+    const siteStructure = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, 1.2, 1),
+      new THREE.MeshStandardMaterial({ color: 0x4b5563 })
+    )
+    siteStructure.position.set(SITE_POS.x, 0.75, SITE_POS.z)
+    siteGroup.add(siteStructure)
+    scene.add(siteGroup)
+
     // Parliament chamber interior (simple room: seats + podium)
     const chamberGroup = new THREE.Group()
     chamberGroup.position.set(PARLIAMENT_POS.x, 0, PARLIAMENT_POS.z)
@@ -448,6 +480,15 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       new THREE.Vector3(AIRPORT_POS.x, 0.22, AIRPORT_POS.z),
     ]
     const motorcadePathFromAirport = [...motorcadePathToAirport].reverse()
+
+    // Visit region / Launch infra: palace driveway -> site (and back)
+    const motorcadePathToSite = [
+      new THREE.Vector3(DRIVEWAY.x, 0.22, DRIVEWAY.z),
+      new THREE.Vector3(-3, 0.22, -4),
+      new THREE.Vector3(-6, 0.22, 1),
+      new THREE.Vector3(SITE_POS.x, 0.22, SITE_POS.z),
+    ]
+    const motorcadePathFromSite = [...motorcadePathToSite].reverse()
 
     function getPathPoint(path, tNorm) {
       const segs = path.length - 1
@@ -587,6 +628,29 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       } else {
         airportTerminal.visible = false
         airportTarmac.visible = false
+      }
+
+      const vrPhase = visitRegionPhaseRef.current
+      const liPhase = launchInfrastructurePhaseRef.current
+      const showSiteExterior = vrPhase === VISIT_REGION_PHASES.MOTORCADE || vrPhase === VISIT_REGION_PHASES.RETURN || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN
+      if (showSiteExterior) {
+        ground.visible = true
+        palace.visible = true
+        road1.visible = true
+        road2.visible = true
+        road3.visible = true
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        siteGroup.visible = true
+        limo.visible = true
+        escort1.visible = true
+        escort2.visible = true
+        officeGroup.visible = false
+        npcs.forEach((n) => { n.mesh.visible = true })
+      } else {
+        siteGroup.visible = false
       }
 
       const inBriefingRoom = !!securityBriefingPhaseRef.current || !!cabinetMeetingActiveRef.current
@@ -828,6 +892,75 @@ const WorldViewInner = forwardRef(function WorldViewInner({
             onStateVisitPhaseCompleteRef.current?.()
           }
         }
+      } else if (vrPhase === VISIT_REGION_PHASES.MOTORCADE || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE) {
+        if (sitePhaseStartRef.current === null) sitePhaseStartRef.current = Date.now()
+        const elapsed = Date.now() - sitePhaseStartRef.current
+        const norm = Math.min(1, elapsed / MOTORCADE_TO_SITE_MS)
+        const pathPos = getPathPoint(motorcadePathToSite, norm)
+        limo.position.copy(pathPos)
+        const back = getPathPoint(motorcadePathToSite, Math.max(0, norm - 0.03))
+        const dir = new THREE.Vector3().subVectors(pathPos, back).normalize()
+        const yaw = Math.atan2(dir.x, dir.z)
+        limo.rotation.y = yaw
+        escort1.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
+        escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
+        escort1.rotation.y = yaw
+        escort2.rotation.y = yaw
+        const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
+        camera.position.lerp(camPos, 0.12)
+        controls.target.lerp(pathPos, 0.15)
+        controls.enabled = false
+        if (norm >= 1) {
+          sitePhaseStartRef.current = null
+          if (vrPhase === VISIT_REGION_PHASES.MOTORCADE) onVisitRegionPhaseCompleteRef.current?.()
+          else onLaunchInfrastructurePhaseCompleteRef.current?.()
+        }
+      } else if (vrPhase === VISIT_REGION_PHASES.RETURN || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN) {
+        if (sitePhaseStartRef.current === null) sitePhaseStartRef.current = Date.now()
+        const elapsed = Date.now() - sitePhaseStartRef.current
+        const motorcadeDuration = MOTORCADE_TO_SITE_MS
+        const totalDuration = motorcadeDuration + WALK_DURATION_MS
+        if (elapsed < motorcadeDuration) {
+          const norm = elapsed / motorcadeDuration
+          const pathPos = getPathPoint(motorcadePathFromSite, norm)
+          limo.position.copy(pathPos)
+          const back = getPathPoint(motorcadePathFromSite, Math.max(0, norm - 0.03))
+          const dir = new THREE.Vector3().subVectors(pathPos, back).normalize()
+          const yaw = Math.atan2(dir.x, dir.z)
+          limo.rotation.y = yaw
+          escort1.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
+          escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
+          escort1.rotation.y = yaw
+          escort2.rotation.y = yaw
+          const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
+          camera.position.lerp(camPos, 0.12)
+          controls.target.lerp(pathPos, 0.15)
+          controls.enabled = false
+        } else {
+          const walkElapsed = elapsed - motorcadeDuration
+          const walkNorm = Math.min(1, walkElapsed / WALK_DURATION_MS)
+          const outside = new THREE.Vector3(0, 1.6, -6.5)
+          const door = new THREE.Vector3(OFFICE_DOOR.x, OFFICE_DOOR.y, OFFICE_DOOR.z)
+          const eye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
+          limo.position.set(DRIVEWAY.x, 0.22, DRIVEWAY.z)
+          escort1.position.set(DRIVEWAY.x - 1.2, 0.22, DRIVEWAY.z - 0.5)
+          escort2.position.set(DRIVEWAY.x + 1.2, 0.22, DRIVEWAY.z - 0.5)
+          if (walkNorm < 0.5) {
+            const local = walkNorm * 2
+            camera.position.lerpVectors(outside, door, local)
+            controls.target.lerp(new THREE.Vector3(0, 1, -8), new THREE.Vector3(0, 1.2, -2), local)
+          } else {
+            const local = (walkNorm - 0.5) * 2
+            camera.position.lerpVectors(door, eye, local)
+            controls.target.lerp(new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z), local)
+          }
+          controls.enabled = false
+          if (walkNorm >= 1) {
+            sitePhaseStartRef.current = null
+            if (vrPhase === VISIT_REGION_PHASES.RETURN) onVisitRegionPhaseCompleteRef.current?.()
+            else onLaunchInfrastructurePhaseCompleteRef.current?.()
+          }
+        }
       } else if (!inBriefingRoom && !inPodiumRoom) {
         if (vm === 'office') {
           mapCameraInitializedRef.current = false
@@ -907,6 +1040,13 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         <div style={{ position: 'absolute', top: 44, left: 10, right: 10, textAlign: 'center', pointerEvents: 'none' }}>
           <span style={{ fontSize: 11, color: '#8b98a5', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             {stateVisitPhase === STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT ? 'Motorcade to airport' : 'Returning to palace'}
+          </span>
+        </div>
+      )}
+      {viewMode === 'office' && (visitRegionPhase === VISIT_REGION_PHASES.MOTORCADE || visitRegionPhase === VISIT_REGION_PHASES.RETURN || launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE || launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN) && (
+        <div style={{ position: 'absolute', top: 44, left: 10, right: 10, textAlign: 'center', pointerEvents: 'none' }}>
+          <span style={{ fontSize: 11, color: '#8b98a5', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            {visitRegionPhase === VISIT_REGION_PHASES.MOTORCADE || launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE ? 'Motorcade to site' : 'Returning to palace'}
           </span>
         </div>
       )}

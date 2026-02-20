@@ -107,7 +107,7 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 | I3.2 | **One “site” beat** | At destination: rally (visit region) or ribbon-cutting (launch infra). Simple 3D or narrative card with backdrop. |
 | I3.3 | **Return motorcade** | Back to palace → office. |
 
-**Outcome:** Visit region and Launch infrastructure are 3D flows, not only narrative.
+**Outcome:** Visit region and Launch infrastructure use 3D motorcade to/from site; site beat remains narrative. ✅
 
 ---
 

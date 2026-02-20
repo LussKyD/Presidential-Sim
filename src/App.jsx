@@ -236,7 +236,7 @@ function App() {
           onClose={() => setShowVisitRegionModal(false)}
         />
       )}
-      {visitRegionPhase && (
+      {visitRegionPhase && visitRegionPhase !== VISIT_REGION_PHASES.MOTORCADE && visitRegionPhase !== VISIT_REGION_PHASES.RETURN && (
         <VisitRegionView
           phase={visitRegionPhase}
           regionName={visitRegionId ?? ''}
@@ -301,7 +301,7 @@ function App() {
           onClose={() => setShowLaunchInfrastructureModal(false)}
         />
       )}
-      {launchInfrastructurePhase && (
+      {launchInfrastructurePhase && launchInfrastructurePhase !== LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE && launchInfrastructurePhase !== LAUNCH_INFRASTRUCTURE_PHASES.RETURN && (
         <LaunchInfrastructureView
           phase={launchInfrastructurePhase}
           regionName={launchInfrastructureRegion ?? ''}
@@ -378,6 +378,26 @@ function App() {
               securityBriefingPhase={securityBriefingPhase}
               pressConferencePhase={pressConferencePhase}
               cabinetMeetingActive={cabinetMeetingActive}
+              visitRegionPhase={visitRegionPhase}
+              launchInfrastructurePhase={launchInfrastructurePhase}
+              onVisitRegionPhaseComplete={() => {
+                if (visitRegionPhase === VISIT_REGION_PHASES.MOTORCADE) {
+                  setVisitRegionPhase(VISIT_REGION_PHASE_ORDER[VISIT_REGION_PHASE_ORDER.indexOf(VISIT_REGION_PHASES.MOTORCADE) + 1])
+                } else if (visitRegionPhase === VISIT_REGION_PHASES.RETURN) {
+                  addEvent('President returns to palace.', 'news')
+                  setVisitRegionPhase(null)
+                  setVisitRegionId(null)
+                }
+              }}
+              onLaunchInfrastructurePhaseComplete={() => {
+                if (launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE) {
+                  setLaunchInfrastructurePhase(LAUNCH_INFRASTRUCTURE_PHASE_ORDER[LAUNCH_INFRASTRUCTURE_PHASE_ORDER.indexOf(LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE) + 1])
+                } else if (launchInfrastructurePhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN) {
+                  addEvent('President returns to palace.', 'news')
+                  setLaunchInfrastructurePhase(null)
+                  setLaunchInfrastructureRegion(null)
+                }
+              }}
             />
           </div>
           <DeskPanel
