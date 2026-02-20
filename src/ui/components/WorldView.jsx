@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STATE_ADDRESS_PHASES } from '../../core/constants/activities'
+import { REGION_IDS } from '../../core/constants/regions'
 import { formatGameDate } from '../../utils/dateFormat'
 
 // Oval Office style: president in lone chair behind desk, looking into room and at TV on far wall
@@ -48,6 +49,7 @@ export default function WorldView({
   const onTabletClickRef = useRef(onTabletClick)
   const speechReadyFiredRef = useRef(false)
   const officeCameraSettledRef = useRef(false)
+  const mapCameraInitializedRef = useRef(false)
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
@@ -497,24 +499,25 @@ export default function WorldView({
         }
       } else {
         if (vm === 'office') {
+          mapCameraInitializedRef.current = false
           controls.enabled = true
           controls.minDistance = 1.2
           controls.maxDistance = 10
-          const deskEye = new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
-          const deskLook = new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
-          const needSnap = !officeCameraSettledRef.current || camera.position.distanceTo(deskEye) > 2
-          if (!phase && needSnap) {
-            camera.position.copy(deskEye)
-            controls.target.copy(deskLook)
+          if (!phase && !officeCameraSettledRef.current) {
+            camera.position.copy(new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z))
+            controls.target.copy(new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z))
             officeCameraSettledRef.current = true
           }
         } else {
           officeCameraSettledRef.current = false
-          controls.minDistance = 4
-          controls.maxDistance = 30
+          controls.minDistance = 2
+          controls.maxDistance = 50
           controls.enabled = true
-          camera.position.lerp(new THREE.Vector3(12, 9, 12), 0.05)
-          controls.target.lerp(new THREE.Vector3(0, 0, -3), 0.05)
+          if (vm === 'map' && !mapCameraInitializedRef.current) {
+            camera.position.set(12, 9, 12)
+            controls.target.set(0, 0, -3)
+            mapCameraInitializedRef.current = true
+          }
         }
       }
 
@@ -592,8 +595,18 @@ export default function WorldView({
           </div>
         </div>
       )}
+      {viewMode === 'map' && state?.regions && (
+        <div style={{ position: 'absolute', bottom: 36, left: 10, right: 10, display: 'flex', flexWrap: 'wrap', gap: '8px 16px', pointerEvents: 'none', zIndex: 5 }}>
+          {REGION_IDS.map((id) => {
+            const pct = state.regions[id]
+            const v = typeof pct === 'number' ? Math.round(pct * 100) : '—'
+            const color = typeof v === 'number' ? (v >= 50 ? '#00ba7c' : v >= 35 ? '#f7931a' : '#f4212e') : '#8b98a5'
+            return <span key={id} style={{ fontSize: 11, color: '#e7e9ea' }}><span style={{ color: '#8b98a5' }}>{id}:</span> <span style={{ color, fontWeight: 600 }}>{typeof v === 'number' ? `${v}%` : v}</span></span>
+          })}
+        </div>
+      )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#8b98a5', fontSize: 12 }}>
-        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click the tablet for diary, calendar, calls" : 'Orbit the capital'}
+        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click the tablet for diary, calendar, calls" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom' : 'Orbit the capital'}
       </div>
     </div>
   )

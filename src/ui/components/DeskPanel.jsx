@@ -121,6 +121,13 @@ export default function DeskPanel({
         <span>{date}</span>
         <span>Approval: {approvalPct}% · Coup: {coupPct}%{parliamentPct != null ? ` · Parliament: ${parliamentPct}%` : ''}{oppositionPct != null ? ` · Opposition: ${oppositionPct}%` : ''}</span>
       </div>
+      {!outOfPower && (() => {
+        const coupRisk = state?.politics?.coupRisk ?? 0
+        if (budgetDue) return <div style={{ fontSize: 11, color: '#f7931a', marginTop: -4 }}>Focus: Table budget in Parliament</div>
+        if (coupRisk >= 0.45) return <div style={{ fontSize: 11, color: '#f4212e', marginTop: -4 }}>Focus: Coup risk elevated — consider security briefing or cabinet</div>
+        if (parliamentPct != null && parliamentPct < 40) return <div style={{ fontSize: 11, color: '#f7931a', marginTop: -4 }}>Focus: Parliament support low — build support before next vote</div>
+        return <div style={{ fontSize: 11, color: '#6e767d', marginTop: -4 }}>Focus: Manage policies and activities</div>
+      })()}
 
       {budgetDue && (
         <button

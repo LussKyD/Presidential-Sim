@@ -370,6 +370,8 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.01, 0, 1)
     const summary = `President visited ${regionId}. Regional support strengthened.`
     const dossier = addDossier({ countryId: null, type: 'visit_region', title: `Visit brief — ${regionId}`, summary, details: `Regional rally and meetings in ${regionId}. Local approval increased. National approval nudged up.`, at: state.time })
+    const regionLines = REGION_IDS.map((id) => `${id}: ${Math.round((state.regions[id] ?? 0.5) * 100)}% approval`).join('\n')
+    addDossier({ countryId: null, type: 'regional_summary', title: 'Regional report', summary: 'Updated regional approval after visit.', details: `Current regional support:\n${regionLines}`, at: state.time })
     state.events.push({
       id: `visit-region-${state.time.tick}-${regionId}`,
       at: { ...state.time },
