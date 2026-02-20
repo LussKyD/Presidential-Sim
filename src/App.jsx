@@ -204,7 +204,7 @@ function App() {
           onClose={() => setShowMeetForeignModal(false)}
         />
       )}
-      {stateVisitPhase && (
+      {stateVisitPhase && stateVisitPhase !== STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT && stateVisitPhase !== STATE_VISIT_PHASES.RETURN_TO_OFFICE && (
         <StateVisitView
           phase={stateVisitPhase}
           countryName={getCountry(stateVisitCountry)?.name ?? ''}
@@ -213,19 +213,6 @@ function App() {
             const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
             if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
             if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
-            if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) {
-              const countryName = getCountry(stateVisitCountry)?.name ?? stateVisitCountry
-              addEvent(`President back from ${countryName}.`, 'state_visit')
-              const dossier = addDossier({
-                countryId: stateVisitCountry,
-                type: 'deputy_handover',
-                title: `Handover brief — ${countryName}`,
-                summary: 'Deputy handed over. While you were away, your deputy handled a minor domestic issue. Calm maintained.',
-                details: 'Your deputy convened a brief inter-ministerial meeting on a minor labour dispute. No escalation. Calm maintained. You resume with full authority.',
-                at: state?.time,
-              })
-              addEvent('While you were away, your deputy handled a minor domestic issue. Calm maintained.', 'deputy', dossier ? { dossierId: dossier.id } : {})
-            }
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
               setStateVisitCountry(null)
@@ -357,6 +344,27 @@ function App() {
               onSpeechReady={() => setSpeechReady(true)}
               onTabletClick={() => setTabletOpen(true)}
               onResetView={view === 'map' ? () => worldViewRef.current?.resetMapView() : undefined}
+              stateVisitPhase={stateVisitPhase}
+              onStateVisitPhaseComplete={() => {
+                if (stateVisitPhase === STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT) {
+                  const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
+                  if (idx >= 0 && idx < STATE_VISIT_PHASE_ORDER.length - 1) setStateVisitPhase(STATE_VISIT_PHASE_ORDER[idx + 1])
+                } else if (stateVisitPhase === STATE_VISIT_PHASES.RETURN_TO_OFFICE) {
+                  const countryName = getCountry(stateVisitCountry)?.name ?? stateVisitCountry
+                  addEvent(`President back from ${countryName}.`, 'state_visit')
+                  const dossier = addDossier({
+                    countryId: stateVisitCountry,
+                    type: 'deputy_handover',
+                    title: `Handover brief — ${countryName}`,
+                    summary: 'Deputy handed over. While you were away, your deputy handled a minor domestic issue. Calm maintained.',
+                    details: 'Your deputy convened a brief inter-ministerial meeting on a minor labour dispute. No escalation. Calm maintained. You resume with full authority.',
+                    at: state?.time,
+                  })
+                  addEvent('While you were away, your deputy handled a minor domestic issue. Calm maintained.', 'deputy', dossier ? { dossierId: dossier.id } : {})
+                  setStateVisitPhase(null)
+                  setStateVisitCountry(null)
+                }
+              }}
             />
           </div>
           <DeskPanel
