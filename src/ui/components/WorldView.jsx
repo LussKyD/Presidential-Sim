@@ -342,6 +342,42 @@ const WorldViewInner = forwardRef(function WorldViewInner({
     airportTarmac.position.set(AIRPORT_POS.x, 0.01, AIRPORT_POS.z)
     scene.add(airportTarmac)
 
+    // Plane interior (state visit FLIGHT phase): cabin with window and seat
+    const PLANE_INTERIOR_POS = { x: 0, z: 15 }
+    const planeInteriorGroup = new THREE.Group()
+    planeInteriorGroup.position.set(PLANE_INTERIOR_POS.x, 0, PLANE_INTERIOR_POS.z)
+    const planeFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(3, 4),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+    )
+    planeFloor.rotation.x = -Math.PI / 2
+    planeInteriorGroup.add(planeFloor)
+    const planeWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(3, 1.8),
+      new THREE.MeshStandardMaterial({ color: 0x252a33 })
+    )
+    planeWall.position.set(0, 0.9, -2)
+    planeInteriorGroup.add(planeWall)
+    const planeWindow = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.2, 0.6),
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f })
+    )
+    planeWindow.position.set(0, 1, -1.95)
+    planeInteriorGroup.add(planeWindow)
+    const planeSeat = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.5, 0.5),
+      new THREE.MeshStandardMaterial({ color: 0x374151 })
+    )
+    planeSeat.position.set(0, 0.25, 0.3)
+    planeInteriorGroup.add(planeSeat)
+    const planeTable = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.02, 0.25),
+      new THREE.MeshStandardMaterial({ color: 0x4a5568 })
+    )
+    planeTable.position.set(0, 0.5, 0.1)
+    planeInteriorGroup.add(planeTable)
+    scene.add(planeInteriorGroup)
+
     // Site (visit region / launch infra): generic landmark — platform + small structure
     const siteGroup = new THREE.Group()
     const sitePlatform = new THREE.Mesh(
@@ -734,6 +770,38 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         airportTarmac.visible = false
       }
 
+      const inPlaneView = svPhase === STATE_VISIT_PHASES.FLIGHT
+      if (inPlaneView) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        siteGroup.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = false
+        planeInteriorGroup.visible = true
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(PLANE_INTERIOR_POS.x, 1.2, PLANE_INTERIOR_POS.z + 1.2), 0.1)
+        controls.target.lerp(new THREE.Vector3(PLANE_INTERIOR_POS.x, 0.8, PLANE_INTERIOR_POS.z - 1), 0.1)
+      } else {
+        planeInteriorGroup.visible = false
+      }
+
       const vrPhase = visitRegionPhaseRef.current
       const liPhase = launchInfrastructurePhaseRef.current
       const showSiteExterior = vrPhase === VISIT_REGION_PHASES.MOTORCADE || vrPhase === VISIT_REGION_PHASES.RETURN || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.MOTORCADE || liPhase === LAUNCH_INFRASTRUCTURE_PHASES.RETURN
@@ -779,6 +847,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         siteGroup.visible = false
         foreignPalaceRoomGroup.visible = false
         residenceGroup.visible = false
+        planeInteriorGroup.visible = false
         limo.visible = false
         escort1.visible = false
         escort2.visible = false
@@ -1175,7 +1244,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
             else onLaunchInfrastructurePhaseCompleteRef.current?.()
           }
         }
-      } else if (!inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting && !inResidenceView && !inBudgetDayChamber) {
+      } else if (!inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting && !inResidenceView && !inBudgetDayChamber && !inPlaneView) {
         if (vm === 'office') {
           mapCameraInitializedRef.current = false
           controls.enabled = true
