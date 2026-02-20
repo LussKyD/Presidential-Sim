@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STATE_ADDRESS_PHASES } from '../../core/constants/activities'
@@ -30,7 +30,10 @@ const OFFICE_TV_CHANNELS = [
   { id: 'ini', label: 'INI TV' },
 ]
 
-export default function WorldView({
+const MAP_DEFAULT_POS = new THREE.Vector3(12, 9, 12)
+const MAP_DEFAULT_TARGET = new THREE.Vector3(0, 0, -3)
+
+const WorldViewInner = forwardRef(function WorldViewInner({
   state,
   viewMode = 'office',
   activityPhase,
@@ -38,7 +41,8 @@ export default function WorldView({
   onSpeechDone,
   onSpeechReady,
   onTabletClick,
-}) {
+  onResetView,
+}, ref) {
   const containerRef = useRef(null)
   const activityPhaseRef = useRef(activityPhase)
   const viewModeRef = useRef(viewMode)
@@ -51,6 +55,18 @@ export default function WorldView({
   const officeCameraSettledRef = useRef(false)
   const mapCameraInitializedRef = useRef(false)
   const stateRef = useRef(state)
+  const cameraRef = useRef(null)
+  const controlsRef = useRef(null)
+
+  useImperativeHandle(ref, () => ({
+    resetMapView() {
+      if (cameraRef.current && controlsRef.current) {
+        cameraRef.current.position.copy(MAP_DEFAULT_POS)
+        controlsRef.current.target.copy(MAP_DEFAULT_TARGET)
+        mapCameraInitializedRef.current = true
+      }
+    },
+  }), [])
   stateRef.current = state
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
@@ -74,6 +90,7 @@ export default function WorldView({
     camera = new THREE.PerspectiveCamera(55, el.clientWidth / el.clientHeight, 0.1, 100)
     camera.position.set(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z)
     camera.lookAt(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z)
+    cameraRef.current = camera
 
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(el.clientWidth, el.clientHeight)
@@ -364,6 +381,7 @@ export default function WorldView({
     }
 
     controls = new OrbitControls(camera, renderer.domElement)
+    controlsRef.current = controls
     controls.enableDamping = true
     controls.dampingFactor = 0.05
     controls.minDistance = 4
@@ -651,9 +669,26 @@ export default function WorldView({
           })}
         </div>
       )}
-      <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#8b98a5', fontSize: 12 }}>
-        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click tablet for diary, calendar, calls · Space: pause" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom · Space: pause' : 'Orbit the capital'}
+      <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ color: '#8b98a5', fontSize: 12 }}>
+          {viewMode === 'office' ? "You're at the desk — Drag to look around · Click tablet for diary, calendar, calls · Space: pause" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom · Space: pause' : 'Orbit the capital'}
+        </span>
+        {viewMode === 'map' && onResetView && (
+          <button
+            type="button"
+            onClick={onResetView}
+            style={{ pointerEvents: 'auto', padding: '4px 10px', fontSize: 11, background: '#2f3336', border: '1px solid #536471', borderRadius: 6, color: '#e7e9ea', cursor: 'pointer', fontWeight: 600 }}
+            title="Reset camera to default map view"
+          >
+            Reset view
+          </button>
+        )}
       </div>
     </div>
   )
-}
+})
+
+const WorldView = forwardRef(function WorldView(props, ref) {
+  return <WorldViewInner {...props} ref={ref} />
+})
+export default WorldView

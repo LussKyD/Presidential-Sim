@@ -11,6 +11,7 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 |----------|---------|
 | [**01-PROJECT-ANALYSIS.md**](docs/01-PROJECT-ANALYSIS.md) | Scope, feasibility, risks, success criteria |
 | [**02-ACHIEVEMENT-ROADMAP.md**](docs/02-ACHIEVEMENT-ROADMAP.md) | Phases, deliverables, implementation order |
+| [**06-FINAL-MISSION-DEV-PLAN.md**](docs/06-FINAL-MISSION-DEV-PLAN.md) | **Final mission:** fully functional + immersive roadmap |
 
 ---
 
@@ -30,8 +31,8 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 
 ## Status
 
-- **Current:** Phases 0–6 complete — simulation engine, dashboard, events (protest/coup/election), economy chart, approval/coup drivers, term summary, tick speed, save/load, New game, policy presets (Liberal/Conservative/Authoritarian), 3D Map view (Three.js).
-- **Next:** Balance tuning, more event types, or expand 3D (e.g. motorcade feel).
+- **Current:** Phases 0–6 complete — simulation engine (1 tick = 1 day, 7 days/month), dashboard, events (protest/scandal/diplomatic/coup/election, plus approval bounce and economic praise), economy chart, approval/coup drivers, term summary, tick speed, save/load, New game, policy presets, 3D Map view (Three.js) with Reset view, expanded How to play, event templates doc.
+- **Next:** Balance tuning, more event variety, or expand 3D (e.g. motorcade feel).
 
 ---
 

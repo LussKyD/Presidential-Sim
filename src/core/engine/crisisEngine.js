@@ -1,4 +1,7 @@
-/** Event/crisis triggers and effects. */
+/**
+ * Event/crisis triggers and effects.
+ * Balance target (F1): normal play can last 1–2 terms; extreme policies (high corruption, low police) lead to coup/protest within a few years.
+ */
 import { clamp } from '../../utils/mathHelpers'
 import { REGION_IDS } from '../constants/regions'
 import { COUNTRY_IDS } from '../constants/international'
@@ -46,6 +49,18 @@ const DIPLOMATIC_MESSAGES = [
   'Embassy row: international standing takes a hit.',
 ]
 
+const APPROVAL_BOUNCE_MESSAGES = [
+  'Polls: public mood improves; government gains ground.',
+  'Media: approval uptick as policies gain traction.',
+  'Headlines: president’s standing rises in latest survey.',
+]
+
+const ECONOMIC_PRAISE_MESSAGES = [
+  'Business leaders praise economic stewardship.',
+  'Growth figures boost confidence; markets steady.',
+  'Media: economy on solid footing under current policy.',
+]
+
 function pickRegion(rng) {
   return REGION_IDS[Math.floor(rng() * REGION_IDS.length)]
 }
@@ -62,8 +77,8 @@ export function updateCrisisCheck(state, rng) {
   const { economy, government, population, politics } = state
   const p = government.policies
 
-  // ----- Coup attempt -----
-  if (politics.coupRisk >= 0.75 && rng && rng() < (politics.coupRisk - 0.75) * 1.5) {
+  // ----- Coup attempt (threshold 0.75; roll scales so very high risk = near-certain) -----
+  if (politics.coupRisk >= 0.75 && rng && rng() < (politics.coupRisk - 0.75) * 1.2) {
     state.regime.status = 'coup'
     state.regime.endReason = 'Removed from power by a military coup.'
     state.events.push({
@@ -105,7 +120,7 @@ export function updateCrisisCheck(state, rng) {
     p.corruptionLevel * 0.05 -
     p.policeFunding * 0.02
 
-  if (rng && protestChance > 0 && rng() < Math.min(protestChance, 0.4)) {
+  if (rng && protestChance > 0 && rng() < Math.min(protestChance, 0.32)) {
     const region = pickRegion(rng)
     const eventId = `protest-${state.time.tick}-${rng().toString(36).slice(2, 6)}`
     const message = pick(PROTEST_MESSAGES, rng)(region)
@@ -129,7 +144,7 @@ export function updateCrisisCheck(state, rng) {
   }
 
   // Economic anxiety headline when inflation is high
-  if (rng && economy.inflation >= 0.15 && rng() < 0.25) {
+  if (rng && economy.inflation >= 0.15 && rng() < 0.18) {
     state.events.push({
       id: `anxiety-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
@@ -140,7 +155,7 @@ export function updateCrisisCheck(state, rng) {
   }
 
   // Scandal when corruption is high — can demand a response
-  if (rng && p.corruptionLevel >= 0.35 && rng() < 0.12) {
+  if (rng && p.corruptionLevel >= 0.35 && rng() < 0.09) {
     const eventId = `scandal-${state.time.tick}-${rng().toString(36).slice(2, 6)}`
     const message = pick(SCANDAL_MESSAGES, rng)
     if (!state.crisis?.pendingResponse) {
@@ -157,7 +172,7 @@ export function updateCrisisCheck(state, rng) {
   }
 
   // Diplomatic incident (low chance) — hurts a random bilateral relation
-  if (rng && rng() < 0.06) {
+  if (rng && rng() < 0.045) {
     state.events.push({
       id: `diplomatic-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
       at: { ...state.time },
@@ -170,6 +185,28 @@ export function updateCrisisCheck(state, rng) {
       const hit = COUNTRY_IDS[Math.floor(rng() * COUNTRY_IDS.length)]
       state.international.relations[hit] = clamp((state.international.relations[hit] ?? 0.5) - 0.06, 0.2, 0.9)
     }
+  }
+
+  // Positive: approval bounce when approval is healthy
+  if (rng && population.publicApproval >= 0.55 && rng() < 0.07) {
+    state.events.push({
+      id: `approval_bounce-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
+      at: { ...state.time },
+      type: 'approval_bounce',
+      message: pick(APPROVAL_BOUNCE_MESSAGES, rng),
+    })
+    state.population.publicApproval = clamp(population.publicApproval + 0.01, 0, 1)
+  }
+
+  // Positive: economic praise when growth is positive
+  if (rng && economy.gdpGrowth > 0.02 && rng() < 0.08) {
+    state.events.push({
+      id: `economic_praise-${state.time.tick}-${rng().toString(36).slice(2, 6)}`,
+      at: { ...state.time },
+      type: 'economic_praise',
+      message: pick(ECONOMIC_PRAISE_MESSAGES, rng),
+    })
+    state.population.publicApproval = clamp(population.publicApproval + 0.008, 0, 1)
   }
 
   // Cap event log length

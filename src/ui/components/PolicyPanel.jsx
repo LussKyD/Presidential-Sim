@@ -70,7 +70,7 @@ export default function PolicyPanel({ policies, values, onChange, presets, onPre
         })}
       </div>
       <div style={{ marginTop: 12, color: '#8b98a5', fontSize: 12 }}>
-        Tip: pause the sim to step month-by-month.
+        Tip: pause the sim to step day-by-day.
       </div>
     </section>
   )

@@ -3,6 +3,8 @@ import { createSimulationEngine } from '../../core/engine/simulationEngine'
 
 export const SAVE_KEY = 'presidential-sim-save'
 const SAVE_EVERY_TICKS = 5
+
+/** Save stores engine state only. In-progress activity phases (state visit, security briefing, etc.) are not persisted; on load the player is at the desk and any activity in progress is abandoned (F1.2). */
 export function useSimulation({ tickMs = 2000, seed = 1, gameKey = 0, initialSave = null } = {}) {
   const engineRef = useRef(null)
   const [state, setState] = useState(null)

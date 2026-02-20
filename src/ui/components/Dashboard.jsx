@@ -42,6 +42,8 @@ function eventColor(type) {
     case 'visit_region': return '#f7931a'
     case 'launch_infrastructure': return '#6366f1'
     case 'tick': return '#8b98a5'
+    case 'approval_bounce': return '#00ba7c'
+    case 'economic_praise': return '#00ba7c'
     default: return '#8b98a5'
   }
 }

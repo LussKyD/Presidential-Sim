@@ -1,8 +1,10 @@
 [
-  {
-    "id": "protest",
-    "label": "Protest in {region}",
-    "condition": {},
-    "effects": {}
-  }
+  { "id": "protest", "label": "Protest in {region}", "condition": {}, "effects": {} },
+  { "id": "economic", "label": "Economic / cost-of-living headline", "condition": { "inflationMin": 0.15 }, "effects": { "approval": -0.02 } },
+  { "id": "scandal", "label": "Corruption scandal", "condition": { "corruptionMin": 0.35 }, "effects": {} },
+  { "id": "diplomatic", "label": "Diplomatic incident", "condition": {}, "effects": { "approval": -0.015, "relationsDrop": true } },
+  { "id": "coup", "label": "Coup attempt", "condition": { "coupRiskMin": 0.75 }, "effects": { "gameOver": true } },
+  { "id": "election", "label": "Election (win or lose)", "condition": { "everyNYears": 4 }, "effects": {} },
+  { "id": "approval_bounce", "label": "Approval bounce / positive poll", "condition": { "approvalMin": 0.55 }, "effects": { "approval": 0.01 } },
+  { "id": "economic_praise", "label": "Economic praise / growth headline", "condition": { "gdpGrowthMin": 0.02 }, "effects": { "approval": 0.008 } }
 ]

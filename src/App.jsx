@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import MainLayout from './ui/layout/MainLayout'
 import Dashboard from './ui/components/Dashboard'
 import PolicyPanel from './ui/components/PolicyPanel'
@@ -71,6 +71,7 @@ function App() {
   const [showLaunchInfrastructureModal, setShowLaunchInfrastructureModal] = useState(false)
   const [launchInfrastructurePhase, setLaunchInfrastructurePhase] = useState(null)
   const [launchInfrastructureRegion, setLaunchInfrastructureRegion] = useState(null)
+  const worldViewRef = useRef(null)
 
   function startNewGame() {
     try { localStorage.removeItem(SAVE_KEY) } catch (_) {}
@@ -348,12 +349,14 @@ function App() {
         <div style={{ display: 'flex', minHeight: 'calc(100vh - 2rem)', margin: '-1.5rem', marginTop: outOfPower ? 12 : undefined, opacity: outOfPower ? 0.6 : 1 }}>
           <div style={{ flex: 1, minHeight: 380 }}>
             <WorldView
+              ref={worldViewRef}
               state={state}
               viewMode={view}
               activityPhase={stateAddressPhase}
               onPhaseComplete={handlePhaseComplete}
               onSpeechReady={() => setSpeechReady(true)}
               onTabletClick={() => setTabletOpen(true)}
+              onResetView={view === 'map' ? () => worldViewRef.current?.resetMapView() : undefined}
             />
           </div>
           <DeskPanel
@@ -406,7 +409,7 @@ function App() {
         <>
           <h1>Presidential Sim — Alpha</h1>
           <p style={{ color: '#8b98a5', marginTop: 0 }}>
-            One tick = one month. Adjust policies and watch the country react. Systemic consequences, not scripted story.
+            One tick = one day (7 days per month). Adjust policies and watch the country react. Systemic consequences, not scripted story.
           </p>
           <div style={{ marginBottom: 12 }}>
             <button
@@ -426,7 +429,7 @@ function App() {
             </button>
             {showHowToPlay && (
               <p style={{ color: '#6e767d', fontSize: 12, marginTop: 6, maxWidth: 560 }}>
-                Set policies with the sliders (or use Liberal / Conservative / Authoritarian presets). Keep approval up and coup risk down. Elections run every 4 years — low approval makes losing likely. Avoid coups by keeping military and elites satisfied. Use <kbd style={{ background: '#2f3336', padding: '2px 6px', borderRadius: 4 }}>Space</kbd> to pause. Office view: you in the president&apos;s seat; deliver a state address to move to Parliament. Progress is saved automatically; New game starts fresh.
+                Set policies with the sliders (or use Liberal / Conservative / Authoritarian presets). Keep approval up and coup risk down. Elections run every 4 years — low approval makes losing likely. Avoid coups by keeping military and elites satisfied. Use <kbd style={{ background: '#2f3336', padding: '2px 6px', borderRadius: 4 }}>Space</kbd> to pause. <strong>Office view:</strong> you at the desk; click the tablet for diary, calendar, and calls; use desk activities (State of the Nation, cabinet, visit region, etc.) and check recent dossiers. <strong>Map view:</strong> regional approval and capital overview; drag to orbit, scroll to zoom, “Reset view” to recenter. Progress is saved automatically; New game starts fresh.
               </p>
             )}
           </div>
@@ -440,8 +443,8 @@ function App() {
                 <button onClick={toggleRunning} style={buttonStyle} disabled={outOfPower}>
                   {isRunning ? 'Pause' : 'Resume'}
                 </button>
-                <button onClick={tick} style={buttonStyle} disabled={isRunning || outOfPower}>
-                  Step month
+                <button onClick={tick} style={buttonStyle} disabled={isRunning || outOfPower} title="Advance one day">
+                  Step day
                 </button>
                 <button onClick={startNewGame} style={{ ...buttonStyle, background: '#2f3336', color: '#e7e9ea' }} disabled={outOfPower}>
                   New game

@@ -17,7 +17,7 @@ export default function TermSummary({ state }) {
   const yearsInPower = time.year - startYear + (time.month >= 1 ? 0 : -1)
   const monthsTotal = Math.max(0, (time.year - startYear) * 12 + (time.month - 1))
 
-  const headlineTypes = ['protest', 'economic', 'election', 'coup']
+  const headlineTypes = ['protest', 'economic', 'scandal', 'diplomatic', 'election', 'coup', 'approval_bounce', 'economic_praise']
   const headlines = []
   const seen = new Set()
   for (const e of events) {
