@@ -1167,6 +1167,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           controls.enabled = false
           if (walkNorm >= 1) {
             phaseStartRef.current = null
+            officeCameraSettledRef.current = false
             onStateVisitPhaseCompleteRef.current?.()
           }
         }
@@ -1240,6 +1241,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           controls.enabled = false
           if (walkNorm >= 1) {
             sitePhaseStartRef.current = null
+            officeCameraSettledRef.current = false
             if (vrPhase === VISIT_REGION_PHASES.RETURN) onVisitRegionPhaseCompleteRef.current?.()
             else onLaunchInfrastructurePhaseCompleteRef.current?.()
           }
@@ -1250,6 +1252,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           controls.enabled = true
           controls.minDistance = 1.2
           controls.maxDistance = 10
+          if (!phase && !svPhase && !vrPhase && !liPhase) {
+            officeGroup.visible = true
+          }
           if (!phase && !officeCameraSettledRef.current) {
             camera.position.copy(new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z))
             controls.target.copy(new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z))
