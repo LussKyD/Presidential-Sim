@@ -80,6 +80,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
   const onTabletClickRef = useRef(onTabletClick)
   const speechReadyFiredRef = useRef(false)
   const officeCameraSettledRef = useRef(false)
+  const prevInBriefingOrPodiumRef = useRef(false)
   const mapCameraInitializedRef = useRef(false)
   const stateRef = useRef(state)
   const cameraRef = useRef(null)
@@ -834,6 +835,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       const inResidenceView = vm === 'residence' && !phase && !showStateVisitExterior && !showSiteExterior && !inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting
       const inBudgetDayChamber = !!budgetDayChamberActiveRef.current
       if (inBriefingRoom) {
+        prevInBriefingOrPodiumRef.current = true
         officeGroup.visible = false
         ground.visible = false
         palace.visible = false
@@ -861,6 +863,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         camera.position.lerp(new THREE.Vector3(BRIEFING_ROOM_POS.x, 1.5, BRIEFING_ROOM_POS.z + 1.8), 0.1)
         controls.target.lerp(new THREE.Vector3(BRIEFING_ROOM_POS.x, 1, BRIEFING_ROOM_POS.z), 0.1)
       } else if (inPodiumRoom) {
+        prevInBriefingOrPodiumRef.current = true
         officeGroup.visible = false
         ground.visible = false
         palace.visible = false
@@ -1255,6 +1258,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           if (!phase && !svPhase && !vrPhase && !liPhase) {
             officeGroup.visible = true
           }
+          const justLeftBriefingOrPodium = prevInBriefingOrPodiumRef.current && !inBriefingRoom && !inPodiumRoom
+          if (justLeftBriefingOrPodium) officeCameraSettledRef.current = false
+          prevInBriefingOrPodiumRef.current = false
           if (!phase && !officeCameraSettledRef.current) {
             camera.position.copy(new THREE.Vector3(OFFICE_EYE.x, OFFICE_EYE.y, OFFICE_EYE.z))
             controls.target.copy(new THREE.Vector3(OFFICE_LOOK.x, OFFICE_LOOK.y, OFFICE_LOOK.z))
