@@ -86,6 +86,8 @@ export default function DeskPanel({
   const oppositionPct = oppositionStrength != null ? Math.round(oppositionStrength * 100) : null
   const date = state?.time ? formatGameDate(state.time) : '—'
   const recentDossiers = (state?.desk?.dossiers ?? []).slice(-5).reverse()
+  const eventsList = state?.events ?? []
+  const lastEvent = eventsList[eventsList.length - 1]
 
   const phaseLabel = stateAddressPhase ? PHASE_LABELS[stateAddressPhase] : null
   const showAdvanceButton =
@@ -128,6 +130,9 @@ export default function DeskPanel({
         if (parliamentPct != null && parliamentPct < 40) return <div style={{ fontSize: 11, color: '#f7931a', marginTop: -4 }}>Focus: Parliament support low — build support before next vote</div>
         return <div style={{ fontSize: 11, color: '#6e767d', marginTop: -4 }}>Focus: Manage policies and activities</div>
       })()}
+      {lastEvent && (
+        <div style={{ fontSize: 10, color: '#6e767d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Latest: {lastEvent.message}</div>
+      )}
 
       {budgetDue && (
         <button

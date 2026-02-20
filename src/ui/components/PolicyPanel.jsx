@@ -22,6 +22,7 @@ export default function PolicyPanel({ policies, values, onChange, presets, onPre
               type="button"
               onClick={() => onPresetSelect?.(id)}
               disabled={disabled}
+              title={`Apply ${label} preset`}
               style={{
                 padding: '0.35rem 0.6rem',
                 fontSize: 11,

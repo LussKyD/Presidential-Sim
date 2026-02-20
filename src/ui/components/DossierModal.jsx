@@ -68,7 +68,7 @@ export default function DossierModal({ dossier, onClose }) {
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.06em', marginBottom: 2 }}>OFFICIAL BRIEF</div>
             <div style={{ fontWeight: 800, fontSize: 18, color: '#e7e9ea' }}>{dossier.title}</div>
-            {atStr && <div style={{ fontSize: 11, color: '#6e767d', marginTop: 4 }}>{atStr}</div>}
+            {atStr && <div style={{ fontSize: 12, color: '#8b98a5', marginTop: 6, fontWeight: 600 }}>Received: {atStr}</div>}
           </div>
         </div>
         <div style={{ borderTop: '1px solid #2f3336', paddingTop: 16 }}>

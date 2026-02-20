@@ -3,6 +3,13 @@ export default function Sidebar({ view = 'office', onViewChange }) {
     color: view === v ? '#e7e9ea' : '#8b98a5',
     cursor: 'pointer',
     textDecoration: 'none',
+    background: view === v ? '#2f3336' : 'none',
+    border: 'none',
+    fontSize: 'inherit',
+    padding: '6px 10px',
+    borderRadius: 6,
+    width: '100%',
+    textAlign: 'left',
   })
   return (
     <aside style={{
@@ -14,18 +21,18 @@ export default function Sidebar({ view = 'office', onViewChange }) {
       <nav>
         <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Presidential Sim</div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          <li>
-            <button type="button" onClick={() => onViewChange?.('office')} style={{ ...linkStyle('office'), background: 'none', border: 'none', fontSize: 'inherit' }}>
+          <li style={{ marginBottom: 4 }}>
+            <button type="button" onClick={() => onViewChange?.('office')} style={linkStyle('office')}>
               Office
             </button>
           </li>
-          <li>
-            <button type="button" onClick={() => onViewChange?.('map')} style={{ ...linkStyle('map'), background: 'none', border: 'none', fontSize: 'inherit' }}>
+          <li style={{ marginBottom: 4 }}>
+            <button type="button" onClick={() => onViewChange?.('map')} style={linkStyle('map')}>
               Map
             </button>
           </li>
-          <li>
-            <button type="button" onClick={() => onViewChange?.('dashboard')} style={{ ...linkStyle('dashboard'), background: 'none', border: 'none', fontSize: 'inherit' }}>
+          <li style={{ marginBottom: 4 }}>
+            <button type="button" onClick={() => onViewChange?.('dashboard')} style={linkStyle('dashboard')}>
               Dashboard
             </button>
           </li>

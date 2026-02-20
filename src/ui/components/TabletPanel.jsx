@@ -142,6 +142,10 @@ export default function TabletPanel({
           )}
           {tab === TABS.CALENDAR && (
             <>
+              <div style={{ marginBottom: 10, padding: '6px 10px', background: '#0f1419', borderRadius: 6, fontSize: 11, color: '#8b98a5', display: 'flex', gap: 12 }}>
+                <span>Approval: <strong style={{ color: '#e7e9ea' }}>{typeof state?.population?.publicApproval === 'number' ? Math.round(state.population.publicApproval * 100) : '—'}%</strong></span>
+                <span>Coup risk: <strong style={{ color: '#e7e9ea' }}>{typeof state?.politics?.coupRisk === 'number' ? Math.round(state.politics.coupRisk * 100) : '—'}%</strong></span>
+              </div>
               {(() => {
                 const curM = time?.month ?? 1
                 const curY = time?.year ?? 2026

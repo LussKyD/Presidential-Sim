@@ -82,8 +82,20 @@ export default function Dashboard({ state, onOpenDossier }) {
 
   const lastEvents = (state?.events ?? []).slice(-8).reverse()
 
+  const calendar = state?.calendar
+  const nextBudget = calendar?.budgetDue ? { month: calendar.budgetMonth ?? 3, year: time?.year } : null
+  const nextOpening = calendar?.openingMonth ? { month: calendar.openingMonth, year: time?.year } : null
+  const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
   return (
     <section data-component="Dashboard">
+      {(nextBudget || nextOpening) && (
+        <div style={{ marginBottom: 12, padding: '8px 12px', background: '#1a1f26', border: '1px solid #2f3336', borderRadius: 8, fontSize: 12, color: '#e7e9ea' }}>
+          <span style={{ color: '#8b98a5', marginRight: 8 }}>Next:</span>
+          {nextBudget && <span style={{ marginRight: 12 }}>Budget day — {monthNames[nextBudget.month]} {nextBudget.year}</span>}
+          {nextOpening && <span>Opening of Parliament — {monthNames[nextOpening.month]} {nextOpening.year}</span>}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <Card title="Date" value={time ? formatGameDate(time) : '—'} sub={time ? `Tick ${time.tick}` : ''} />
         <Card title="GDP" value={formatNum(econ?.gdp)} sub={econ ? `Growth: ${formatPct(econ.gdpGrowth)}` : ''} />
@@ -152,6 +164,7 @@ export default function Dashboard({ state, onOpenDossier }) {
           <>
             <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #2f3336' }}>
               <span style={{ fontSize: 10, color: '#f4212e', fontWeight: 700, marginRight: 6 }}>LATEST</span>
+              <span style={{ fontSize: 10, color: eventColor(lastEvents[0].type), marginRight: 6, textTransform: 'uppercase' }}>{lastEvents[0].type?.replace(/_/g, ' ') || 'Event'}</span>
               <span style={{ fontSize: 11, color: '#8b98a5' }}>{lastEvents[0].at ? `${lastEvents[0].at.month}/${lastEvents[0].at.year}` : ''}</span>
               <div style={{ color: eventColor(lastEvents[0].type), fontWeight: 700, fontSize: 13, marginTop: 4, lineHeight: 1.35 }}>
                 {lastEvents[0].message}
@@ -165,7 +178,7 @@ export default function Dashboard({ state, onOpenDossier }) {
             <ul style={{ margin: 0, paddingLeft: 14, listStyle: 'none' }}>
               {lastEvents.slice(1, 7).map((e) => (
                 <li key={e.id} style={{ color: '#8b98a5', marginBottom: 6, fontSize: 12, display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
-                  <span style={{ color: eventColor(e.type), flexShrink: 0 }}>•</span>
+                  <span style={{ color: eventColor(e.type), flexShrink: 0 }} title={e.type?.replace(/_/g, ' ')}>•</span>
                   <span style={{ color: '#e7e9ea', flex: 1 }}>{e.message}</span>
                   {e.dossierId && onOpenDossier && (
                     <button type="button" onClick={() => onOpenDossier(e.dossierId)} style={{ fontSize: 10, background: 'transparent', color: '#6366f1', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}>

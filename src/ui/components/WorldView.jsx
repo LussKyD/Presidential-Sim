@@ -50,6 +50,8 @@ export default function WorldView({
   const speechReadyFiredRef = useRef(false)
   const officeCameraSettledRef = useRef(false)
   const mapCameraInitializedRef = useRef(false)
+  const stateRef = useRef(state)
+  stateRef.current = state
   activityPhaseRef.current = activityPhase
   viewModeRef.current = viewMode
   onPhaseCompleteRef.current = onPhaseComplete
@@ -162,13 +164,75 @@ export default function WorldView({
     tablet.rotation.x = -Math.PI / 12
     officeGroup.add(tablet)
 
-    const tv = new THREE.Mesh(
-      new THREE.BoxGeometry(1.3, 0.7, 0.04),
-      new THREE.MeshStandardMaterial({ color: 0x0a0a0a, emissive: 0x111827, emissiveIntensity: 0.7 })
-    )
-    // Position and size tuned so the in-world TV aligns visually with the on-screen TV4/NATV widget.
+    const tvCanvas = document.createElement('canvas')
+    tvCanvas.width = 512
+    tvCanvas.height = 256
+    const tvCtx = tvCanvas.getContext('2d')
+    const tvTexture = new THREE.CanvasTexture(tvCanvas)
+    tvTexture.minFilter = THREE.LinearFilter
+    tvTexture.magFilter = THREE.LinearFilter
+    const tvMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0a0a,
+      emissive: 0x111827,
+      emissiveIntensity: 0.6,
+      map: tvTexture,
+      emissiveMap: tvTexture,
+    })
+    const tv = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.7, 0.04), tvMat)
     tv.position.set(0, 1.6, -2.85)
     officeGroup.add(tv)
+
+    function drawTvScreen() {
+      const s = stateRef.current
+      const events = s?.events ?? []
+      const recent = [...events].reverse().slice(0, 4)
+      const lastEvent = events.length ? events[events.length - 1] : null
+      const labels = ['TV4', 'NATV', 'DEFENCE TV', 'INI TV']
+      const c = tvCtx
+      const w = tvCanvas.width
+      const h = tvCanvas.height
+      c.fillStyle = '#0a0a0c'
+      c.fillRect(0, 0, w, h)
+      const pad = 4
+      const cw = (w - pad * 3) / 2
+      const ch = (h - pad * 3) / 2
+      const shortDate = (at) => {
+        if (!at) return ''
+        const name = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][(at.month ?? 1) - 1]
+        return name ? `${name} ${at.day ?? 1}` : `${at.month}/${at.year}`
+      }
+      for (let i = 0; i < 4; i++) {
+        const col = i % 2
+        const row = Math.floor(i / 2)
+        const x = pad + col * (cw + pad)
+        const y = pad + row * (ch + pad)
+        c.fillStyle = '#111'
+        c.fillRect(x, y, cw, ch)
+        c.fillStyle = i === 0 ? '#1d9bf0' : '#8b98a5'
+        c.font = 'bold 14px system-ui, sans-serif'
+        c.fillText(labels[i], x + 8, y + 20)
+        c.strokeStyle = '#2f3336'
+        c.lineWidth = 1
+        c.strokeRect(x, y, cw, ch)
+        const ev = recent[i]
+        if (ev) {
+          c.fillStyle = '#6e767d'
+          c.font = '11px system-ui, sans-serif'
+          c.fillText(shortDate(ev.at), x + 8, y + 38)
+          c.fillStyle = '#e7e9ea'
+          c.font = '12px system-ui, sans-serif'
+          const msg = (i === 0 && lastEvent ? 'LIVE ' : '') + (ev.message || '')
+          const lines = msg.length > 36 ? msg.slice(0, 36) + '…' : msg
+          c.fillText(lines, x + 8, y + 54)
+        } else {
+          c.fillStyle = '#6e767d'
+          c.font = '12px system-ui, sans-serif'
+          c.fillText('—', x + 8, y + 48)
+        }
+      }
+      tvTexture.needsUpdate = true
+    }
+    drawTvScreen()
 
     scene.add(officeGroup)
 
@@ -359,6 +423,7 @@ export default function WorldView({
         showExterior = elapsed < WALK_DURATION_MS * 0.5
       }
       officeGroup.visible = showOffice
+      if (showOffice && vm === 'office' && !phase) drawTvScreen()
       ground.visible = showExterior
       palace.visible = showExterior
       road1.visible = showExterior
@@ -572,32 +637,10 @@ export default function WorldView({
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}% · Coup: {coupPct}%</span>
       </div>
-      {showOfficeTv && (
-        <div style={{ position: 'absolute', top: '22%', left: '50%', transform: 'translate(-50%, -50%)', width: 320, maxWidth: '85vw', zIndex: 5, pointerEvents: 'none' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 3, background: '#0a0a0c', border: '10px solid #1a1a1a', borderRadius: 4, boxShadow: 'inset 0 0 0 2px #2f3336, 0 8px 32px rgba(0,0,0,0.5)', padding: 4 }}>
-            {OFFICE_TV_CHANNELS.map((ch, i) => (
-              <div key={ch.id} style={{ background: '#111', borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 72 }}>
-                <div style={{ padding: '4px 6px', background: '#16181c', borderBottom: '1px solid #2f3336', fontSize: 9, fontWeight: 700, color: i === 0 ? '#1d9bf0' : '#8b98a5' }}>
-                  {ch.label}
-                </div>
-                <div style={{ flex: 1, padding: '6px 8px', fontSize: 10, color: '#e7e9ea', lineHeight: 1.3, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
-                  {recentEventsForTv[i] ? (
-                    <>
-                      <span style={{ fontSize: 9, color: '#6e767d' }}>{shortDate(recentEventsForTv[i].at)}</span>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{i === 0 && lastEvent ? `LIVE ${recentEventsForTv[i].message}` : recentEventsForTv[i].message}</span>
-                    </>
-                  ) : (
-                    <span style={{ color: '#6e767d' }}>—</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {viewMode === 'map' && state?.regions && (
-        <div style={{ position: 'absolute', bottom: 36, left: 10, right: 10, display: 'flex', flexWrap: 'wrap', gap: '8px 16px', pointerEvents: 'none', zIndex: 5 }}>
-          {REGION_IDS.map((id) => {
+      {viewMode === 'map' && (
+        <div style={{ position: 'absolute', bottom: 36, left: 10, right: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px', pointerEvents: 'none', zIndex: 5 }}>
+          {date && <span style={{ fontSize: 11, color: '#8b98a5', marginRight: 8 }}>{date}</span>}
+          {state?.regions && REGION_IDS.map((id) => {
             const pct = state.regions[id]
             const v = typeof pct === 'number' ? Math.round(pct * 100) : '—'
             const color = typeof v === 'number' ? (v >= 50 ? '#00ba7c' : v >= 35 ? '#f7931a' : '#f4212e') : '#8b98a5'
@@ -606,7 +649,7 @@ export default function WorldView({
         </div>
       )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#8b98a5', fontSize: 12 }}>
-        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click the tablet for diary, calendar, calls" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom' : 'Orbit the capital'}
+        {viewMode === 'office' ? "You're at the desk — Drag to look around · Click tablet for diary, calendar, calls · Space: pause" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom · Space: pause' : 'Orbit the capital'}
       </div>
     </div>
   )
