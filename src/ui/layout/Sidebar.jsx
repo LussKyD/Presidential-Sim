@@ -32,6 +32,11 @@ export default function Sidebar({ view = 'office', onViewChange }) {
             </button>
           </li>
           <li style={{ marginBottom: 4 }}>
+            <button type="button" onClick={() => onViewChange?.('residence')} style={linkStyle('residence')} title="Residence wing">
+              Residence
+            </button>
+          </li>
+          <li style={{ marginBottom: 4 }}>
             <button type="button" onClick={() => onViewChange?.('dashboard')} style={linkStyle('dashboard')} title="Stats, economy, headlines">
               Dashboard
             </button>

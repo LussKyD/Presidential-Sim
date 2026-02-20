@@ -451,17 +451,99 @@ const WorldViewInner = forwardRef(function WorldViewInner({
     }
     scene.add(podiumRoomGroup)
 
+    // ---- Foreign palace meeting room (state visit bilateral meeting): different tone ----
+    const FOREIGN_PALACE_ROOM_POS = { x: -6, z: -4 }
+    const foreignPalaceRoomGroup = new THREE.Group()
+    foreignPalaceRoomGroup.position.set(FOREIGN_PALACE_ROOM_POS.x, 0, FOREIGN_PALACE_ROOM_POS.z)
+    const foreignFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(5, 4),
+      new THREE.MeshStandardMaterial({ color: 0x2a2218 })
+    )
+    foreignFloor.rotation.x = -Math.PI / 2
+    foreignPalaceRoomGroup.add(foreignFloor)
+    const foreignWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(5, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0x3d2c1e })
+    )
+    foreignWall.position.z = -2
+    foreignPalaceRoomGroup.add(foreignWall)
+    const foreignTable = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 0.06, 1),
+      new THREE.MeshStandardMaterial({ color: 0x5c4a32 })
+    )
+    foreignTable.position.set(0, 0.38, 0)
+    foreignPalaceRoomGroup.add(foreignTable)
+    const foreignFlag = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.2, 0.7),
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f })
+    )
+    foreignFlag.position.set(0, 1.2, -1.9)
+    foreignPalaceRoomGroup.add(foreignFlag)
+    const foreignChair1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.4), new THREE.MeshStandardMaterial({ color: 0x4a3c2a }))
+    foreignChair1.position.set(-0.6, 0.25, 0.65)
+    foreignPalaceRoomGroup.add(foreignChair1)
+    const foreignChair2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.5, 0.4), new THREE.MeshStandardMaterial({ color: 0x4a3c2a }))
+    foreignChair2.position.set(0.6, 0.25, 0.65)
+    foreignPalaceRoomGroup.add(foreignChair2)
+    scene.add(foreignPalaceRoomGroup)
+
+    // ---- Residence wing (palace multiple rooms): private quarters ----
+    const RESIDENCE_POS = { x: 4, z: -6 }
+    const residenceGroup = new THREE.Group()
+    residenceGroup.position.set(RESIDENCE_POS.x, 0, RESIDENCE_POS.z)
+    const resFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(4, 4),
+      new THREE.MeshStandardMaterial({ color: 0x1e1a16 })
+    )
+    resFloor.rotation.x = -Math.PI / 2
+    residenceGroup.add(resFloor)
+    const resWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(4, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0x2c2520 })
+    )
+    resWall.position.z = -2
+    residenceGroup.add(resWall)
+    const resBed = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 0.4, 1),
+      new THREE.MeshStandardMaterial({ color: 0x4a3c2a })
+    )
+    resBed.position.set(-0.6, 0.2, 0.2)
+    residenceGroup.add(resBed)
+    const resTable = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.5, 0.4),
+      new THREE.MeshStandardMaterial({ color: 0x5c4a32 })
+    )
+    resTable.position.set(0.6, 0.25, 0.3)
+    residenceGroup.add(resTable)
+    const resLamp = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.08, 0.35, 8),
+      new THREE.MeshStandardMaterial({ color: 0x374151 })
+    )
+    resLamp.position.set(0.6, 0.6, 0.3)
+    residenceGroup.add(resLamp)
+    scene.add(residenceGroup)
+
     // Motorcade: limo + escorts (start at driveway, drive to parliament)
     const carGeo = new THREE.BoxGeometry(0.9, 0.45, 1.8)
     const limo = new THREE.Mesh(carGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.4, roughness: 0.4 }))
     const escort1 = new THREE.Mesh(carGeo, new THREE.MeshStandardMaterial({ color: 0x1f2933, metalness: 0.3, roughness: 0.5 }))
     const escort2 = new THREE.Mesh(carGeo, new THREE.MeshStandardMaterial({ color: 0x1f2933, metalness: 0.3, roughness: 0.5 }))
+    const leadCar = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.4, 1.4), new THREE.MeshStandardMaterial({ color: 0x1f2933, metalness: 0.35, roughness: 0.5 }))
+    const bikeGeo = new THREE.BoxGeometry(0.25, 0.35, 0.9)
+    const bike1 = new THREE.Mesh(bikeGeo, new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.4, roughness: 0.5 }))
+    const bike2 = new THREE.Mesh(bikeGeo, new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.4, roughness: 0.5 }))
     limo.position.set(DRIVEWAY.x, 0.22, DRIVEWAY.z)
     escort1.position.set(DRIVEWAY.x - 1.2, 0.22, DRIVEWAY.z - 0.5)
     escort2.position.set(DRIVEWAY.x + 1.2, 0.22, DRIVEWAY.z - 0.5)
+    leadCar.position.set(DRIVEWAY.x, 0.2, DRIVEWAY.z + 1.5)
+    bike1.position.set(DRIVEWAY.x - 0.6, 0.18, DRIVEWAY.z - 1.2)
+    bike2.position.set(DRIVEWAY.x + 0.6, 0.18, DRIVEWAY.z - 1.2)
     scene.add(limo)
     scene.add(escort1)
     scene.add(escort2)
+    scene.add(leadCar)
+    scene.add(bike1)
+    scene.add(bike2)
 
     const motorcadePathOut = [
       new THREE.Vector3(DRIVEWAY.x, 0.22, DRIVEWAY.z),
@@ -499,6 +581,19 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       const result = new THREE.Vector3()
       result.lerpVectors(path[idx], path[idx + 1], localT)
       return result
+    }
+    function setMotorcadeExtras(path, norm, yaw) {
+      const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
+      const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
+      const leadPos = getPathPoint(path, Math.min(1, norm + 0.06))
+      leadCar.position.copy(leadPos)
+      leadCar.rotation.y = yaw
+      const bike1Pos = getPathPoint(path, Math.max(0, norm - 0.05)).add(right.clone().multiplyScalar(-0.7))
+      bike1.position.copy(bike1Pos)
+      bike1.rotation.y = yaw
+      const bike2Pos = getPathPoint(path, Math.max(0, norm - 0.09)).add(right.clone().multiplyScalar(0.7))
+      bike2.position.copy(bike2Pos)
+      bike2.rotation.y = yaw
     }
 
     // NPCs: guards at palace, crowds at parliament, parliamentarians in chamber
@@ -606,6 +701,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       limo.visible = showExterior
       escort1.visible = showExterior
       escort2.visible = showExterior
+      leadCar.visible = showExterior
+      bike1.visible = showExterior
+      bike2.visible = showExterior
       npcs.forEach((n) => { n.mesh.visible = showExterior })
 
       const svPhase = stateVisitPhaseRef.current
@@ -623,6 +721,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         limo.visible = true
         escort1.visible = true
         escort2.visible = true
+        leadCar.visible = true
+        bike1.visible = true
+        bike2.visible = true
         officeGroup.visible = false
         npcs.forEach((n) => { n.mesh.visible = true })
       } else {
@@ -647,6 +748,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         limo.visible = true
         escort1.visible = true
         escort2.visible = true
+        leadCar.visible = true
+        bike1.visible = true
+        bike2.visible = true
         officeGroup.visible = false
         npcs.forEach((n) => { n.mesh.visible = true })
       } else {
@@ -655,6 +759,8 @@ const WorldViewInner = forwardRef(function WorldViewInner({
 
       const inBriefingRoom = !!securityBriefingPhaseRef.current || !!cabinetMeetingActiveRef.current
       const inPodiumRoom = !!pressConferencePhaseRef.current
+      const inForeignPalaceMeeting = svPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE
+      const inResidenceView = vm === 'residence' && !phase && !showStateVisitExterior && !showSiteExterior && !inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting
       if (inBriefingRoom) {
         officeGroup.visible = false
         ground.visible = false
@@ -666,9 +772,15 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         chamberGroup.visible = false
         airportTerminal.visible = false
         airportTarmac.visible = false
+        siteGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = false
         limo.visible = false
         escort1.visible = false
         escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
         briefingRoomGroup.visible = true
         podiumRoomGroup.visible = false
         npcs.forEach((n) => { n.mesh.visible = false })
@@ -686,18 +798,78 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         chamberGroup.visible = false
         airportTerminal.visible = false
         airportTarmac.visible = false
+        siteGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = false
         limo.visible = false
         escort1.visible = false
         escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
         briefingRoomGroup.visible = false
         podiumRoomGroup.visible = true
         npcs.forEach((n) => { n.mesh.visible = false })
         controls.enabled = false
         camera.position.lerp(new THREE.Vector3(PODIUM_ROOM_POS.x, 1.5, PODIUM_ROOM_POS.z + 2.2), 0.1)
         controls.target.lerp(new THREE.Vector3(PODIUM_ROOM_POS.x, 1, PODIUM_ROOM_POS.z - 0.8), 0.1)
+      } else if (inForeignPalaceMeeting) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        siteGroup.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = false
+        foreignPalaceRoomGroup.visible = true
+        residenceGroup.visible = false
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(FOREIGN_PALACE_ROOM_POS.x, 1.5, FOREIGN_PALACE_ROOM_POS.z + 1.8), 0.1)
+        controls.target.lerp(new THREE.Vector3(FOREIGN_PALACE_ROOM_POS.x, 1, FOREIGN_PALACE_ROOM_POS.z), 0.1)
+      } else if (inResidenceView) {
+        officeGroup.visible = false
+        ground.visible = false
+        palace.visible = false
+        road1.visible = false
+        road2.visible = false
+        road3.visible = false
+        parliament.visible = false
+        chamberGroup.visible = false
+        airportTerminal.visible = false
+        airportTarmac.visible = false
+        siteGroup.visible = false
+        limo.visible = false
+        escort1.visible = false
+        escort2.visible = false
+        leadCar.visible = false
+        bike1.visible = false
+        bike2.visible = false
+        briefingRoomGroup.visible = false
+        podiumRoomGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = true
+        npcs.forEach((n) => { n.mesh.visible = false })
+        controls.enabled = false
+        camera.position.lerp(new THREE.Vector3(RESIDENCE_POS.x, 1.4, RESIDENCE_POS.z + 1.6), 0.1)
+        controls.target.lerp(new THREE.Vector3(RESIDENCE_POS.x, 0.8, RESIDENCE_POS.z), 0.1)
       } else {
         briefingRoomGroup.visible = false
         podiumRoomGroup.visible = false
+        foreignPalaceRoomGroup.visible = false
+        residenceGroup.visible = false
       }
 
       if (phase === STATE_ADDRESS_PHASES.WALK_TO_CARS) {
@@ -737,6 +909,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
         escort1.rotation.y = yaw
         escort2.rotation.y = yaw
+        setMotorcadeExtras(motorcadePathOut, norm, yaw)
         const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
         camera.position.lerp(camPos, 0.12)
         controls.target.lerp(pathPos, 0.15)
@@ -792,6 +965,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
         escort1.rotation.y = yaw
         escort2.rotation.y = yaw
+        setMotorcadeExtras(motorcadePathBack, norm, yaw)
         const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
         camera.position.lerp(camPos, 0.12)
         controls.target.lerp(pathPos, 0.15)
@@ -839,6 +1013,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
         escort1.rotation.y = yaw
         escort2.rotation.y = yaw
+        setMotorcadeExtras(motorcadePathToAirport, norm, yaw)
         const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
         camera.position.lerp(camPos, 0.12)
         controls.target.lerp(pathPos, 0.15)
@@ -864,6 +1039,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
           escort1.rotation.y = yaw
           escort2.rotation.y = yaw
+          setMotorcadeExtras(motorcadePathFromAirport, norm, yaw)
           const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
           camera.position.lerp(camPos, 0.12)
           controls.target.lerp(pathPos, 0.15)
@@ -877,6 +1053,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           limo.position.set(DRIVEWAY.x, 0.22, DRIVEWAY.z)
           escort1.position.set(DRIVEWAY.x - 1.2, 0.22, DRIVEWAY.z - 0.5)
           escort2.position.set(DRIVEWAY.x + 1.2, 0.22, DRIVEWAY.z - 0.5)
+          leadCar.position.set(DRIVEWAY.x, 0.2, DRIVEWAY.z + 1.5)
+          bike1.position.set(DRIVEWAY.x - 0.6, 0.18, DRIVEWAY.z - 1.2)
+          bike2.position.set(DRIVEWAY.x + 0.6, 0.18, DRIVEWAY.z - 1.2)
           if (walkNorm < 0.5) {
             const local = walkNorm * 2
             camera.position.lerpVectors(outside, door, local)
@@ -906,6 +1085,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
         escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
         escort1.rotation.y = yaw
         escort2.rotation.y = yaw
+        setMotorcadeExtras(motorcadePathToSite, norm, yaw)
         const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
         camera.position.lerp(camPos, 0.12)
         controls.target.lerp(pathPos, 0.15)
@@ -932,6 +1112,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           escort2.position.copy(pathPos).add(dir.clone().multiplyScalar(-1.5)).add(new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(0.8))
           escort1.rotation.y = yaw
           escort2.rotation.y = yaw
+          setMotorcadeExtras(motorcadePathFromSite, norm, yaw)
           const camPos = pathPos.clone().add(dir.clone().multiplyScalar(-4)).add(new THREE.Vector3(0, 2, 0))
           camera.position.lerp(camPos, 0.12)
           controls.target.lerp(pathPos, 0.15)
@@ -945,6 +1126,9 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           limo.position.set(DRIVEWAY.x, 0.22, DRIVEWAY.z)
           escort1.position.set(DRIVEWAY.x - 1.2, 0.22, DRIVEWAY.z - 0.5)
           escort2.position.set(DRIVEWAY.x + 1.2, 0.22, DRIVEWAY.z - 0.5)
+          leadCar.position.set(DRIVEWAY.x, 0.2, DRIVEWAY.z + 1.5)
+          bike1.position.set(DRIVEWAY.x - 0.6, 0.18, DRIVEWAY.z - 1.2)
+          bike2.position.set(DRIVEWAY.x + 0.6, 0.18, DRIVEWAY.z - 1.2)
           if (walkNorm < 0.5) {
             const local = walkNorm * 2
             camera.position.lerpVectors(outside, door, local)
@@ -961,7 +1145,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
             else onLaunchInfrastructurePhaseCompleteRef.current?.()
           }
         }
-      } else if (!inBriefingRoom && !inPodiumRoom) {
+      } else if (!inBriefingRoom && !inPodiumRoom && !inForeignPalaceMeeting && !inResidenceView) {
         if (vm === 'office') {
           mapCameraInitializedRef.current = false
           controls.enabled = true
@@ -1063,7 +1247,7 @@ const WorldViewInner = forwardRef(function WorldViewInner({
       )}
       <div style={{ position: 'absolute', bottom: 10, left: 10, right: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>
-          {viewMode === 'office' ? "You're at the desk — Drag to look around · Click tablet for diary, calendar, calls · Space: pause" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom · Space: pause' : 'Orbit the capital'}
+          {viewMode === 'office' ? "You're at the desk — Drag to look around · Click tablet for diary, calendar, calls · Space: pause" : viewMode === 'map' ? 'Drag to orbit · Scroll to zoom · Space: pause' : viewMode === 'residence' ? 'Residence wing — Private quarters' : 'Orbit the capital'}
         </span>
         {viewMode === 'map' && onResetView && (
           <button

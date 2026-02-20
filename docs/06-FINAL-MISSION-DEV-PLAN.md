@@ -121,7 +121,7 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 | I4.2 | **News during state visit** | Event feed entries: “President departs for Norden,” “Arrival in Sudland,” “Summit concludes.” Optional: TV ticker. |
 | I4.3 | **Deputy-in-charge** | While abroad, one random event “deputy handled X”; small outcome (already partially done per vision doc). |
 
-**Outcome:** State visit end-to-end immersive; media and deputy add depth.
+**Outcome:** State visit end-to-end immersive; foreign palace 3D room + news events (depart, arrival, summit concludes). Done.
 
 ---
 
@@ -131,8 +131,8 @@ From **04-IMMERSION-VISION.md** and **05-VISION-LIST-REAL-LIFE.md**:
 
 | # | Task | Notes |
 |---|------|--------|
-| I5.1 | **Full motorcade** | More vehicles (bikes, ambulance, security); cosmetic. |
-| I5.2 | **Palace: multiple rooms** | Cabinet room, briefing room, residence wing; doors/security. |
+| I5.1 | **Full motorcade** | Done: lead security car + 2 motorcycle outriders; follow path in all motorcade phases. |
+| I5.2 | **Palace: multiple rooms** | Done: residence wing 3D room (bed, table, lamp); Sidebar "Residence" view. Briefing/cabinet and podium already separate rooms. |
 | I5.3 | **Opening of Parliament / Budget day** | Optional short 3D beat in chamber (speech or ceremony). |
 | I5.4 | **Opposition motion / judiciary** | Optional events (motion of no confidence; court challenge); see vision list. |
 

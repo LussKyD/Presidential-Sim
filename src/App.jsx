@@ -176,7 +176,7 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [outOfPower, toggleRunning])
 
-  const isWorldView = view === 'office' || view === 'map'
+  const isWorldView = view === 'office' || view === 'map' || view === 'residence'
   const pendingCrisis = state?.crisis?.pendingResponse
 
   return (
@@ -206,7 +206,26 @@ function App() {
           onClose={() => setShowMeetForeignModal(false)}
         />
       )}
-      {stateVisitPhase && stateVisitPhase !== STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT && stateVisitPhase !== STATE_VISIT_PHASES.RETURN_TO_OFFICE && (
+      {stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1001, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 24, pointerEvents: 'none' }}>
+          <div style={{ pointerEvents: 'auto', maxWidth: 420, width: '100%', background: 'rgba(22,24,28,0.92)', border: '1px solid #2f3336', borderRadius: 16, padding: 24, boxShadow: '0 12px 48px rgba(0,0,0,0.5)' }}>
+            <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8b98a5', marginBottom: 6 }}>Bilateral meeting</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#e7e9ea', marginBottom: 16 }}>Meeting with {getCountry(stateVisitCountry)?.name ?? stateVisitCountry}</div>
+            <button
+              type="button"
+              onClick={() => {
+                addEvent('Summit concludes.', 'state_visit')
+                applyMeetForeignLeader(stateVisitCountry)
+                setStateVisitPhase(STATE_VISIT_PHASE_ORDER[STATE_VISIT_PHASE_ORDER.indexOf(STATE_VISIT_PHASES.MEETING_AT_PALACE) + 1])
+              }}
+              style={{ padding: '12px 24px', background: '#1d9bf0', color: '#0f1419', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+      {stateVisitPhase && stateVisitPhase !== STATE_VISIT_PHASES.MOTORCADE_TO_AIRPORT && stateVisitPhase !== STATE_VISIT_PHASES.RETURN_TO_OFFICE && stateVisitPhase !== STATE_VISIT_PHASES.MEETING_AT_PALACE && (
         <StateVisitView
           phase={stateVisitPhase}
           countryName={getCountry(stateVisitCountry)?.name ?? ''}
@@ -214,7 +233,6 @@ function App() {
           onAdvance={() => {
             const idx = STATE_VISIT_PHASE_ORDER.indexOf(stateVisitPhase)
             if (stateVisitPhase === STATE_VISIT_PHASES.ARRIVAL) addEvent(`President arrives in ${getCountry(stateVisitCountry)?.name ?? stateVisitCountry}.`, 'state_visit')
-            if (stateVisitPhase === STATE_VISIT_PHASES.MEETING_AT_PALACE) applyMeetForeignLeader(stateVisitCountry)
             if (idx < 0 || idx >= STATE_VISIT_PHASE_ORDER.length - 1) {
               setStateVisitPhase(null)
               setStateVisitCountry(null)
