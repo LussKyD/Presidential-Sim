@@ -1,5 +1,5 @@
 /** Desk tablet: Diary, Calendar (events + propose), Call log (contacts, call, schedule meeting). */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CONTACTS, getContact } from '../../core/constants/contacts'
 
 const TABS = { DIARY: 'diary', CALENDAR: 'calendar', CALLS: 'calls' }
@@ -60,6 +60,12 @@ export default function TabletPanel({
     setScheduleFor(null)
   }
 
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   return (
     <div
       style={{
@@ -89,7 +95,7 @@ export default function TabletPanel({
       >
         <div style={{ padding: '12px 16px', borderBottom: '1px solid #2f3336', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontWeight: 800, color: '#e7e9ea' }}>Desk tablet</span>
-          <button type="button" onClick={onClose} style={{ background: '#2f3336', border: 'none', color: '#e7e9ea', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>
+          <button type="button" onClick={onClose} title="Close (Esc)" style={{ background: '#2f3336', border: 'none', color: '#e7e9ea', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>
             Close
           </button>
         </div>
@@ -122,7 +128,7 @@ export default function TabletPanel({
                 <textarea
                   value={diaryInput}
                   onChange={(e) => setDiaryInput(e.target.value)}
-                  placeholder="Add diary entry..."
+                  placeholder="Type a note..."
                   rows={2}
                   style={{ width: '100%', padding: 8, background: '#0f1419', border: '1px solid #2f3336', borderRadius: 8, color: '#e7e9ea', fontSize: 12, resize: 'vertical' }}
                 />
@@ -158,9 +164,14 @@ export default function TabletPanel({
                   ? nextBudget
                   : nextOpen
                 return (
-                  <div style={{ marginBottom: 12, padding: 8, background: '#0f1419', borderRadius: 8, border: '1px solid #2f3336', fontSize: 12, color: '#e7e9ea' }}>
-                    <span style={{ color: '#6e767d' }}>Next: </span>{first.label} — {monthNames[first.month]} {first.year}
-                  </div>
+                  <>
+                    <div style={{ marginBottom: 8, padding: '6px 10px', background: '#1c3a5e', borderRadius: 8, border: '1px solid #2f3336', fontSize: 12, color: '#e7e9ea', fontWeight: 600 }} title="Current game date">
+                      Today: {monthNames[curM]} {curY}
+                    </div>
+                    <div style={{ marginBottom: 12, padding: 8, background: '#0f1419', borderRadius: 8, border: '1px solid #2f3336', fontSize: 12, color: '#e7e9ea' }}>
+                      <span style={{ color: '#6e767d' }}>Next: </span>{first.label} — {monthNames[first.month]} {first.year}
+                    </div>
+                  </>
                 )
               })()}
               <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5', fontSize: 12 }}>Upcoming &amp; scheduled</div>

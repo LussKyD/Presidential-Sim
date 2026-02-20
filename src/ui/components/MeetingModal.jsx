@@ -1,4 +1,5 @@
 /** Shown when a scheduled meeting is due: person comes to office for dialogue. */
+import { useEffect } from 'react'
 import { getContact } from '../../core/constants/contacts'
 
 const DIALOGUE_LINES = [
@@ -8,6 +9,12 @@ const DIALOGUE_LINES = [
 ]
 
 export default function MeetingModal({ meeting, onDismiss }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onDismiss?.(meeting?.id) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [meeting?.id, onDismiss])
+
   if (!meeting) return null
   const contact = getContact(meeting.contactId)
   const name = contact?.name ?? meeting.contactId
@@ -45,6 +52,7 @@ export default function MeetingModal({ meeting, onDismiss }) {
         <button
           type="button"
           onClick={() => onDismiss?.(meeting.id)}
+          title="End meeting (Esc)"
           style={{ width: '100%', padding: '12px 16px', background: '#059669', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}
         >
           End meeting

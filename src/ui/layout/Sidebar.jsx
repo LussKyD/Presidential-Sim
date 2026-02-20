@@ -22,17 +22,17 @@ export default function Sidebar({ view = 'office', onViewChange }) {
         <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Presidential Sim</div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           <li style={{ marginBottom: 4 }}>
-            <button type="button" onClick={() => onViewChange?.('office')} style={linkStyle('office')}>
+            <button type="button" onClick={() => onViewChange?.('office')} style={linkStyle('office')} title="Desk view and 3D office">
               Office
             </button>
           </li>
           <li style={{ marginBottom: 4 }}>
-            <button type="button" onClick={() => onViewChange?.('map')} style={linkStyle('map')}>
+            <button type="button" onClick={() => onViewChange?.('map')} style={linkStyle('map')} title="Map and regional approval">
               Map
             </button>
           </li>
           <li style={{ marginBottom: 4 }}>
-            <button type="button" onClick={() => onViewChange?.('dashboard')} style={linkStyle('dashboard')}>
+            <button type="button" onClick={() => onViewChange?.('dashboard')} style={linkStyle('dashboard')} title="Stats, economy, headlines">
               Dashboard
             </button>
           </li>

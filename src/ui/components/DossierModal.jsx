@@ -1,4 +1,5 @@
 /** Dossier modal: country seal, handover title, what deputy did while away. */
+import { useEffect } from 'react'
 import { getCountry } from '../../core/constants/international'
 import { formatGameDate } from '../../utils/dateFormat'
 
@@ -31,11 +32,20 @@ function CountrySeal({ countryId, name }) {
   )
 }
 
+const TYPE_LABELS = { parliament: 'PARLIAMENT', cabinet: 'CABINET', state_address: 'STATE ADDRESS', visit_region: 'VISIT', security_briefing: 'SECURITY', press_conference: 'PRESS', launch_infrastructure: 'INFRA', regional_summary: 'REGIONS', crisis_response: 'CRISIS', calendar: 'CALENDAR', deputy_handover: 'HANDOVER', state_visit: 'STATE VISIT', brief: 'BRIEF' }
+
 export default function DossierModal({ dossier, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   if (!dossier) return null
   const country = dossier.countryId ? getCountry(dossier.countryId) : null
   const countryName = country?.name ?? dossier.countryId ?? 'Republic of Valdris'
   const atStr = dossier.at ? formatGameDate(dossier.at) : ''
+  const typeLabel = TYPE_LABELS[dossier.type] ?? (dossier.type || 'BRIEF').toUpperCase().replace(/_/g, ' ')
 
   return (
     <div
@@ -66,7 +76,10 @@ export default function DossierModal({ dossier, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
           <CountrySeal countryId={dossier.countryId} name={countryName} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.06em', marginBottom: 2 }}>OFFICIAL BRIEF</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+              <span style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.06em' }}>OFFICIAL BRIEF</span>
+              <span style={{ fontSize: 9, padding: '2px 6px', background: '#2f3336', borderRadius: 4, color: '#8b98a5' }}>{typeLabel}</span>
+            </div>
             <div style={{ fontWeight: 800, fontSize: 18, color: '#e7e9ea' }}>{dossier.title}</div>
             {atStr && <div style={{ fontSize: 12, color: '#8b98a5', marginTop: 6, fontWeight: 600 }}>Received: {atStr}</div>}
           </div>
@@ -96,6 +109,7 @@ export default function DossierModal({ dossier, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            title="Close (Esc)"
             style={{
               padding: '10px 20px',
               background: '#1d9bf0',

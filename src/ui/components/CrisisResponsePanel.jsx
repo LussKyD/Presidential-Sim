@@ -29,6 +29,8 @@ export default function CrisisResponsePanel({ pending, onRespond }) {
       }}
     >
       <div
+        role="dialog"
+        aria-label="Crisis response required"
         style={{
           background: '#16181c',
           border: '1px solid #2f3336',
@@ -38,7 +40,7 @@ export default function CrisisResponsePanel({ pending, onRespond }) {
           width: '90%',
         }}
       >
-        <div style={{ fontSize: 10, color: '#f4212e', letterSpacing: '0.08em', marginBottom: 6 }}>REQUIRES DECISION</div>
+        <div style={{ fontSize: 10, color: '#f4212e', letterSpacing: '0.08em', marginBottom: 6 }} title="Choose how to respond">REQUIRES DECISION</div>
         <div style={{ fontWeight: 700, marginBottom: 8, color: '#e7e9ea' }}>
           {isProtest ? 'Protest' : 'Scandal'} — Your response?
         </div>

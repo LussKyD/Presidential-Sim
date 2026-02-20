@@ -1,7 +1,14 @@
 /** Pick a region to launch an infrastructure project (regional + national approval, 6-month cooldown). */
+import { useEffect } from 'react'
 import { REGION_IDS } from '../../core/constants/regions'
 
 export default function LaunchInfrastructureModal({ state, onPick, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   const regions = state?.regions ?? {}
 
   return (
@@ -58,7 +65,7 @@ export default function LaunchInfrastructureModal({ state, onPick, onClose }) {
             )
           })}
         </div>
-        <button type="button" onClick={onClose} style={{ marginTop: 16, padding: '8px 16px', background: '#2f3336', border: 'none', borderRadius: 8, color: '#e7e9ea', cursor: 'pointer', fontSize: 12 }}>
+        <button type="button" onClick={onClose} title="Close (Esc)" style={{ marginTop: 16, padding: '8px 16px', background: '#2f3336', border: 'none', borderRadius: 8, color: '#e7e9ea', cursor: 'pointer', fontSize: 12 }}>
           Cancel
         </button>
       </div>

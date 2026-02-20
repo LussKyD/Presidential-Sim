@@ -33,7 +33,7 @@ export default function EconomyChart({ state }) {
   if (history.length === 0) {
     return (
       <div style={chartPanel}>
-        <div style={{ color: '#8b98a5', fontSize: 12 }}>Economy over time</div>
+        <div style={{ color: '#8b98a5', fontSize: 12, fontWeight: 700 }}>GDP & economy over time</div>
         <div style={{ color: '#6e767d', fontSize: 12, marginTop: 8 }}>Run the sim to see history.</div>
       </div>
     )
@@ -54,7 +54,7 @@ export default function EconomyChart({ state }) {
 
   return (
     <div style={chartPanel}>
-      <div style={{ color: '#8b98a5', fontSize: 12, marginBottom: 8 }}>Economy over time</div>
+      <div style={{ color: '#8b98a5', fontSize: 12, marginBottom: 8, fontWeight: 700 }}>GDP & economy over time</div>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 200 }}>
         <defs>
           <linearGradient id="gdpGrad" x1="0" y1="1" x2="0" y2="0">

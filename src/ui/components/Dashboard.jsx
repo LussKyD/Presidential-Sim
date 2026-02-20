@@ -15,7 +15,7 @@ function formatNum(x) {
 
 function Card({ title, value, sub, titleAttr }) {
   return (
-    <div style={cardStyle} title={titleAttr}>
+    <div style={cardStyle} title={titleAttr} role="region" aria-label={titleAttr || title}>
       <div style={{ color: '#8b98a5', fontSize: 12, marginBottom: 6 }}>{title}</div>
       <div style={{ fontSize: 22, fontWeight: 800 }}>{value}</div>
       {sub ? <div style={{ color: '#8b98a5', fontSize: 12, marginTop: 6 }}>{sub}</div> : null}
@@ -130,10 +130,12 @@ export default function Dashboard({ state, onOpenDossier }) {
 
       {state?.regions && (
         <div style={{ marginTop: 16, ...panelStyle }}>
-          <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5' }}>Regional approval</div>
+          <div style={{ fontWeight: 700, marginBottom: 8, color: '#8b98a5' }}>Regional approval (lowest first)</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-            {REGION_IDS.map((id) => {
-              const pct = state.regions[id]
+            {[...REGION_IDS]
+              .map((id) => ({ id, pct: state.regions[id] }))
+              .sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0))
+              .map(({ id, pct }) => {
               const v = typeof pct === 'number' ? Math.round(pct * 100) : '—'
               return (
                 <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 100 }}>
@@ -159,7 +161,7 @@ export default function Dashboard({ state, onOpenDossier }) {
         <div style={{ fontSize: 10, color: '#6e767d', letterSpacing: '0.08em', marginBottom: 4 }}>REPUBLIC OF VALDRIS</div>
         <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 12, color: '#e7e9ea' }}>Front page</div>
         {lastEvents.length === 0 ? (
-          <div style={{ color: '#8b98a5', fontStyle: 'italic' }}>No headlines yet.</div>
+          <div style={{ color: '#8b98a5', fontStyle: 'italic' }}>No headlines yet. Table budget, address Parliament, or take activities to generate events.</div>
         ) : (
           <>
             <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #2f3336' }}>
@@ -179,7 +181,7 @@ export default function Dashboard({ state, onOpenDossier }) {
               {lastEvents.slice(1, 7).map((e) => (
                 <li key={e.id} style={{ color: '#8b98a5', marginBottom: 6, fontSize: 12, display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
                   <span style={{ color: eventColor(e.type), flexShrink: 0 }} title={e.type?.replace(/_/g, ' ')}>•</span>
-                  <span style={{ color: '#e7e9ea', flex: 1 }}>{e.message}</span>
+                  <span style={{ color: '#e7e9ea', flex: 1 }} title={e.message}>{e.message?.length > 60 ? e.message.slice(0, 60) + '…' : e.message}</span>
                   {e.dossierId && onOpenDossier && (
                     <button type="button" onClick={() => onOpenDossier(e.dossierId)} style={{ fontSize: 10, background: 'transparent', color: '#6366f1', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}>
                       Dossier

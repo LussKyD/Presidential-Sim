@@ -131,8 +131,9 @@ export default function DeskPanel({
         return <div style={{ fontSize: 11, color: '#6e767d', marginTop: -4 }}>Focus: Manage policies and activities</div>
       })()}
       {lastEvent && (
-        <div style={{ fontSize: 10, color: '#6e767d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Latest: {lastEvent.message}</div>
+        <div style={{ fontSize: 10, color: '#6e767d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lastEvent.message}>Latest: {lastEvent.message}</div>
       )}
+      <div style={{ fontSize: 9, color: '#4a5568', marginTop: 4 }}>Shortcuts: Space = Pause</div>
 
       {budgetDue && (
         <button
@@ -258,6 +259,10 @@ export default function DeskPanel({
         </button>
       </div>
 
+      {!outOfPower && !budgetDue && stateAddressCooldown && cabinetCooldown && foreignLeaderCooldown && visitRegionCooldown && securityBriefingCooldown && pressConferenceCooldown && launchInfrastructureCooldown && !stateAddressPhase && !stateVisitActive && !visitRegionActive && !securityBriefingActive && !pressConferenceActive && !launchInfrastructureActive && (
+        <div style={{ fontSize: 11, color: '#6e767d', marginTop: 4 }} title="Step or run the sim to advance time">All activities on cooldown — advance days to refresh.</div>
+      )}
+
       {phaseLabel && (
         <div
           style={{
@@ -288,19 +293,19 @@ export default function DeskPanel({
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-        <button type="button" onClick={toggleRunning} style={btn} disabled={outOfPower}>
+        <button type="button" onClick={toggleRunning} style={btn} disabled={outOfPower} title="Pause simulation (or press Space)">
           {isRunning ? 'Pause' : 'Resume'}
         </button>
-        <button type="button" onClick={tick} style={btn} disabled={isRunning || outOfPower}>
+        <button type="button" onClick={tick} style={btn} disabled={isRunning || outOfPower} title="Advance one day">
           Step
         </button>
-        <button type="button" onClick={startNewGame} style={{ ...btn, background: '#2f3336', color: '#e7e9ea' }} disabled={outOfPower}>
+        <button type="button" onClick={startNewGame} style={{ ...btn, background: '#2f3336', color: '#e7e9ea' }} disabled={outOfPower} title="Start new game">
           New game
         </button>
       </div>
 
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, color: '#8b98a5' }}>
-        Speed:
+        <span title="Simulation speed">Speed:</span>
         {(speeds || [{ value: 0.5, label: '0.5×' }, { value: 1, label: '1×' }, { value: 2, label: '2×' }]).map(({ value, label }) => (
           <button
             key={value}
@@ -338,7 +343,7 @@ export default function DeskPanel({
         </button>
         {recentDossiers.length > 0 && onOpenDossier && (
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #2f3336' }}>
-            <div style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.05em', marginBottom: 8 }}>RECENT DOSSIERS</div>
+            <div style={{ fontSize: 10, color: '#8b98a5', letterSpacing: '0.05em', marginBottom: 8 }}>RECENT DOSSIERS {recentDossiers.length > 0 ? `(${recentDossiers.length})` : ''}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {recentDossiers.map((d) => {
                 const country = d.countryId ? getCountry(d.countryId) : null
@@ -363,7 +368,7 @@ export default function DeskPanel({
                       fontSize: 12,
                     }}
                   >
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2f3336', border: '2px solid #8b98a5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2f3336', border: '2px solid #8b98a5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }} title={d.type?.replace(/_/g, ' ')}>
                       {initial}
                     </div>
                     <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</span>

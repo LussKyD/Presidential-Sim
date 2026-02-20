@@ -30,6 +30,8 @@ export default function TermSummary({ state }) {
 
   return (
     <div
+      role="region"
+      aria-label="Your term summary"
       style={{
         marginTop: 16,
         padding: '1rem 1.2rem',

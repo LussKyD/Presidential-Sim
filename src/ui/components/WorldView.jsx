@@ -193,6 +193,9 @@ export default function WorldView({
       const h = tvCanvas.height
       c.fillStyle = '#0a0a0c'
       c.fillRect(0, 0, w, h)
+      c.strokeStyle = 'rgba(0,0,0,0.15)'
+      c.lineWidth = 1
+      for (let y = 0; y < h; y += 4) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke() }
       const pad = 4
       const cw = (w - pad * 3) / 2
       const ch = (h - pad * 3) / 2
@@ -634,7 +637,7 @@ export default function WorldView({
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 380, background: '#0f1419', overflow: 'hidden' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%', minHeight: 380 }} />
       <div style={{ position: 'absolute', top: 10, left: 10, right: 10, display: 'flex', justifyContent: 'space-between', pointerEvents: 'none' }}>
-        <span style={{ color: '#8b98a5', fontSize: 12 }}>Republic of Valdris — {date}</span>
+        <span style={{ color: '#8b98a5', fontSize: 12 }} title="Republic of Valdris — current game date">Republic of Valdris — {date}</span>
         <span style={{ color: '#8b98a5', fontSize: 12 }}>Approval: {approvalPct}% · Coup: {coupPct}%</span>
       </div>
       {viewMode === 'map' && (

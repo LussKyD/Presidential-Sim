@@ -9,7 +9,7 @@ function formatValue(def, value) {
 export default function PolicyPanel({ policies, values, onChange, presets, onPresetSelect, disabled }) {
   const spendingPie = policies?.filter((p) => BUDGET_PIE_IDS.includes(p.id)).length === BUDGET_PIE_IDS.length
   return (
-    <section data-component="PolicyPanel" style={panelStyle}>
+    <section data-component="PolicyPanel" role="region" aria-label="Policy sliders" style={panelStyle}>
       <div style={{ fontWeight: 800, marginBottom: 10 }}>Policies</div>
       {spendingPie && (
         <div style={{ fontSize: 11, color: '#6e767d', marginBottom: 8 }}>Infrastructure, Education, Defense, Police share one budget (100%).</div>
@@ -59,6 +59,9 @@ export default function PolicyPanel({ policies, values, onChange, presets, onPre
                 onChange={(e) => onChange?.(p.id, e.target.value)}
                 style={{ width: '100%', marginTop: 6 }}
               />
+              <div style={{ fontSize: 10, color: '#6e767d', marginTop: 2 }}>
+                {formatValue(p, p.min)} – {formatValue(p, p.max)}
+              </div>
               {p.affects && (
                 <div style={{ fontSize: 11, color: '#6e767d', marginTop: 2 }}>Affects: {p.affects}</div>
               )}

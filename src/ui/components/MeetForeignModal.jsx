@@ -1,7 +1,14 @@
 /** Pick a country to hold a bilateral meeting (Meet foreign leader). */
+import { useEffect } from 'react'
 import { COUNTRIES } from '../../core/constants/international'
 
 export default function MeetForeignModal({ state, onPick, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   const relations = state?.international?.relations ?? {}
 
   return (
@@ -28,7 +35,7 @@ export default function MeetForeignModal({ state, onPick, onClose }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: '#e7e9ea' }}>Meet foreign leader</div>
+        <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8, color: '#e7e9ea' }} title="Esc to close">Meet foreign leader</div>
         <div style={{ fontSize: 12, color: '#8b98a5', marginBottom: 16 }}>Choose a country for a bilateral meeting. Improves relations (6‑month cooldown).</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {COUNTRIES.map((c) => {
@@ -59,7 +66,7 @@ export default function MeetForeignModal({ state, onPick, onClose }) {
             )
           })}
         </div>
-        <button type="button" onClick={onClose} style={{ marginTop: 16, padding: '8px 16px', background: '#2f3336', border: 'none', borderRadius: 8, color: '#e7e9ea', cursor: 'pointer', fontSize: 12 }}>
+        <button type="button" onClick={onClose} title="Close (Esc)" style={{ marginTop: 16, padding: '8px 16px', background: '#2f3336', border: 'none', borderRadius: 8, color: '#e7e9ea', cursor: 'pointer', fontSize: 12 }}>
           Cancel
         </button>
       </div>
