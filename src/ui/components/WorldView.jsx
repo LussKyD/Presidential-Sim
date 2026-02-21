@@ -1253,6 +1253,8 @@ const WorldViewInner = forwardRef(function WorldViewInner({
           controls.enabled = true
           controls.minDistance = 1.2
           controls.maxDistance = 10
+          // CRITICAL: If the player is returning from anywhere to the office, the view must never be blocked.
+          // When leaving briefing (Security/Cabinet) or podium (Press), force office visibility and reset camera this frame.
           const justLeftBriefingOrPodium = prevInBriefingOrPodiumRef.current && !inBriefingRoom && !inPodiumRoom
           if (justLeftBriefingOrPodium) {
             officeGroup.visible = true

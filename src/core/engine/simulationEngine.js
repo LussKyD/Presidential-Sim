@@ -35,6 +35,56 @@ const OPENING_OF_PARLIAMENT_MONTH = 6
 const DAYS_PER_MONTH = 7
 const COOLDOWN_MONTHS_TO_TICKS = (months) => months * DAYS_PER_MONTH
 
+function pick(arr, rng) {
+  return arr[Math.floor(rng() * arr.length)]
+}
+
+const CABINET_SUCCESS_MESSAGES = [
+  'Cabinet meeting: unity behind your agenda.',
+  'Cabinet meeting: ministers align behind priorities.',
+  'Cabinet meeting: strong coordination; agenda endorsed.',
+]
+const CABINET_FAIL_MESSAGES = [
+  'Cabinet meeting: ministers disagree on priorities.',
+  'Cabinet meeting: divisions surface; follow-up needed.',
+  'Cabinet meeting: pushback on key policies.',
+]
+const STATE_ADDRESS_POSITIVE_MESSAGES = [
+  'State address to Parliament: strong reception. Approval rises.',
+  'State address to Parliament: well received. Approval up.',
+  'State address to Parliament: speech lands well; approval gains.',
+]
+const STATE_ADDRESS_NEGATIVE_MESSAGES = [
+  'State address to Parliament: lukewarm reception. Approval dips.',
+  'State address to Parliament: mixed reaction. Approval falls.',
+  'State address to Parliament: opposition critical; approval down.',
+]
+const SECURITY_BRIEFING_MESSAGES = [
+  'Security briefing concluded. Threat assessment updated; coup risk slightly reduced.',
+  'Security briefing concluded. Intel reviewed; no imminent threats. Coup risk edged down.',
+  'Security briefing concluded. Situation stable; coup risk trimmed.',
+]
+const PRESS_POSITIVE_MESSAGES = [
+  'Press conference: message landed well. Approval rises.',
+  'Press conference: key points well received. Approval up.',
+  'Press conference: headlines favourable; approval gains.',
+]
+const PRESS_NEGATIVE_MESSAGES = [
+  'Press conference: tough questions; approval dips.',
+  'Press conference: hostile questions; approval down.',
+  'Press conference: coverage mixed; approval slips.',
+]
+const VISIT_REGION_MESSAGES = [
+  (r) => `President visited ${r}. Regional support strengthened.`,
+  (r) => `Presidential visit to ${r} boosts local support.`,
+  (r) => `Visit to ${r} concludes; regional approval up.`,
+]
+const LAUNCH_INFRA_MESSAGES = [
+  (r) => `Infrastructure project launched in ${r}. Regional support and approval rise.`,
+  (r) => `Ribbon-cutting in ${r}; regional and national approval gain.`,
+  (r) => `Infrastructure launch in ${r} boosts support.`,
+]
+
 function getDefaultState(seed = 1) {
   return {
     meta: { seed, lastVisitRegionTick: -999, lastSecurityBriefingTick: -999, lastPressConferenceTick: -999, lastLaunchInfrastructureTick: -999 },
@@ -360,7 +410,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     state.meta.lastCabinetTick = state.time.tick
     const delta = success ? 0.02 : -0.01
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
-    const summary = success ? 'Cabinet meeting: unity behind your agenda.' : 'Cabinet meeting: ministers disagree on priorities.'
+    const summary = success ? pick(CABINET_SUCCESS_MESSAGES, rng) : pick(CABINET_FAIL_MESSAGES, rng)
     const details = success ? 'Ministers aligned behind your priorities. Coordination strengthened.' : 'Some ministers raised concerns. Follow-up required.'
     const dossier = addDossier({ countryId: null, type: 'cabinet', title: 'Cabinet meeting brief', summary, details, at: state.time })
     state.events.push({
@@ -382,7 +432,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const delta = positive ? 0.03 : -0.02
     state.population.publicApproval = clamp(state.population.publicApproval + delta, 0, 1)
     if (state.opposition) state.opposition.strength = clamp((state.opposition.strength || 0.35) + (positive ? -0.02 : 0.02), 0.1, 0.9)
-    const summary = positive ? 'State address to Parliament: strong reception. Approval rises.' : 'State address to Parliament: lukewarm reception. Approval dips.'
+    const summary = positive ? pick(STATE_ADDRESS_POSITIVE_MESSAGES, rng) : pick(STATE_ADDRESS_NEGATIVE_MESSAGES, rng)
     const details = positive ? 'Parliament and public responded well. Agenda reinforced.' : 'Mixed reception. Opposition critical.'
     const dossier = addDossier({ countryId: null, type: 'state_address', title: 'State of the Nation brief', summary, details, at: state.time })
     state.events.push({
@@ -404,7 +454,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const current = state.regions?.[regionId] ?? 0.5
     state.regions[regionId] = clamp(current + 0.06, 0.05, 0.95)
     state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.01, 0, 1)
-    const summary = `President visited ${regionId}. Regional support strengthened.`
+    const summary = pick(VISIT_REGION_MESSAGES, rng)(regionId)
     const dossier = addDossier({ countryId: null, type: 'visit_region', title: `Visit brief — ${regionId}`, summary, details: `Regional rally and meetings in ${regionId}. Local approval increased. National approval nudged up.`, at: state.time })
     const regionLines = REGION_IDS.map((id) => `${id}: ${Math.round((state.regions[id] ?? 0.5) * 100)}% approval`).join('\n')
     addDossier({ countryId: null, type: 'regional_summary', title: 'Regional report', summary: 'Updated regional approval after visit.', details: `Current regional support:\n${regionLines}`, at: state.time })
@@ -425,7 +475,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     if (state.time.tick - last < SECURITY_BRIEFING_COOLDOWN_TICKS) return
     state.meta.lastSecurityBriefingTick = state.time.tick
     state.politics.coupRisk = clamp((state.politics.coupRisk ?? 0.2) - 0.02, 0.05, 0.95)
-    const summary = 'Security briefing concluded. Threat assessment updated; coup risk slightly reduced.'
+    const summary = pick(SECURITY_BRIEFING_MESSAGES, rng)
     const dossier = addDossier({ countryId: null, type: 'security_briefing', title: 'Security briefing brief', summary, details: 'Intel reviewed. No imminent threats. Coup risk assessment adjusted downward. Recommend continued monitoring.', at: state.time })
     state.events.push({
       id: `security-briefing-${state.time.tick}`,
@@ -447,7 +497,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const positive = approval >= 0.45
     const delta = positive ? 0.02 : -0.01
     state.population.publicApproval = clamp(approval + delta, 0, 1)
-    const summary = positive ? 'Press conference: message landed well. Approval rises.' : 'Press conference: tough questions; approval dips.'
+    const summary = positive ? pick(PRESS_POSITIVE_MESSAGES, rng) : pick(PRESS_NEGATIVE_MESSAGES, rng)
     const details = positive ? 'Key points well received. Headlines favourable.' : 'Some hostile questions. Coverage mixed.'
     const dossier = addDossier({ countryId: null, type: 'press_conference', title: 'Press conference brief', summary, details, at: state.time })
     state.events.push({
@@ -469,7 +519,7 @@ export function createSimulationEngine({ seed = 1, initialState } = {}) {
     const current = state.regions?.[regionId] ?? 0.5
     state.regions[regionId] = clamp(current + 0.05, 0.05, 0.95)
     state.population.publicApproval = clamp((state.population.publicApproval ?? 0.5) + 0.015, 0, 1)
-    const summary = `Infrastructure project launched in ${regionId}. Regional support and approval rise.`
+    const summary = pick(LAUNCH_INFRA_MESSAGES, rng)(regionId)
     const dossier = addDossier({ countryId: null, type: 'launch_infrastructure', title: `Infrastructure launch — ${regionId}`, summary, details: `Ribbon-cutting and opening ceremony in ${regionId}. Regional and national approval increased.`, at: state.time })
     state.events.push({
       id: `launch-infra-${state.time.tick}-${regionId}`,

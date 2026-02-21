@@ -1,6 +1,7 @@
 /**
  * Event/crisis triggers and effects.
- * Balance target (F1): normal play can last 1–2 terms; extreme policies (high corruption, low police) lead to coup/protest within a few years.
+ * Balance target: normal play can last 1–2 terms; extreme policies (high corruption, low police) lead to coup/protest within a few years.
+ * Tuning levers: protestChance cap (0.28), scandal roll (0.09), diplomatic (0.045), approval_bounce (0.07), economic_praise (0.08).
  */
 import { clamp } from '../../utils/mathHelpers'
 import { REGION_IDS } from '../constants/regions'
@@ -11,18 +12,23 @@ const PROTEST_MESSAGES = [
   (r) => `${r} rallies against cost of living and graft.`,
   (r) => `Street protests in ${r} — "Jobs and accountability now."`,
   (r) => `Demonstrations in ${r}; police contain crowds.`,
+  (r) => `Unrest in ${r}: marchers demand jobs and lower prices.`,
+  (r) => `${r} sees sit-ins over housing and wages.`,
 ]
 
 const ECONOMIC_MESSAGES = [
   (inf) => `Media: "Cost of living crisis" as inflation hits ${(inf * 100).toFixed(0)}%.`,
   (inf) => `Opposition: "People can't afford basics" — inflation ${(inf * 100).toFixed(0)}%.`,
   (inf) => `Headlines: soaring prices erode wages; inflation at ${(inf * 100).toFixed(0)}%.`,
+  (inf) => `Polls: cost-of-living worries dominate; inflation ${(inf * 100).toFixed(0)}%.`,
+  (inf) => `Markets jittery as inflation stays high at ${(inf * 100).toFixed(0)}%.`,
 ]
 
 const COUP_MESSAGES = [
   'Coup attempt succeeds. You are removed from power.',
   'Military declares you unfit; tanks secure the palace.',
   'Generals seize control. Your term ends tonight.',
+  'Armed forces take control; presidency dissolved.',
 ]
 
 const ELECTION_WIN_MESSAGES = [
@@ -35,30 +41,39 @@ const ELECTION_LOSE_MESSAGES = [
   'Election: you lose power after a disappointing result.',
   'Election: voters choose change. You concede.',
   'Election: defeat at the polls. Handover begins.',
+  'Election: opposition wins majority; transition begins.',
 ]
 
 const SCANDAL_MESSAGES = [
   'Scandal: leak implicates officials in kickbacks.',
   'Media: "Corruption at the top" — approval drops.',
   'Opposition demands inquiry into government contracts.',
+  'Allegations of favouritism in procurement; inquiry demanded.',
+  'Leaked documents suggest misuse of public funds.',
 ]
 
 const DIPLOMATIC_MESSAGES = [
   'Diplomatic incident: ally condemns policy shift.',
   'Foreign press: relations strained over recent decisions.',
   'Embassy row: international standing takes a hit.',
+  'Partner country recalls envoy over disputed remarks.',
+  'Summit cancelled; bilateral ties under strain.',
 ]
 
 const APPROVAL_BOUNCE_MESSAGES = [
   'Polls: public mood improves; government gains ground.',
   'Media: approval uptick as policies gain traction.',
   'Headlines: president’s standing rises in latest survey.',
+  'Survey: majority back government direction.',
+  'Approval ticks up as key promises delivered.',
 ]
 
 const ECONOMIC_PRAISE_MESSAGES = [
   'Business leaders praise economic stewardship.',
   'Growth figures boost confidence; markets steady.',
   'Media: economy on solid footing under current policy.',
+  'Employers group: "Stable environment for investment."',
+  'Latest data shows growth; business sentiment improves.',
 ]
 
 function pickRegion(rng) {
@@ -120,7 +135,7 @@ export function updateCrisisCheck(state, rng) {
     p.corruptionLevel * 0.05 -
     p.policeFunding * 0.02
 
-  if (rng && protestChance > 0 && rng() < Math.min(protestChance, 0.32)) {
+  if (rng && protestChance > 0 && rng() < Math.min(protestChance, 0.28)) {
     const region = pickRegion(rng)
     const eventId = `protest-${state.time.tick}-${rng().toString(36).slice(2, 6)}`
     const message = pick(PROTEST_MESSAGES, rng)(region)

@@ -136,7 +136,7 @@ export default function DeskPanel({
       {lastEvent && (
         <div style={{ fontSize: 10, color: '#6e767d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lastEvent.message}>Latest: {lastEvent.message}</div>
       )}
-      <div style={{ fontSize: 9, color: '#4a5568', marginTop: 4 }}>Shortcuts: Space = Pause</div>
+      <div style={{ fontSize: 9, color: '#4a5568', marginTop: 4 }}>Shortcuts: Space = Pause · Step = one day</div>
 
       {budgetDue && (
         <button
@@ -264,7 +264,7 @@ export default function DeskPanel({
       </div>
 
       {!outOfPower && !budgetDue && stateAddressCooldown && cabinetCooldown && foreignLeaderCooldown && visitRegionCooldown && securityBriefingCooldown && pressConferenceCooldown && launchInfrastructureCooldown && !stateAddressPhase && !stateVisitActive && !visitRegionActive && !securityBriefingActive && !pressConferenceActive && !launchInfrastructureActive && !cabinetActive && (
-        <div style={{ fontSize: 11, color: '#6e767d', marginTop: 4 }} title="Step or run the sim to advance time">All activities on cooldown — advance days to refresh.</div>
+        <div style={{ fontSize: 11, color: '#6e767d', marginTop: 4 }} title="One tick = one day. Step or run the sim to advance time.">All activities on cooldown — advance days to refresh.</div>
       )}
 
       {phaseLabel && (
@@ -300,7 +300,7 @@ export default function DeskPanel({
         <button type="button" onClick={toggleRunning} style={btn} disabled={outOfPower} title="Pause simulation (or press Space)">
           {isRunning ? 'Pause' : 'Resume'}
         </button>
-        <button type="button" onClick={tick} style={btn} disabled={isRunning || outOfPower} title="Advance one day">
+        <button type="button" onClick={tick} style={btn} disabled={isRunning || outOfPower} title="Advance one day (one tick = one day)">
           Step
         </button>
         <button type="button" onClick={startNewGame} style={{ ...btn, background: '#2f3336', color: '#e7e9ea' }} disabled={outOfPower} title="Start new game">

@@ -12,6 +12,7 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 | [**01-PROJECT-ANALYSIS.md**](docs/01-PROJECT-ANALYSIS.md) | Scope, feasibility, risks, success criteria |
 | [**02-ACHIEVEMENT-ROADMAP.md**](docs/02-ACHIEVEMENT-ROADMAP.md) | Phases, deliverables, implementation order |
 | [**06-FINAL-MISSION-DEV-PLAN.md**](docs/06-FINAL-MISSION-DEV-PLAN.md) | **Final mission:** fully functional + immersive roadmap |
+| [**FRAGILE-AREAS.md**](docs/FRAGILE-AREAS.md) | **Do not break:** return-to-office, view transitions (Security/Cabinet/Press, state visit, etc.) |
 
 ---
 
@@ -33,6 +34,7 @@ You run policies, the simulation runs the country. Economy, approval, coup risk,
 
 - **Current:** **Final mission complete** (see [06-FINAL-MISSION-DEV-PLAN.md](docs/06-FINAL-MISSION-DEV-PLAN.md)). Fully functional: balance pass, save/load, calendar, crises, parliament (table budget), international (state visit), regions. Immersive: State of the Nation 3D (office → motorcade → Parliament chamber → speech → return); state visit 3D (motorcade to airport, return); visit region & launch infra 3D (motorcade to site, return); briefing room (security/cabinet), podium room (press), foreign palace meeting room, residence wing; Budget day 3D chamber beat; full motorcade (lead car, outriders); opposition motion of no confidence & court challenge events. Office, Map, Residence views; event feed, dossiers, term summary.
 - **Next:** Polish (UX, copy), balance tuning, more event variety, or optional I5 extras.
+- **Safeguards:** Return-to-office (Security Briefing, Cabinet Meeting, Press Conference) and other view transitions are documented in [FRAGILE-AREAS.md](docs/FRAGILE-AREAS.md) and enforced via `.cursor/rules`; avoid changing that behavior without updating both.
 
 ---
 
@@ -57,6 +59,7 @@ Open `http://localhost:5173`. For correct asset paths when testing the built sit
 ## Tech
 
 - **Stack:** React, Vite, static export
+- **Time:** One tick = one day; 7 days = one month (calendar months).
 - **Simulation:** Pure JS (economy, population, politics, crisis, event bus)
 - **Charts:** In-app SVG (economy over time)
 - **3D:** Three.js — office, palace exterior, Parliament chamber, motorcade (limo, escorts, lead car, bikes), airport, regional site, briefing room, podium room, foreign meeting room, residence wing; Map view (capital); Budget day chamber view.

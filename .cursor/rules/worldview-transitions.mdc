@@ -1,0 +1,51 @@
+---
+description: Preserve 3D view transitions and return-to-office; never break Security Briefing, Cabinet, or other activity returns
+globs: src/ui/components/WorldView.jsx, src/App.jsx
+alwaysApply: false
+---
+
+# WorldView and Return-to-Office (Do Not Break)
+
+## Critical behavior
+
+When the player finishes an activity that uses a **different 3D view** (briefing room, podium room, plane, state visit exterior, visit region/launch infra motorcade, etc.) and returns to the **Palace Office**, the main content area must show the **office interior** and the **camera must be at the office position**. A blank or stuck view is a regression.
+
+## Activities that use alternate views
+
+- **Security Briefing** → briefing room → return to office
+- **Cabinet Meeting** → briefing room → return to office
+- **Press Conference** → podium room → return to office
+- **State Visit** → motorcade to airport, flight, foreign palace meeting, return to office
+- **Visit Region / Launch Infrastructure** → motorcade to site, return to office
+- **State of the Nation** → motorcade, Parliament chamber, return to office
+- **Budget Day** → chamber → return to office
+
+## WorldView.jsx rules
+
+1. **Return-from-briefing/podium**
+   - `prevInBriefingOrPodiumRef` must be updated **once per frame at the end** of the animation loop: `prevInBriefingOrPodiumRef.current = inBriefingRoom || inPodiumRoom`.
+   - When `justLeftBriefingOrPodium` (prev was true, now `!inBriefingRoom && !inPodiumRoom`), you **must** in the same frame:
+     - Set `officeGroup.visible = true`
+     - Set `briefingRoomGroup.visible = false` and `podiumRoomGroup.visible = false`
+     - Set camera position and target to office (OFFICE_EYE / OFFICE_LOOK)
+     - Set `officeCameraSettledRef.current = true`
+   - Do **not** remove this block or rely only on the generic "show office when no phase" logic; the camera would stay at the briefing/podium position and the view would stay blank.
+
+2. **Adding new "room" or view states**
+   - If you add another view that hides the office (e.g. a new room), either:
+     - Include it in the same "previous" ref and "just left" reset (show office + reset camera when leaving that view), or
+     - Follow the same pattern: end-of-frame ref update + explicit visibility and camera reset when transitioning back to office.
+
+3. **State visit / visit region / launch infra**
+   - Return flows (e.g. RETURN_TO_OFFICE, RETURN phase) must eventually clear the phase and show the default office view; ensure WorldView shows office when `!phase && !svPhase && !vrPhase && !liPhase` and viewMode is office.
+
+## App.jsx rules
+
+- When clearing activity state (e.g. `setSecurityBriefingPhase(null)`, `setCabinetMeetingActive(false)`), the view mode remains "office"; no need to set viewMode again. Do not clear viewMode when ending an activity unless you explicitly intend to switch the user to another view.
+
+## Testing
+
+After any change to WorldView or to activity phase handling in App, verify:
+- Security Briefing → Complete → Return to office → office view visible, not blank.
+- Cabinet Meeting → Complete → Return to office → office view visible, not blank.
+- Press Conference → Complete → Return to office → office view visible, not blank.
